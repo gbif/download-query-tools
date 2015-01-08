@@ -2,8 +2,8 @@ package org.gbif.occurrence.query;
 
 import org.gbif.utils.HttpUtil;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.sun.jersey.api.client.WebResource;
@@ -17,12 +17,12 @@ import org.apache.http.client.HttpClient;
 /**
  * Guice module providing a TitleLookup instance for the HumanFilterBuilder to lookup species and dataset titles.
  */
-public class TitleLookupModule extends AbstractModule {
+public class TitleLookupModule extends PrivateModule {
   private final boolean provideHttpClient;
   private final String apiRoot;
 
   /**
-   * @param provideHttpClient if true the module creates a new default http client instance
+   * @param provideHttpClient if true the module creates a new internal only http client instance
    */
   public TitleLookupModule(boolean provideHttpClient, String apiRoot) {
     this.provideHttpClient = provideHttpClient;
@@ -34,6 +34,7 @@ public class TitleLookupModule extends AbstractModule {
     if (provideHttpClient) {
       bind(HttpClient.class).toInstance(provideHttpClient());
     }
+    expose(TitleLookup.class);
   }
 
   @Provides
