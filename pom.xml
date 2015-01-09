@@ -39,7 +39,7 @@
 
     <commons-lang3.version>3.3.2</commons-lang3.version>
     <gbif-api.version>0.17-SNAPSHOT</gbif-api.version>
-    <gbif-httputils.version>0.5</gbif-httputils.version>
+    <gbif-httputils.version>0.6-SNAPSHOT</gbif-httputils.version>
     <guava.version>18.0</guava.version>
     <guice.version>3.0</guice.version>
     <httpclient.version>4.3.6</httpclient.version>

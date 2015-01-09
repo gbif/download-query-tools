@@ -40,7 +40,7 @@ public class TitleLookupModule extends PrivateModule {
   @Provides
   @Singleton
   @Inject
-  private TitleLookup provideLookup(HttpClient hc) {
+  public TitleLookup provideLookup(HttpClient hc) {
     ApacheHttpClient4Handler hch = new ApacheHttpClient4Handler(hc, null, false);
     ClientConfig clientConfig = new DefaultClientConfig();
     clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
