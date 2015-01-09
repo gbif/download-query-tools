@@ -48,7 +48,7 @@
 <span class="sourceLineNo">040</span>  @Provides<a name="line.40"></a>
 <span class="sourceLineNo">041</span>  @Singleton<a name="line.41"></a>
 <span class="sourceLineNo">042</span>  @Inject<a name="line.42"></a>
-<span class="sourceLineNo">043</span>  private TitleLookup provideLookup(HttpClient hc) {<a name="line.43"></a>
+<span class="sourceLineNo">043</span>  public TitleLookup provideLookup(HttpClient hc) {<a name="line.43"></a>
 <span class="sourceLineNo">044</span>    ApacheHttpClient4Handler hch = new ApacheHttpClient4Handler(hc, null, false);<a name="line.44"></a>
 <span class="sourceLineNo">045</span>    ClientConfig clientConfig = new DefaultClientConfig();<a name="line.45"></a>
 <span class="sourceLineNo">046</span>    clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);<a name="line.46"></a>
