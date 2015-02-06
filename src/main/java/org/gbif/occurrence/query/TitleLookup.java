@@ -3,15 +3,9 @@ package org.gbif.occurrence.query;
 import org.gbif.api.model.checklistbank.NameUsage;
 import org.gbif.api.model.registry.Dataset;
 import org.gbif.utils.HttpUtil;
+import org.gbif.ws.client.guice.GbifWsClientModule;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
-import com.sun.jersey.client.apache4.ApacheHttpClient4;
-import com.sun.jersey.client.apache4.ApacheHttpClient4Handler;
-import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +16,11 @@ public class TitleLookup {
   /**
    * Creates a lookup instance using a new http & jersey client.
    * This is a rather costly operation and should not be instantiated many times.
+   * @param threads number of concurrent http client threads to use
    */
-  public TitleLookup(String apiRootUrl) {
-    this.apiRoot = provideJerseyClient().resource(apiRootUrl);
+  public TitleLookup(String apiRootUrl, int threads) {
+    this.apiRoot = GbifWsClientModule.buildJerseyClient(HttpUtil.newMultithreadedClient(2000, threads, threads))
+      .resource(apiRootUrl);
   }
 
   /**
@@ -52,12 +48,4 @@ public class TitleLookup {
     }
   }
 
-  private Client provideJerseyClient() {
-    HttpClient client = HttpUtil.newMultithreadedClient(2000, 4, 4);
-    ApacheHttpClient4Handler hch = new ApacheHttpClient4Handler(client, null, false);
-
-    ClientConfig clientConfig = new DefaultClientConfig();
-    clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-    return new ApacheHttpClient4(hch, clientConfig);
-  }
 }

@@ -35,12 +35,15 @@ public class TitleLookupTest {
     assertEquals("PonTaurus", tl.getDatasetTitle(UUID.randomUUID().toString()));
   }
 
+
+
   @Test
   //@Ignore("manual API test only")
   public void integrationTestLookup() throws Exception {
-    TitleLookup tl = new TitleLookup("http://api.gbif.org/v1/");
+    TitleLookup tl = new TitleLookup("http://api.gbif.org/v1/", 2);
     assertEquals("Aves", tl.getSpeciesName("212"));
     assertEquals("GBIF Backbone Taxonomy", tl.getDatasetTitle(Constants.NUB_DATASET_KEY.toString()));
+    assertEquals("EOD - eBird Observation Dataset", tl.getDatasetTitle("4fa7b334-ce0d-4e88-aaae-2e0c138d049e"));
   }
 
 }
