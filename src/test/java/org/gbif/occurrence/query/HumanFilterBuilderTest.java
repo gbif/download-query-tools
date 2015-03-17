@@ -12,6 +12,7 @@ import org.gbif.api.model.occurrence.predicate.NotPredicate;
 import org.gbif.api.model.occurrence.predicate.Predicate;
 import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 
 import java.util.Date;
@@ -69,6 +70,9 @@ public class HumanFilterBuilderTest {
       if (p.type().isEnum()) {
         if (p.type() == Country.class) {
           ands.add(new EqualsPredicate(p, Country.DENMARK.getIso2LetterCode()));
+
+        } else if (p.type() == Continent.class) {
+            ands.add(new EqualsPredicate(p, Continent.AFRICA.getTitle()));
 
         } else {
           Class<Enum<?>> vocab = (Class<Enum<?>>) p.type();
