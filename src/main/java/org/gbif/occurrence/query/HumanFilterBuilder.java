@@ -209,6 +209,11 @@ public class HumanFilterBuilder {
   }
 
   private String lookupMonth(String month) {
+    //It's a range
+    String[] monthRange = month.split("-");
+    if(monthRange.length == 2) {
+      return resourceBundle.getString("enum.month." + monthRange[0]) + "-"  + resourceBundle.getString("enum.month." + monthRange[1]);
+    }
     return resourceBundle.getString("enum.month." + month);
   }
 

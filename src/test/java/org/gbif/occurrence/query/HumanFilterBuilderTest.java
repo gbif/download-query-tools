@@ -58,6 +58,21 @@ public class HumanFilterBuilderTest {
     assertEquals(lower + "-" + upper, x.get(OccurrenceSearchParameter.EVENT_DATE).getFirst());
   }
 
+  @Test
+  public void testMonthRange() throws Exception {
+    final String lower = "1";
+    final String upper = "6";
+    Map<OccurrenceSearchParameter, LinkedList<String>> x = builder.humanFilter(
+      new ConjunctionPredicate(Lists.<Predicate>newArrayList(
+        new GreaterThanOrEqualsPredicate(OccurrenceSearchParameter.MONTH, lower),
+        new LessThanOrEqualsPredicate(OccurrenceSearchParameter.MONTH, upper)
+      )
+      ));
+    assertEquals(1, x.size());
+    assertEquals(1, x.get(OccurrenceSearchParameter.MONTH).size());
+    assertEquals("January-June", x.get(OccurrenceSearchParameter.MONTH).getFirst());
+  }
+
   /**
    * test all available search parameters and make sure we have a bundle entry for all possible enum values
    */
