@@ -17,7 +17,7 @@
 'UTF-8'
 -docfilessubdirs
 -doctitle
-'Download Query Tools 1.6-SNAPSHOT API'
+'Download Query Tools 1.7-SNAPSHOT API'
 -link
 'http://freemarker.org/docs/api'
 -link
@@ -30,4 +30,4 @@
 -use
 -version
 -windowtitle
-'Download Query Tools 1.6-SNAPSHOT API'
+'Download Query Tools 1.7-SNAPSHOT API'
