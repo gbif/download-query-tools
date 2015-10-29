@@ -38,16 +38,15 @@
     <jdkLevel>1.7</jdkLevel>
 
     <commons-lang3.version>3.3.2</commons-lang3.version>
-    <gbif-api.version>0.27</gbif-api.version>
-    <gbif-common-ws.version>0.24</gbif-common-ws.version>
-    <gbif-httputils.version>0.7</gbif-httputils.version>
+    <gbif-api.version>0.29</gbif-api.version>
+    <gbif-common-ws.version>0.25</gbif-common-ws.version>
+    <gbif-httputils.version>0.8</gbif-httputils.version>
     <guava.version>18.0</guava.version>
     <guice.version>3.0</guice.version>
     <httpclient.version>4.3.6</httpclient.version>
     <jackson.version>1.9.13</jackson.version>
     <jersey.version>1.18.3</jersey.version>
     <junit.version>4.11</junit.version>
-    <logback.version>1.0.13</logback.version>
     <mockito.version>1.10.8</mockito.version>
     <slf4j.version>1.7.7</slf4j.version>
   </properties>
@@ -90,11 +89,6 @@
       <version>${jersey.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
-      <version>${jersey.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-apache-client4</artifactId>
       <version>${jersey.version}</version>
@@ -123,12 +117,6 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>${logback.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

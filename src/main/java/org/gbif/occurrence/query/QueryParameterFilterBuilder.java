@@ -51,21 +51,18 @@ public class QueryParameterFilterBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(QueryParameterFilterBuilder.class);
   private static final String WILDCARD = "*";
-  private final static Pattern POLYGON_PATTERN = Pattern.compile("POLYGON\\s*\\(\\s*\\((.+)\\)\\s*\\)",
+  private static final Pattern POLYGON_PATTERN = Pattern.compile("POLYGON\\s*\\(\\s*\\((.+)\\)\\s*\\)",
     Pattern.CASE_INSENSITIVE);
 
   private Map<OccurrenceSearchParameter, LinkedList<String>> filter;
 
   private enum State {
     ROOT, AND, OR
-  };
+  }
 
   private State state;
   private OccurrenceSearchParameter lastParam;
 
-  public QueryParameterFilterBuilder() {
-
-  }
 
   public synchronized String queryFilter(Predicate p) {
     StringBuilder b = new StringBuilder();
@@ -78,14 +75,14 @@ public class QueryParameterFilterBuilder {
     visit(p);
 
     // transform filter map into query string
-    for (OccurrenceSearchParameter param : filter.keySet()) {
-      for (String val : filter.get(param)) {
+    for (Map.Entry<OccurrenceSearchParameter, LinkedList<String>> entry : filter.entrySet()) {
+      for (String val : entry.getValue()) {
         if (first) {
           first = false;
         } else {
           b.append("&");
         }
-        b.append(param.name());
+        b.append(entry.getKey().name());
         b.append("=");
         b.append(URLEncoder.encode(val));
       }

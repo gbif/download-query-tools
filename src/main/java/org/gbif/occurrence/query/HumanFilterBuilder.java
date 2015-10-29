@@ -184,9 +184,9 @@ public class HumanFilterBuilder {
 
   private void addParamValue(OccurrenceSearchParameter param, String op) {
     // verify that last param if existed was the same
-    if (lastParam != null && param != lastParam) {
+    /*if (lastParam != null && param != lastParam) {
       throw new IllegalArgumentException("Mix of search params not supported: "+param);
-    }
+    }  */
 
     if (!filter.containsKey(param)) {
       filter.put(param, Lists.<String>newLinkedList());
@@ -226,16 +226,16 @@ public class HumanFilterBuilder {
       // must be a root AND
     }
 
-    if (state != State.ROOT) {
+   /* if (state != State.ROOT) {
       throw new IllegalStateException("AND must be a root predicate or a valid range");
-    }
+    }     */
     state = State.AND;
 
     for (Predicate p : and.getPredicates()) {
       lastParam = null;
       visit(p);
     }
-    state = State.ROOT;
+    //state = State.ROOT;
   }
 
   private void visit(DisjunctionPredicate or) throws IllegalStateException {

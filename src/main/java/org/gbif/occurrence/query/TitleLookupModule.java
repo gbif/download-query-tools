@@ -56,7 +56,7 @@ public class TitleLookupModule extends PrivateModule {
     return new TitleLookup(api);
   }
 
-  private HttpClient provideHttpClient() {
+  private static HttpClient provideHttpClient() {
     return HttpUtil.newMultithreadedClient(5000, 10, 10);
   }
 

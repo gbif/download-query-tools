@@ -9,8 +9,14 @@ import com.sun.jersey.api.client.WebResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Utility ws-client class to get dataset and species titles used in downloads.
+ */
 public class TitleLookup {
+
+  private static final int  HTTP_TIME_OUT =  2000;
   private static final Logger LOG = LoggerFactory.getLogger(TitleLookup.class);
+
   private final WebResource apiRoot;
 
   /**
@@ -19,7 +25,7 @@ public class TitleLookup {
    * @param threads number of concurrent http client threads to use
    */
   public TitleLookup(String apiRootUrl, int threads) {
-    this.apiRoot = GbifWsClientModule.buildJerseyClient(HttpUtil.newMultithreadedClient(2000, threads, threads))
+    apiRoot = GbifWsClientModule.buildJerseyClient(HttpUtil.newMultithreadedClient(HTTP_TIME_OUT, threads, threads))
       .resource(apiRootUrl);
   }
 
