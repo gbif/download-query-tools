@@ -192,9 +192,9 @@
 <span class="sourceLineNo">184</span><a name="line.184"></a>
 <span class="sourceLineNo">185</span>  private void addParamValue(OccurrenceSearchParameter param, String op) {<a name="line.185"></a>
 <span class="sourceLineNo">186</span>    // verify that last param if existed was the same<a name="line.186"></a>
-<span class="sourceLineNo">187</span>    if (lastParam != null &amp;&amp; param != lastParam) {<a name="line.187"></a>
+<span class="sourceLineNo">187</span>    /*if (lastParam != null &amp;&amp; param != lastParam) {<a name="line.187"></a>
 <span class="sourceLineNo">188</span>      throw new IllegalArgumentException("Mix of search params not supported: "+param);<a name="line.188"></a>
-<span class="sourceLineNo">189</span>    }<a name="line.189"></a>
+<span class="sourceLineNo">189</span>    }  */<a name="line.189"></a>
 <span class="sourceLineNo">190</span><a name="line.190"></a>
 <span class="sourceLineNo">191</span>    if (!filter.containsKey(param)) {<a name="line.191"></a>
 <span class="sourceLineNo">192</span>      filter.put(param, Lists.&lt;String&gt;newLinkedList());<a name="line.192"></a>
@@ -234,16 +234,16 @@
 <span class="sourceLineNo">226</span>      // must be a root AND<a name="line.226"></a>
 <span class="sourceLineNo">227</span>    }<a name="line.227"></a>
 <span class="sourceLineNo">228</span><a name="line.228"></a>
-<span class="sourceLineNo">229</span>    if (state != State.ROOT) {<a name="line.229"></a>
+<span class="sourceLineNo">229</span>   /* if (state != State.ROOT) {<a name="line.229"></a>
 <span class="sourceLineNo">230</span>      throw new IllegalStateException("AND must be a root predicate or a valid range");<a name="line.230"></a>
-<span class="sourceLineNo">231</span>    }<a name="line.231"></a>
+<span class="sourceLineNo">231</span>    }     */<a name="line.231"></a>
 <span class="sourceLineNo">232</span>    state = State.AND;<a name="line.232"></a>
 <span class="sourceLineNo">233</span><a name="line.233"></a>
 <span class="sourceLineNo">234</span>    for (Predicate p : and.getPredicates()) {<a name="line.234"></a>
 <span class="sourceLineNo">235</span>      lastParam = null;<a name="line.235"></a>
 <span class="sourceLineNo">236</span>      visit(p);<a name="line.236"></a>
 <span class="sourceLineNo">237</span>    }<a name="line.237"></a>
-<span class="sourceLineNo">238</span>    state = State.ROOT;<a name="line.238"></a>
+<span class="sourceLineNo">238</span>    //state = State.ROOT;<a name="line.238"></a>
 <span class="sourceLineNo">239</span>  }<a name="line.239"></a>
 <span class="sourceLineNo">240</span><a name="line.240"></a>
 <span class="sourceLineNo">241</span>  private void visit(DisjunctionPredicate or) throws IllegalStateException {<a name="line.241"></a>
