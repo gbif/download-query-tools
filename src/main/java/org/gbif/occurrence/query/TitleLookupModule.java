@@ -1,6 +1,7 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.utils.HttpUtil;
+import org.gbif.ws.json.JacksonJsonContextResolver;
 
 import java.net.URI;
 
@@ -16,6 +17,7 @@ import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.client.apache4.ApacheHttpClient4;
 import com.sun.jersey.client.apache4.ApacheHttpClient4Handler;
 import org.apache.http.client.HttpClient;
+import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,9 @@ public class TitleLookupModule extends PrivateModule {
   public TitleLookup provideLookup(HttpClient hc) {
     ApacheHttpClient4Handler hch = new ApacheHttpClient4Handler(hc, null, false);
     ClientConfig clientConfig = new DefaultClientConfig();
+    clientConfig.getClasses().add(JacksonJsonContextResolver.class);
+    // this line is critical! Note that this is the jersey version of this class name!
+    clientConfig.getClasses().add(JacksonJsonProvider.class);
     clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
     WebResource api = new ApacheHttpClient4(hch, clientConfig).resource(apiRoot);
     return new TitleLookup(api);
