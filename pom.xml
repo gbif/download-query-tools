@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.gbif</groupId>
     <artifactId>motherpom</artifactId>
-    <version>34</version>
+    <version>35</version>
   </parent>
 
   <groupId>org.gbif.occurrence</groupId>
@@ -39,8 +39,8 @@
 
     <commons-lang3.version>3.4</commons-lang3.version>
     <gbif-api.version>0.34</gbif-api.version>
-    <gbif-common-ws.version>0.27</gbif-common-ws.version>
-    <gbif-httputils.version>0.8</gbif-httputils.version>
+    <gbif-common-ws.version>0.28</gbif-common-ws.version>
+    <gbif-httputils.version>0.9</gbif-httputils.version>
     <guava.version>18.0</guava.version>
     <guice.version>3.0</guice.version>
     <httpclient.version>4.3.6</httpclient.version>
