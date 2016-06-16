@@ -147,6 +147,14 @@ public class HumanFilterBuilder {
     // lookup values
     switch (param) {
       case TAXON_KEY:
+      case KINGDOM_KEY:
+      case PHYLUM_KEY:
+      case CLASS_KEY:
+      case ORDER_KEY:
+      case FAMILY_KEY:
+      case GENUS_KEY:
+      case SUBGENUS_KEY:
+      case SPECIES_KEY:
         humanValue = titleLookup.getSpeciesName(value);
         break;
       case DATASET_KEY:
