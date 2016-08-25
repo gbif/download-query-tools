@@ -1,10 +1,14 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.api.model.checklistbank.NameUsage;
+import org.gbif.api.model.occurrence.Occurrence;
 import org.gbif.api.model.registry.Dataset;
 import org.gbif.utils.HttpUtil;
 import org.gbif.ws.client.guice.GbifWsClientModule;
+import org.gbif.ws.json.JacksonJsonContextResolver;
+import org.gbif.ws.mixin.LicenseMixin;
 
+import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.WebResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +42,8 @@ public class TitleLookup {
 
   public String getDatasetTitle(String datasetKey) {
     try {
+      JacksonJsonContextResolver.addMixIns(new ImmutableMap.Builder<Class<?>, Class<?>>()
+                                             .put(Dataset.class, LicenseMixin.class).build());
       return apiRoot.path("dataset").path(datasetKey).get(Dataset.class).getTitle();
     } catch (RuntimeException e) {
       LOG.error("Cannot lookup dataset title {}", datasetKey, e);
