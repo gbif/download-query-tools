@@ -21,6 +21,8 @@ import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.gbif.ws.mixin.Mixins.getPredefinedMixins;
+
 /**
  * Guice module providing a TitleLookup instance for the HumanFilterBuilder to lookup species and dataset titles.
  */
@@ -54,9 +56,12 @@ public class TitleLookupModule extends PrivateModule {
     ApacheHttpClient4Handler hch = new ApacheHttpClient4Handler(hc, null, false);
     ClientConfig clientConfig = new DefaultClientConfig();
     clientConfig.getClasses().add(JacksonJsonContextResolver.class);
+    JacksonJsonContextResolver.addMixIns(getPredefinedMixins());
+
     // this line is critical! Note that this is the jersey version of this class name!
     clientConfig.getClasses().add(JacksonJsonProvider.class);
     clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+
     WebResource api = new ApacheHttpClient4(hch, clientConfig).resource(apiRoot);
     return new TitleLookup(api);
   }
