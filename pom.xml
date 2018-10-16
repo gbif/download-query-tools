@@ -45,8 +45,8 @@
     <jdkLevel>1.7</jdkLevel>
 
     <commons-lang3.version>3.4</commons-lang3.version>
-    <gbif-api.version>0.67</gbif-api.version>
-    <gbif-common-ws.version>0.40</gbif-common-ws.version>
+    <gbif-api.version>0.72-SNAPSHOT</gbif-api.version>
+    <gbif-common-ws.version>0.43</gbif-common-ws.version>
     <gbif-httputils.version>0.10</gbif-httputils.version>
     <guava.version>18.0</guava.version>
     <guice.version>3.0</guice.version>
