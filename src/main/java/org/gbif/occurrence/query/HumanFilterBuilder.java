@@ -205,7 +205,7 @@ public class HumanFilterBuilder {
   }
 
   private String lookupEnum(Class clazz, String value) {
-    return resourceBundle.getString("enum." + clazz.getSimpleName().toLowerCase() + "." + value);
+    return resourceBundle.getString("enum." + clazz.getSimpleName().toLowerCase() + "." + value.trim());
   }
 
   private String lookupCountryCode(String code) {

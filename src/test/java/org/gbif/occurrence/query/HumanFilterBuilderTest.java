@@ -291,4 +291,12 @@ public class HumanFilterBuilderTest {
     assertEquals("is not null", x.get(OccurrenceSearchParameter.MEDIA_TYPE).getLast());
   }
 
+  @Test
+  public void testEqualsTrimValue() {
+    Map<OccurrenceSearchParameter, LinkedList<String>> x =
+            builder.humanFilter(new EqualsPredicate(OccurrenceSearchParameter.BASIS_OF_RECORD, " PRESERVED_SPECIMEN    "));
+    assertEquals(1, x.size());
+    assertEquals(1, x.get(OccurrenceSearchParameter.BASIS_OF_RECORD).size());
+  }
+
 }
