@@ -299,4 +299,20 @@ public class HumanFilterBuilderTest {
     assertEquals(1, x.get(OccurrenceSearchParameter.BASIS_OF_RECORD).size());
   }
 
+  @Test
+  public void testEnumCaseSensitive() {
+    Map<OccurrenceSearchParameter, LinkedList<String>> x =
+      builder.humanFilter(new EqualsPredicate(OccurrenceSearchParameter.BASIS_OF_RECORD, " Preserved_Specimen   "));
+    assertEquals(1, x.size());
+    assertEquals(1, x.get(OccurrenceSearchParameter.BASIS_OF_RECORD).size());
+  }
+
+  @Test
+  public void testEnumCaseSensitiveImage() {
+    Map<OccurrenceSearchParameter, LinkedList<String>> x =
+      builder.humanFilter(new EqualsPredicate(OccurrenceSearchParameter.MEDIA_TYPE, " StillImage   "));
+    assertEquals(1, x.size());
+    assertEquals(1, x.get(OccurrenceSearchParameter.MEDIA_TYPE).size());
+  }
+
 }

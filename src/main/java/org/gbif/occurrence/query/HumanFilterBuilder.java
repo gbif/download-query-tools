@@ -30,6 +30,7 @@ import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.util.VocabularyUtils;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
+import org.gbif.api.vocabulary.MediaType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -205,7 +206,7 @@ public class HumanFilterBuilder {
   }
 
   private String lookupEnum(Class clazz, String value) {
-    return resourceBundle.getString("enum." + clazz.getSimpleName().toLowerCase() + "." + value.trim());
+    return resourceBundle.getString("enum." + clazz.getSimpleName().toLowerCase() + "." + (clazz == MediaType.class? value.trim() : value.trim().toUpperCase()));
   }
 
   private String lookupCountryCode(String code) {
