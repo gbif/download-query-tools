@@ -49,15 +49,15 @@ public class HumanPredicateBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(HumanPredicateBuilder.class);
   private static final String DEFAULT_BUNDLE = "org/gbif/occurrence/query/filter";
 
-  private static final String EQUALS_OPERATOR = "Is ";
-  private static final String IN_OPERATOR = "Is one of the ";
-  private static final String GREATER_THAN_OPERATOR = "Is greater than ";
-  private static final String GREATER_THAN_EQUALS_OPERATOR = "Is grater than or equals to ";
+  private static final String EQUALS_OPERATOR = "is ";
+  private static final String IN_OPERATOR = "is one of ";
+  private static final String GREATER_THAN_OPERATOR = "is greater than ";
+  private static final String GREATER_THAN_EQUALS_OPERATOR = "is greater than or equal to ";
   private static final String LESS_THAN_OPERATOR = "is less than ";
-  private static final String LESS_THAN_EQUALS_OPERATOR = "Is less than or equals to ";
+  private static final String LESS_THAN_EQUALS_OPERATOR = "is less than or equal to ";
 
-  private static final String NOT_OPERATOR = "Not";
-  private static final String IS_NOT_NULL_OPERATOR = "Is not null";
+  private static final String NOT_OPERATOR = "not";
+  private static final String IS_NOT_NULL_OPERATOR = "is not null";
 
   private static final String LIKE_OPERATOR = "~";
   private static final String ENUM_MONTH = "enum.month.";
