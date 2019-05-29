@@ -42,7 +42,7 @@
   </repositories>
 
   <properties>
-    <jdkLevel>1.7</jdkLevel>
+    <jdkLevel>1.8</jdkLevel>
 
     <commons-lang3.version>3.4</commons-lang3.version>
     <gbif-api.version>0.73</gbif-api.version>

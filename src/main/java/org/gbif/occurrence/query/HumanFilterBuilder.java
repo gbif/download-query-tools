@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
  * parameter being logically disjunct (OR) while different search parameters are logically combined (AND). Therefore
  * the {#humanFilter(Predicate p)} result is a map of OccurrenceSearchParameter (AND'ed) to a list of values (OR'ed).
  */
+@Deprecated
 public class HumanFilterBuilder {
 
   private enum State {
