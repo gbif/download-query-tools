@@ -147,10 +147,10 @@ public class HumanFilterBuilderTest {
 
     Map<OccurrenceSearchParameter, LinkedList<String>> x = builder.humanFilter(or);
     assertEquals(5, x.get(OccurrenceSearchParameter.YEAR).size());
-    assertEquals(">= 2000", x.get(OccurrenceSearchParameter.YEAR).getFirst());
+    assertEquals("≥ 2000", x.get(OccurrenceSearchParameter.YEAR).getFirst());
     assertEquals("> 2001", x.get(OccurrenceSearchParameter.YEAR).get(1));
     assertEquals("< 1750", x.get(OccurrenceSearchParameter.YEAR).get(2));
-    assertEquals("<= 1760", x.get(OccurrenceSearchParameter.YEAR).get(3));
+    assertEquals("≤ 1760", x.get(OccurrenceSearchParameter.YEAR).get(3));
     assertEquals("is not null", x.get(OccurrenceSearchParameter.YEAR).getLast());
   }
 
@@ -175,7 +175,7 @@ public class HumanFilterBuilderTest {
     countries.add(new EqualsPredicate(OccurrenceSearchParameter.COUNTRY, Country.DENMARK.getIso2LetterCode()));
     ands.add(new DisjunctionPredicate(countries));
 
-    assertEquals("Year: >= 2000 or <= 1760 \n"
+    assertEquals("Year: ≥ 2000 or ≤ 1760 \n"
                  + "Depth: > 2001m or < 1750m \n"
                  + "TypeStatus: is not null \n"
                  + "Country: Angola or Denmark"
@@ -217,7 +217,7 @@ public class HumanFilterBuilderTest {
     assertEquals("Human Observation", x.get(OccurrenceSearchParameter.BASIS_OF_RECORD).getFirst());
     assertEquals("Germany", x.get(OccurrenceSearchParameter.COUNTRY).getFirst());
     assertEquals(4, x.get(OccurrenceSearchParameter.DATASET_KEY).size());
-    assertEquals(">= 0m", x.get(OccurrenceSearchParameter.DEPTH).getFirst());
+    assertEquals("≥ 0m", x.get(OccurrenceSearchParameter.DEPTH).getFirst());
   }
 
   @Test
@@ -240,7 +240,7 @@ public class HumanFilterBuilderTest {
     x = builder.humanFilter(new ConjunctionPredicate(ands));
     assertEquals(2, x.size());
     assertEquals(3, x.get(OccurrenceSearchParameter.YEAR).size());
-    assertEquals("<= 1760", x.get(OccurrenceSearchParameter.YEAR).getLast());
+    assertEquals("≤ 1760", x.get(OccurrenceSearchParameter.YEAR).getLast());
 
     NotPredicate noBirds = new NotPredicate(new EqualsPredicate(OccurrenceSearchParameter.TAXON_KEY, "212"));
     ands.add(noBirds);

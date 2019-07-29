@@ -65,9 +65,9 @@ public class HumanFilterBuilder {
 
   private static final String EQUALS_OPERATOR = "";
   private static final String GREATER_THAN_OPERATOR = "> ";
-  private static final String GREATER_THAN_EQUALS_OPERATOR = ">= ";
+  private static final String GREATER_THAN_EQUALS_OPERATOR = "≥ ";
   private static final String LESS_THAN_OPERATOR = "< ";
-  private static final String LESS_THAN_EQUALS_OPERATOR = "<= ";
+  private static final String LESS_THAN_EQUALS_OPERATOR = "≤ ";
 
   private static final String NOT_OPERATOR = "not";
   private static final String IS_NOT_NULL_OPERATOR = "is not null";
