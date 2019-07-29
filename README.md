@@ -1,5 +1,5 @@
-# download-query-tools
-Utility classes to handle common aspects of GBIF download REST services. This public classes in this library provide:
+# Download Query Tools
+Utility classes to handle common aspects of GBIF download REST services. The public classes in this library provide:
  
   * HumanFilterBuilder: translates download query predicates into human readable strings.
   * QueryParameterFilterBuilder: translates download query predicates into a flat query string that is suitable for HTTP links.

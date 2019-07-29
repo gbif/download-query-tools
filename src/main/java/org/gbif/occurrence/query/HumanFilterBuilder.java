@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 /**
  * This class builds a human readable filter from a {@link org.gbif.api.model.occurrence.predicate.Predicate} hierarchy.
  * This class is not thread safe, create a new instance for every use if concurrent calls to {#humanFilter} is expected.
- * The IN predicate is not yet supported and you'll get an IllegalArgumentException.
  * This builder only supports predicates that follow our search query parameters style with multiple values for the same
  * parameter being logically disjunct (OR) while different search parameters are logically combined (AND). Therefore
  * the {#humanFilter(Predicate p)} result is a map of OccurrenceSearchParameter (AND'ed) to a list of values (OR'ed).
@@ -73,9 +72,10 @@ public class HumanFilterBuilder {
   private static final String IS_NOT_NULL_OPERATOR = "is not null";
 
   private static final String LIKE_OPERATOR = "~";
-  private Map<OccurrenceSearchParameter, LinkedList<String>> filter;;
+  private Map<OccurrenceSearchParameter, LinkedList<String>> filter;
   private State state;
   private OccurrenceSearchParameter lastParam;
+  private final FilterLookupCounter filterLookupCounter = new FilterLookupCounter();
   private final TitleLookup titleLookup;
   private final ResourceBundle resourceBundle;
 
@@ -98,6 +98,11 @@ public class HumanFilterBuilder {
    * @throws IllegalStateException if more complex predicates than the portal handles are supplied
    */
   public synchronized Map<OccurrenceSearchParameter, LinkedList<String>> humanFilter(Predicate p) {
+    int count = filterLookupCounter.countLookups(p);
+    if (count > 10050) {
+      throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
+    }
+
     filter = Maps.newLinkedHashMap();
     state = State.ROOT;
     lastParam = null;
@@ -148,6 +153,7 @@ public class HumanFilterBuilder {
     String humanValue;
     // lookup values
     switch (param) {
+      case ACCEPTED_TAXON_KEY:
       case TAXON_KEY:
       case KINGDOM_KEY:
       case PHYLUM_KEY:

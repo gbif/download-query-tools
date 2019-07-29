@@ -1,16 +1,22 @@
 package org.gbif.occurrence.query;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.gbif.api.model.occurrence.predicate.InPredicate;
+import org.gbif.api.model.occurrence.predicate.Predicate;
+import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,5 +51,26 @@ public class HumanPredicateBuilderTest {
 
       assertEquals(expected, actual);
     }
+  }
+
+  @Test
+  public void testTooManyLookups() throws Exception {
+    // If there are more than 10,050 lookups (dataset, taxa) give up; it's likely to be too slow.
+
+    List<String> bigList = new ArrayList<>();
+    for (int i = 0; i<11000; i++) {
+      bigList.add(""+i);
+    }
+    Predicate bigIn = new InPredicate(OccurrenceSearchParameter.TAXON_KEY, bigList);
+
+    try {
+      builder.humanFilter(bigIn);
+      fail();
+    } catch (IllegalStateException e) {}
+
+    try {
+      builder.humanFilterString(bigIn);
+      fail();
+    } catch (IllegalStateException e) {}
   }
 }

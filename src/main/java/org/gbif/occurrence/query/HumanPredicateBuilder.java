@@ -61,6 +61,8 @@ public class HumanPredicateBuilder {
 
   private static final String LIKE_OPERATOR = "~";
   private static final String ENUM_MONTH = "enum.month.";
+
+  private final FilterLookupCounter filterLookupCounter = new FilterLookupCounter();
   private final TitleLookup titleLookup;
   private final ResourceBundle resourceBundle;
 
@@ -83,6 +85,11 @@ public class HumanPredicateBuilder {
    * @throws IllegalStateException if more complex predicates than the portal handles are supplied
    */
   public synchronized JsonNode humanFilter(Predicate p) {
+    int count = filterLookupCounter.countLookups(p);
+    if (count > 10050) {
+      throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
+    }
+
     JsonNode rootNode = MAPPER.createObjectNode();
     visit(p, rootNode);
 
@@ -95,6 +102,11 @@ public class HumanPredicateBuilder {
    * @throws IllegalStateException if more complex predicates than the portal handles are supplied
    */
   public synchronized String humanFilterString(Predicate p) {
+    int count = filterLookupCounter.countLookups(p);
+    if (count > 10050) {
+      throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
+    }
+
     try {
       JsonNode humanFilterNode = humanFilter(p);
       return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(humanFilterNode);
@@ -157,6 +169,7 @@ public class HumanPredicateBuilder {
     String humanValue;
     // lookup values
     switch (param) {
+      case ACCEPTED_TAXON_KEY:
       case TAXON_KEY:
       case KINGDOM_KEY:
       case PHYLUM_KEY:

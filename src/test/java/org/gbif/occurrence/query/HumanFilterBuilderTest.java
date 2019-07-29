@@ -5,6 +5,7 @@ import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
 import org.gbif.api.model.occurrence.predicate.GreaterThanOrEqualsPredicate;
 import org.gbif.api.model.occurrence.predicate.GreaterThanPredicate;
+import org.gbif.api.model.occurrence.predicate.InPredicate;
 import org.gbif.api.model.occurrence.predicate.IsNotNullPredicate;
 import org.gbif.api.model.occurrence.predicate.LessThanOrEqualsPredicate;
 import org.gbif.api.model.occurrence.predicate.LessThanPredicate;
@@ -15,6 +16,7 @@ import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -315,4 +318,24 @@ public class HumanFilterBuilderTest {
     assertEquals(1, x.get(OccurrenceSearchParameter.MEDIA_TYPE).size());
   }
 
+  @Test
+  public void testTooManyLookups() throws Exception {
+    // If there are more than 10,050 lookups (dataset, taxa) give up; it's likely to be too slow.
+
+    List<String> bigList = new ArrayList<>();
+    for (int i = 0; i<11000; i++) {
+      bigList.add(""+i);
+    }
+    Predicate bigIn = new InPredicate(OccurrenceSearchParameter.TAXON_KEY, bigList);
+
+    try {
+      builder.humanFilter(bigIn);
+      fail();
+    } catch (IllegalStateException e) {}
+
+    try {
+      builder.humanFilterString(bigIn);
+      fail();
+    } catch (IllegalStateException e) {}
+  }
 }
