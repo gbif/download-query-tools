@@ -147,7 +147,6 @@ public class HumanFilterBuilderTest {
     ors.add(new IsNotNullPredicate(OccurrenceSearchParameter.YEAR));
     DisjunctionPredicate or = new DisjunctionPredicate(ors);
 
-
     Map<OccurrenceSearchParameter, LinkedList<String>> x = builder.humanFilter(or);
     assertEquals(5, x.get(OccurrenceSearchParameter.YEAR).size());
     assertEquals("≥ 2000", x.get(OccurrenceSearchParameter.YEAR).getFirst());

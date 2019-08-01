@@ -62,7 +62,7 @@ public class HumanPredicateBuilder {
   private static final String LIKE_OPERATOR = "~";
   private static final String ENUM_MONTH = "enum.month.";
 
-  private final FilterLookupCounter filterLookupCounter = new FilterLookupCounter();
+  private final PredicateLookupCounter filterLookupCounter = new PredicateLookupCounter();
   private final TitleLookup titleLookup;
   private final ResourceBundle resourceBundle;
 
@@ -85,7 +85,7 @@ public class HumanPredicateBuilder {
    * @throws IllegalStateException if more complex predicates than the portal handles are supplied
    */
   public synchronized JsonNode humanFilter(Predicate p) {
-    int count = filterLookupCounter.countLookups(p);
+    int count = filterLookupCounter.count(p);
     if (count > 10050) {
       throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
     }
@@ -102,7 +102,7 @@ public class HumanPredicateBuilder {
    * @throws IllegalStateException if more complex predicates than the portal handles are supplied
    */
   public synchronized String humanFilterString(Predicate p) {
-    int count = filterLookupCounter.countLookups(p);
+    int count = filterLookupCounter.count(p);
     if (count > 10050) {
       throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
     }

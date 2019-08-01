@@ -75,7 +75,7 @@ public class HumanFilterBuilder {
   private Map<OccurrenceSearchParameter, LinkedList<String>> filter;
   private State state;
   private OccurrenceSearchParameter lastParam;
-  private final FilterLookupCounter filterLookupCounter = new FilterLookupCounter();
+  private final PredicateLookupCounter filterLookupCounter = new PredicateLookupCounter();
   private final TitleLookup titleLookup;
   private final ResourceBundle resourceBundle;
 
@@ -98,7 +98,7 @@ public class HumanFilterBuilder {
    * @throws IllegalStateException if more complex predicates than the portal handles are supplied
    */
   public synchronized Map<OccurrenceSearchParameter, LinkedList<String>> humanFilter(Predicate p) {
-    int count = filterLookupCounter.countLookups(p);
+    int count = filterLookupCounter.count(p);
     if (count > 10050) {
       throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
     }
