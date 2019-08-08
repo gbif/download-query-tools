@@ -310,6 +310,14 @@ public class HumanFilterBuilderTest {
   }
 
   @Test
+  public void testZeroPaddedMonth() {
+    Map<OccurrenceSearchParameter, LinkedList<String>> x =
+        builder.humanFilter(new EqualsPredicate(OccurrenceSearchParameter.MONTH, "000003"));
+    assertEquals(1, x.size());
+    assertEquals(1, x.get(OccurrenceSearchParameter.MONTH).size());
+  }
+
+  @Test
   public void testEnumCaseSensitiveImage() {
     Map<OccurrenceSearchParameter, LinkedList<String>> x =
       builder.humanFilter(new EqualsPredicate(OccurrenceSearchParameter.MEDIA_TYPE, " StillImage   "));

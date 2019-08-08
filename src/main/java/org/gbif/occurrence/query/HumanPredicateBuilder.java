@@ -244,9 +244,9 @@ public class HumanPredicateBuilder {
     //It's a range
     String[] monthRange = month.split("-");
     if (monthRange.length == 2) {
-      return resourceBundle.getString(ENUM_MONTH + monthRange[0]) + "-" + resourceBundle.getString(ENUM_MONTH + monthRange[1]);
+      return resourceBundle.getString(ENUM_MONTH + Integer.parseInt(monthRange[0])) + "-" + resourceBundle.getString(ENUM_MONTH + Integer.parseInt(monthRange[1]));
     }
-    return resourceBundle.getString(ENUM_MONTH + month);
+    return resourceBundle.getString(ENUM_MONTH + Integer.parseInt(month));
   }
 
   private static void addOrPut(JsonNode node, String fieldName, JsonNode newNode) {

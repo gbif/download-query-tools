@@ -228,9 +228,9 @@ public class HumanFilterBuilder {
     //It's a range
     String[] monthRange = month.split("-");
     if(monthRange.length == 2) {
-      return resourceBundle.getString("enum.month." + monthRange[0]) + "-"  + resourceBundle.getString("enum.month." + monthRange[1]);
+      return resourceBundle.getString("enum.month." + Integer.parseInt(monthRange[0])) + "-"  + resourceBundle.getString("enum.month." + Integer.parseInt(monthRange[1]));
     }
-    return resourceBundle.getString("enum.month." + month);
+    return resourceBundle.getString("enum.month." + Integer.parseInt(month));
   }
 
   private void visit(ConjunctionPredicate and) throws IllegalStateException {
