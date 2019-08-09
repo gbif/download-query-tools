@@ -32,8 +32,8 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class PredicateTaxonCounterTest {
-  PredicateTaxonCounter counter = new PredicateTaxonCounter();
+public class PredicateCounterTest {
+  PredicateCounter counter = new PredicateCounter();
 
   /**
    * test all available search parameters and make sure we have a bundle entry for all possible enum values
@@ -90,7 +90,7 @@ public class PredicateTaxonCounterTest {
     ConjunctionPredicate and = new ConjunctionPredicate(ands);
 
     int c = counter.count(and);
-    assertEquals(11, c);
+    assertEquals(181, c);
   }
 
   @Test

@@ -113,7 +113,7 @@ public class HumanFilterBuilderTest {
 
       } else if (p.type() == String.class) {
         if (p == OccurrenceSearchParameter.GEOMETRY) {
-          ands.add(new EqualsPredicate(p, "POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"));
+          ands.add(new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"));
         } else {
           ands.add(new EqualsPredicate(p, "Bernd Neumann"));
         }
