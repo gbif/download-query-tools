@@ -12,6 +12,9 @@
  */
 package org.gbif.occurrence.query;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
@@ -26,6 +29,8 @@ import org.gbif.api.model.occurrence.predicate.NotPredicate;
 import org.gbif.api.model.occurrence.predicate.Predicate;
 import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,12 +39,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class builds a query parameter filter usable for search links from a
@@ -52,7 +51,7 @@ public class QueryParameterFilterBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(QueryParameterFilterBuilder.class);
   private static final String WILDCARD = "*";
   private static final Pattern POLYGON_PATTERN = Pattern.compile("POLYGON\\s*\\(\\s*\\((.+)\\)\\s*\\)",
-    Pattern.CASE_INSENSITIVE);
+      Pattern.CASE_INSENSITIVE);
 
   private Map<OccurrenceSearchParameter, LinkedList<String>> filter;
 
@@ -219,13 +218,13 @@ public class QueryParameterFilterBuilder {
   private void visit(Predicate p) throws IllegalStateException {
     Method method = null;
     try {
-      method = getClass().getDeclaredMethod("visit", new Class[] {p.getClass()});
+      method = getClass().getDeclaredMethod("visit", new Class[]{p.getClass()});
     } catch (NoSuchMethodException e) {
       LOG
-        .warn(
-          "Visit method could not be found. That means a Predicate has been passed in that is unknown to this "
-            + "class",
-          e);
+          .warn(
+              "Visit method could not be found. That means a Predicate has been passed in that is unknown to this "
+                  + "class",
+              e);
       throw new IllegalArgumentException("Unknown Predicate", e);
     }
     try {
@@ -233,12 +232,11 @@ public class QueryParameterFilterBuilder {
       method.invoke(this, p);
     } catch (IllegalAccessException e) {
       LOG.error(
-        "This should never happen as we set accessible to true explicitly before. Probably a programming error", e);
+          "This should never happen as we set accessible to true explicitly before. Probably a programming error", e);
       throw new RuntimeException("Programming error", e);
     } catch (InvocationTargetException e) {
       LOG.info("Exception thrown while building the Hive Download", e);
       throw new IllegalArgumentException(e);
     }
   }
-
 }

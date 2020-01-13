@@ -1,13 +1,11 @@
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.Constants;
+import com.sun.jersey.api.client.WebResource;
 import org.gbif.api.model.checklistbank.NameUsage;
 import org.gbif.api.model.registry.Dataset;
+import org.junit.Test;
 
 import java.util.UUID;
-
-import com.sun.jersey.api.client.WebResource;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
@@ -29,21 +27,9 @@ public class TitleLookupTest {
     pontaurus.setTitle("PonTaurus");
     when(res.get(Dataset.class)).thenReturn(pontaurus);
 
-    TitleLookup tl = new TitleLookup(res);
+    TitleLookupServiceImpl tl = new TitleLookupServiceImpl(res);
 
     assertEquals("Abies alba Mill.", tl.getSpeciesName("4231"));
     assertEquals("PonTaurus", tl.getDatasetTitle(UUID.randomUUID().toString()));
   }
-
-
-
-  @Test
-  //@Ignore("manual API test only")
-  public void integrationTestLookup() throws Exception {
-    TitleLookup tl = new TitleLookup("http://api.gbif.org/v1/", 2);
-    assertEquals("Aves", tl.getSpeciesName("212"));
-    assertEquals("GBIF Backbone Taxonomy", tl.getDatasetTitle(Constants.NUB_DATASET_KEY.toString()));
-    assertEquals("EOD - eBird Observation Dataset", tl.getDatasetTitle("4fa7b334-ce0d-4e88-aaae-2e0c138d049e"));
-  }
-
 }

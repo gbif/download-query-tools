@@ -12,28 +12,47 @@
  */
 package org.gbif.occurrence.query;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.CaseFormat;
-import com.sun.jersey.api.client.WebResource;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.ObjectNode;
-import org.codehaus.jackson.node.TextNode;
-import org.gbif.api.model.occurrence.predicate.*;
+import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
+import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
+import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
+import org.gbif.api.model.occurrence.predicate.GreaterThanOrEqualsPredicate;
+import org.gbif.api.model.occurrence.predicate.GreaterThanPredicate;
+import org.gbif.api.model.occurrence.predicate.InPredicate;
+import org.gbif.api.model.occurrence.predicate.IsNotNullPredicate;
+import org.gbif.api.model.occurrence.predicate.LessThanOrEqualsPredicate;
+import org.gbif.api.model.occurrence.predicate.LessThanPredicate;
+import org.gbif.api.model.occurrence.predicate.LikePredicate;
+import org.gbif.api.model.occurrence.predicate.NotPredicate;
+import org.gbif.api.model.occurrence.predicate.Predicate;
+import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import org.gbif.api.model.registry.Dataset;
 import org.gbif.api.util.VocabularyUtils;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 import org.gbif.api.vocabulary.MediaType;
+import org.gbif.api.ws.mixin.LicenseMixin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEOMETRY;
 
 /**
  * This class builds a human readable filter from a {@link Predicate} hierarchy.
@@ -44,9 +63,9 @@ import java.util.stream.StreamSupport;
  */
 public class HumanPredicateBuilder {
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
   private static final Logger LOG = LoggerFactory.getLogger(HumanPredicateBuilder.class);
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final String DEFAULT_BUNDLE = "org/gbif/occurrence/query/filter";
 
   private static final String EQUALS_OPERATOR = "is ";
@@ -63,20 +82,24 @@ public class HumanPredicateBuilder {
   private static final String ENUM_MONTH = "enum.month.";
 
   private final PredicateLookupCounter filterLookupCounter = new PredicateLookupCounter();
-  private final TitleLookup titleLookup;
+  private final TitleLookupService titleLookupService;
   private final ResourceBundle resourceBundle;
 
-  public HumanPredicateBuilder(TitleLookup titleLookup) {
-    this.titleLookup = titleLookup;
-    resourceBundle = ResourceBundle.getBundle(DEFAULT_BUNDLE);
+  static {
+    MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    // determines whether encountering of unknown properties (ones that do not map to a property, and there is no
+    // "any setter" or handler that can handle it) should result in a failure (throwing a JsonMappingException) or not.
+    MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+    // Enforce use of ISO-8601 format dates (http://wiki.fasterxml.com/JacksonFAQDateHandling)
+    MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+    MAPPER.addMixIn(Dataset.class, LicenseMixin.class);
   }
 
-  /**
-   * Creates a new human filter builder using the default resource bundle for enumerations from the GBIF API.
-   */
-  public HumanPredicateBuilder(WebResource apiRoot) {
+  public HumanPredicateBuilder(TitleLookupService titleLookupService) {
+    this.titleLookupService = titleLookupService;
     resourceBundle = ResourceBundle.getBundle(DEFAULT_BUNDLE);
-    titleLookup = new TitleLookup(apiRoot);
   }
 
   /**
@@ -87,7 +110,7 @@ public class HumanPredicateBuilder {
   public synchronized JsonNode humanFilter(Predicate p) {
     int count = filterLookupCounter.count(p);
     if (count > 10050) {
-      throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
+      throw new IllegalStateException("Too many lookups (" + count + ") would be needed.");
     }
 
     JsonNode rootNode = MAPPER.createObjectNode();
@@ -104,7 +127,7 @@ public class HumanPredicateBuilder {
   public synchronized String humanFilterString(Predicate p) {
     int count = filterLookupCounter.count(p);
     if (count > 10050) {
-      throw new IllegalStateException("Too many lookups ("+count+") would be needed.");
+      throw new IllegalStateException("Too many lookups (" + count + ") would be needed.");
     }
 
     try {
@@ -120,32 +143,6 @@ public class HumanPredicateBuilder {
     }
   }
 
-  private Stream<JsonNode> toStream(Iterator<JsonNode> iterator) {
-    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.NONNULL), false);
-  }
-
-  // TODO: 2019-05-28 it's not working properly. should be completed: fix output, add indents
-  String toPrettyPrint(JsonNode jsonNode) {
-    if (jsonNode.isObject()) {
-      return
-          StreamSupport.stream(Spliterators.spliteratorUnknownSize(jsonNode.getFieldNames(), Spliterator.NONNULL), false)
-              .map(fieldName -> toStream(jsonNode.get(fieldName).getElements()).map(node -> {
-                if (node instanceof TextNode) {
-                  return node.getTextValue();
-                } else if (node.isObject()) {
-                  return toPrettyPrint(node);
-                } else if (node.isArray()) {
-                  return toStream(node.getElements()).map(this::toPrettyPrint).collect(Collectors.joining()) + '\n';
-                }
-                return "";
-              }).collect(Collectors.joining(" " + fieldName + " ")) + '\n').collect(Collectors.joining()) + '\n';
-
-    } else if (jsonNode.isArray()) {
-      return toStream(jsonNode.getElements()).map(this::toPrettyPrint).collect(Collectors.joining()) + '\n';
-    }
-    return "";
-  }
-
   public synchronized String humanFilterString(String predicate) {
     try {
       return humanFilterString(MAPPER.readValue(predicate, Predicate.class));
@@ -155,7 +152,7 @@ public class HumanPredicateBuilder {
   }
 
   private void addParamValue(OccurrenceSearchParameter param, String op, Collection<String> values, JsonNode node) {
-      addParamValue(param, op + "(" + values.stream().map(p -> getHumanValue(param, p)).collect(Collectors.joining(", ")) + ")", node);
+    addParamValue(param, op + "(" + values.stream().map(p -> getHumanValue(param, p)).collect(Collectors.joining(", ")) + ")", node);
   }
 
   private void addParamValue(OccurrenceSearchParameter param, String op, String value, JsonNode node) {
@@ -179,10 +176,10 @@ public class HumanPredicateBuilder {
       case GENUS_KEY:
       case SUBGENUS_KEY:
       case SPECIES_KEY:
-        humanValue = titleLookup.getSpeciesName(value);
+        humanValue = titleLookupService.getSpeciesName(value);
         break;
       case DATASET_KEY:
-        humanValue = titleLookup.getDatasetTitle(value);
+        humanValue = titleLookupService.getDatasetTitle(value);
         break;
       case COUNTRY:
       case PUBLISHING_COUNTRY:
@@ -203,7 +200,7 @@ public class HumanPredicateBuilder {
         }
     }
     // add unit symbol
-    if (param == OccurrenceSearchParameter.DEPTH || param == OccurrenceSearchParameter.ELEVATION) {
+    if (param == DEPTH || param == ELEVATION) {
       humanValue = humanValue + "m";
     }
     return humanValue;
@@ -220,7 +217,7 @@ public class HumanPredicateBuilder {
     String paramName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, param.name());
     if (node.isObject()) {
       if (!node.has(paramName)) {
-        ((ObjectNode) node).put(paramName, MAPPER.createArrayNode());
+        ((ObjectNode) node).set(paramName, MAPPER.createArrayNode());
       }
       ((ArrayNode) node.get(paramName)).add(op);
     } else if (node.isArray()) {
@@ -251,10 +248,10 @@ public class HumanPredicateBuilder {
 
   private static void addOrPut(JsonNode node, String fieldName, JsonNode newNode) {
     if (node.isObject()) {
-      ((ObjectNode) node).put(fieldName, newNode);
+      ((ObjectNode) node).set(fieldName, newNode);
     } else if (node.isArray()) {
       ObjectNode andBaseNode = MAPPER.createObjectNode();
-      andBaseNode.put(fieldName, newNode);
+      andBaseNode.set(fieldName, newNode);
       ((ArrayNode) node).add(andBaseNode);
     }
   }
@@ -341,7 +338,7 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(WithinPredicate within, JsonNode node) {
-    addParamValue(OccurrenceSearchParameter.GEOMETRY, "", within.getGeometry(), node);
+    addParamValue(GEOMETRY, "", within.getGeometry(), node);
   }
 
   private void visitRange(ConjunctionPredicate and, JsonNode node) {
@@ -362,5 +359,4 @@ public class HumanPredicateBuilder {
     }
     addParamValue(lower.getKey(), "", lower.getValue() + "-" + upper.getValue(), node);
   }
-
 }

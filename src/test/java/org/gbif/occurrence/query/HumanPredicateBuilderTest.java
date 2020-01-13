@@ -1,6 +1,6 @@
 package org.gbif.occurrence.query;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gbif.api.model.occurrence.predicate.InPredicate;
 import org.gbif.api.model.occurrence.predicate.Predicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
@@ -27,7 +27,7 @@ public class HumanPredicateBuilderTest {
 
   @Before
   public void init() {
-    TitleLookup tl = mock(TitleLookup.class);
+    TitleLookupServiceImpl tl = mock(TitleLookupServiceImpl.class);
     when(tl.getDatasetTitle(Matchers.any())).thenReturn("The little Mermaid");
     when(tl.getSpeciesName(Matchers.any())).thenReturn("Abies alba Mill.");
     builder = new HumanPredicateBuilder(tl);
