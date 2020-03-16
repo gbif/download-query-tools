@@ -12,6 +12,10 @@
  */
 package org.gbif.occurrence.query;
 
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEOMETRY;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,7 +24,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.base.CaseFormat;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
@@ -44,16 +53,6 @@ import org.gbif.api.ws.mixin.LicenseMixin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEOMETRY;
-
 /**
  * This class builds a human readable filter from a {@link Predicate} hierarchy.
  * This class is not thread safe, create a new instance for every use if concurrent calls to {#humanFilter} is expected.
@@ -61,6 +60,7 @@ import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEO
  * parameter being logically disjunct (OR) while different search parameters are logically combined (AND). Therefore
  * the {#humanFilter(Predicate p)} result is a map of OccurrenceSearchParameter (AND'ed) to a list of values (OR'ed).
  */
+@SuppressWarnings("unused")
 public class HumanPredicateBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(HumanPredicateBuilder.class);
@@ -214,7 +214,7 @@ public class HumanPredicateBuilder {
   private void addParamValue(OccurrenceSearchParameter param, String op, JsonNode node) {
     // verify that last param if existed was the same
 
-    String paramName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, param.name());
+    String paramName = toCamelCase(param.name());
     if (node.isObject()) {
       if (!node.has(paramName)) {
         ((ObjectNode) node).set(paramName, MAPPER.createArrayNode());
@@ -223,6 +223,19 @@ public class HumanPredicateBuilder {
     } else if (node.isArray()) {
       ((ArrayNode) node).add(TextNode.valueOf(paramName + " " + op));
     }
+  }
+
+  private String toCamelCase(String string){
+    String[] parts = string.split("_");
+
+    return Stream.of(parts)
+        .map(this::toProperCase)
+        .collect(Collectors.joining());
+  }
+
+  private String toProperCase(String s) {
+    return s.substring(0, 1).toUpperCase() +
+        s.substring(1).toLowerCase();
   }
 
   private String lookupEnum(Class clazz, String value) {

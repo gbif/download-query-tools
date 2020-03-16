@@ -1,20 +1,21 @@
 package org.gbif.occurrence.query;
 
+import static org.gbif.api.util.PreconditionUtils.checkArgument;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.google.common.base.Preconditions;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import java.net.URI;
+import java.util.Objects;
 import org.gbif.api.ws.mixin.Mixins;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
 
 public final class TitleLookupServiceFactory {
 
@@ -24,8 +25,8 @@ public final class TitleLookupServiceFactory {
   }
 
   public static TitleLookupService getInstance(String apiRootProperty) {
-    URI apiRoot = URI.create(Preconditions.checkNotNull(apiRootProperty, "API url can't be null"));
-    Preconditions.checkArgument(apiRoot.getHost() != null, "API url must have a host! " + apiRoot);
+    URI apiRoot = URI.create(Objects.requireNonNull(apiRootProperty, "API url can't be null"));
+    checkArgument(apiRoot.getHost() != null, "API url must have a host! " + apiRoot);
     LOG.info("Create new TitleLookup using API {}", apiRoot);
 
     ObjectMapper objectMapper = new ObjectMapper();

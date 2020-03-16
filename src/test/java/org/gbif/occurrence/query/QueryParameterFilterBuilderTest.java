@@ -1,5 +1,6 @@
 package org.gbif.occurrence.query;
 
+import java.util.ArrayList;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
@@ -16,7 +17,6 @@ import org.gbif.api.vocabulary.Country;
 
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +32,7 @@ public class QueryParameterFilterBuilderTest {
     String query = builder.queryFilter(p);
     assertEquals("COUNTRY=AF", query);
 
-    List<Predicate> ors = Lists.newArrayList();
+    List<Predicate> ors = new ArrayList<>();
     ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2000"));
     ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2001"));
     ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2002"));
@@ -73,7 +73,7 @@ public class QueryParameterFilterBuilderTest {
   public void testRange() throws Exception {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
 
-    List<Predicate> rangeAnd = Lists.newArrayList();
+    List<Predicate> rangeAnd = new ArrayList<>();
     rangeAnd.add(new GreaterThanOrEqualsPredicate(OccurrenceSearchParameter.YEAR, "2000"));
     rangeAnd.add(new LessThanOrEqualsPredicate(OccurrenceSearchParameter.YEAR, "2011"));
     Predicate range = new ConjunctionPredicate(rangeAnd);

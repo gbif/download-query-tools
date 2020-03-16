@@ -12,7 +12,13 @@
  */
 package org.gbif.occurrence.query;
 
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
@@ -25,13 +31,6 @@ import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class PredicateCounterTest {
   PredicateCounter counter = new PredicateCounter();
 
@@ -42,7 +41,7 @@ public class PredicateCounterTest {
   public void testAllParams() {
 
     final String date = DateFormatUtils.ISO_DATE_FORMAT.format(new Date());
-    List<Predicate> ands = Lists.newArrayList();
+    List<Predicate> ands = new ArrayList<>();
     for (OccurrenceSearchParameter p : OccurrenceSearchParameter.values()) {
       if (p.type().isEnum()) {
         if (p.type() == Country.class) {
@@ -54,7 +53,7 @@ public class PredicateCounterTest {
         } else {
           Class<Enum<?>> vocab = (Class<Enum<?>>) p.type();
           // add a comparison for every possible enum value to test the resource bundle for completeness
-          List<Predicate> ors = Lists.newArrayList();
+          List<Predicate> ors = new ArrayList<>();
           for (Enum<?> e : vocab.getEnumConstants()) {
             ors.add(new EqualsPredicate(p, e.toString()));
           }
@@ -90,18 +89,18 @@ public class PredicateCounterTest {
     ConjunctionPredicate and = new ConjunctionPredicate(ands);
 
     int c = counter.count(and);
-    assertEquals(192, c);
+    assertEquals(193, c);
   }
 
   @Test
   public void testTaxa() {
-    int c = counter.count(new InPredicate(OccurrenceSearchParameter.TAXON_KEY, Lists.newArrayList("1", "2", "3")));
+    int c = counter.count(new InPredicate(OccurrenceSearchParameter.TAXON_KEY, Arrays.asList("1", "2", "3")));
 
     assertEquals(3, c);
   }
 
   @Test
   public void testCountNull() {
-    assertTrue(counter.count(null) == 0);
+    assertEquals(0, (int) counter.count(null));
   }
 }

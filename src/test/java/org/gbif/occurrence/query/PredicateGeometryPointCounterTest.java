@@ -12,20 +12,23 @@
  */
 package org.gbif.occurrence.query;
 
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.gbif.api.model.occurrence.predicate.*;
+import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
+import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
+import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
+import org.gbif.api.model.occurrence.predicate.Predicate;
+import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 import org.junit.Test;
-
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class PredicateGeometryPointCounterTest {
   PredicateGeometryPointCounter counter = new PredicateGeometryPointCounter();
@@ -37,7 +40,7 @@ public class PredicateGeometryPointCounterTest {
   public void testAllParams() {
 
     final String date = DateFormatUtils.ISO_DATE_FORMAT.format(new Date());
-    List<Predicate> ands = Lists.newArrayList();
+    List<Predicate> ands = new ArrayList<>();
     for (OccurrenceSearchParameter p : OccurrenceSearchParameter.values()) {
       if (p.type().isEnum()) {
         if (p.type() == Country.class) {
@@ -49,7 +52,7 @@ public class PredicateGeometryPointCounterTest {
         } else {
           Class<Enum<?>> vocab = (Class<Enum<?>>) p.type();
           // add a comparison for every possible enum value to test the resource bundle for completeness
-          List<Predicate> ors = Lists.newArrayList();
+          List<Predicate> ors = new ArrayList<>();
           for (Enum<?> e : vocab.getEnumConstants()) {
             ors.add(new EqualsPredicate(p, e.toString()));
           }
@@ -91,16 +94,16 @@ public class PredicateGeometryPointCounterTest {
   @Test
   public void testPolygons() {
     int c = counter.count(
-      new DisjunctionPredicate(Lists.newArrayList(
-        new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"),
-        new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 30 10))")
-        )
+      new DisjunctionPredicate(Arrays.asList(
+          new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"),
+          new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 30 10))")
+      )
       ));
     assertEquals(9, c);
   }
 
   @Test
   public void testCountNull() {
-    assertTrue(counter.count(null) == 0);
+    assertEquals(0, (int) counter.count(null));
   }
 }

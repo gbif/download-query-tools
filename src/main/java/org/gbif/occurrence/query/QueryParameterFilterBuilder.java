@@ -12,9 +12,14 @@
  */
 package org.gbif.occurrence.query;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
@@ -31,14 +36,6 @@ import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URLEncoder;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class builds a query parameter filter usable for search links from a
@@ -68,7 +65,7 @@ public class QueryParameterFilterBuilder {
     boolean first = true;
 
     // build filter map
-    filter = Maps.newHashMap();
+    filter = new HashMap<>();
     state = State.ROOT;
     lastParam = null;
     visit(p);
@@ -130,10 +127,10 @@ public class QueryParameterFilterBuilder {
   }
 
   private String range(String from, String to) {
-    if (Strings.isNullOrEmpty(from)) {
+    if (from == null || from.length() == 0) {
       from = WILDCARD;
     }
-    if (Strings.isNullOrEmpty(to)) {
+    if (to == null || to.length() == 0) {
       to = WILDCARD;
     }
     return from + "," + to;
@@ -209,7 +206,7 @@ public class QueryParameterFilterBuilder {
     }
 
     if (!filter.containsKey(param)) {
-      filter.put(param, Lists.<String>newLinkedList());
+      filter.put(param, new LinkedList<>());
     }
     filter.get(param).add(value);
     lastParam = param;
