@@ -91,7 +91,9 @@ public class HumanPredicateBuilder {
     }
 
     JsonNode rootNode = MAPPER.createObjectNode();
-    visit(p, rootNode);
+    if (p != null) {
+      visit(p, rootNode);
+    }
 
     return rootNode;
   }
@@ -147,6 +149,9 @@ public class HumanPredicateBuilder {
   }
 
   public synchronized String humanFilterString(String predicate) {
+    if (predicate == null) {
+      return "{ }";
+    }
     try {
       return humanFilterString(MAPPER.readValue(predicate, Predicate.class));
     } catch (Exception ex) {
