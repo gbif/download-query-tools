@@ -34,6 +34,15 @@ public class HumanPredicateBuilderTest {
   }
 
   @Test
+  public void testHumanPredicateStringNull() {
+    String s = null;
+    Predicate p = null;
+    builder.humanFilter(p);
+    assertEquals("{ }", builder.humanFilterString(p));
+    assertEquals("{ }", builder.humanFilterString(s));
+  }
+
+  @Test
   public void humanPredicateFilterTest() throws Exception {
     String expected = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource("result.txt").getPath())));
     try (Stream<String> stream = Files.lines(Paths.get(getClass().getClassLoader().getResource("source.txt").getPath()))) {
@@ -54,7 +63,7 @@ public class HumanPredicateBuilderTest {
   }
 
   @Test
-  public void testTooManyLookups() throws Exception {
+  public void testTooManyLookups() {
     // If there are more than 10,050 lookups (dataset, taxa) give up; it's likely to be too slow.
 
     List<String> bigList = new ArrayList<>();

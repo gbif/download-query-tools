@@ -89,7 +89,7 @@ public class PredicateCounterTest {
     ConjunctionPredicate and = new ConjunctionPredicate(ands);
 
     int c = counter.count(and);
-    assertEquals(193, c);
+    assertEquals(194, c);
   }
 
   @Test
