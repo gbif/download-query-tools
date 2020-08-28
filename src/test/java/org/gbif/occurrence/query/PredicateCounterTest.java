@@ -46,42 +46,42 @@ public class PredicateCounterTest {
     for (OccurrenceSearchParameter p : OccurrenceSearchParameter.values()) {
       if (p.type().isEnum()) {
         if (p.type() == Country.class) {
-          ands.add(new EqualsPredicate(p, Country.DENMARK.getIso2LetterCode()));
+          ands.add(new EqualsPredicate(p, Country.DENMARK.getIso2LetterCode(), false));
 
         } else if (p.type() == Continent.class) {
-            ands.add(new EqualsPredicate(p, Continent.AFRICA.getTitle()));
+            ands.add(new EqualsPredicate(p, Continent.AFRICA.getTitle(), false));
 
         } else {
           Class<Enum<?>> vocab = (Class<Enum<?>>) p.type();
           // add a comparison for every possible enum value to test the resource bundle for completeness
           List<Predicate> ors = new ArrayList<>();
           for (Enum<?> e : vocab.getEnumConstants()) {
-            ors.add(new EqualsPredicate(p, e.toString()));
+            ors.add(new EqualsPredicate(p, e.toString(), false));
           }
           ands.add(new DisjunctionPredicate(ors));
         }
 
       } else if (p.type() == Date.class) {
-        ands.add(new EqualsPredicate(p, date));
+        ands.add(new EqualsPredicate(p, date, false));
 
       } else if (p.type() == Double.class) {
-        ands.add(new EqualsPredicate(p, "12.478"));
+        ands.add(new EqualsPredicate(p, "12.478", false));
 
       } else if (p.type() == Integer.class) {
-        ands.add(new EqualsPredicate(p, "10"));
+        ands.add(new EqualsPredicate(p, "10", false));
 
       } else if (p.type() == String.class) {
         if (p == OccurrenceSearchParameter.GEOMETRY) {
           ands.add(new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"));
         } else {
-          ands.add(new EqualsPredicate(p, "Bernd Neumann"));
+          ands.add(new EqualsPredicate(p, "Bernd Neumann", false));
         }
 
       } else if (p.type() == Boolean.class) {
-        ands.add(new EqualsPredicate(p, "true"));
+        ands.add(new EqualsPredicate(p, "true", false));
 
       } else if (p.type() == UUID.class) {
-        ands.add(new EqualsPredicate(p, UUID.randomUUID().toString()));
+        ands.add(new EqualsPredicate(p, UUID.randomUUID().toString(), false));
 
       } else {
         throw new IllegalStateException("Unknown SearchParameter type " + p.type());
@@ -95,7 +95,7 @@ public class PredicateCounterTest {
 
   @Test
   public void testTaxa() {
-    int c = counter.count(new InPredicate(OccurrenceSearchParameter.TAXON_KEY, Arrays.asList("1", "2", "3")));
+    int c = counter.count(new InPredicate(OccurrenceSearchParameter.TAXON_KEY, Arrays.asList("1", "2", "3"), false));
 
     assertEquals(3, c);
   }

@@ -27,15 +27,15 @@ public class QueryParameterFilterBuilderTest {
   public void testMultiValues() throws Exception {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
 
-    Predicate p = new EqualsPredicate(OccurrenceSearchParameter.COUNTRY, Country.AFGHANISTAN.getIso2LetterCode());
+    Predicate p = new EqualsPredicate(OccurrenceSearchParameter.COUNTRY, Country.AFGHANISTAN.getIso2LetterCode(), false);
 
     String query = builder.queryFilter(p);
     assertEquals("COUNTRY=AF", query);
 
     List<Predicate> ors = new ArrayList<>();
-    ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2000"));
-    ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2001"));
-    ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2002"));
+    ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2000", false));
+    ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2001", false));
+    ors.add(new EqualsPredicate(OccurrenceSearchParameter.YEAR, "2002", false));
     DisjunctionPredicate or = new DisjunctionPredicate(ors);
 
     query = builder.queryFilter(or);
@@ -45,7 +45,7 @@ public class QueryParameterFilterBuilderTest {
   @Test(expected = IllegalArgumentException.class)
   public void testNot() throws Exception {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
-    NotPredicate noBirds = new NotPredicate(new EqualsPredicate(OccurrenceSearchParameter.TAXON_KEY, "212"));
+    NotPredicate noBirds = new NotPredicate(new EqualsPredicate(OccurrenceSearchParameter.TAXON_KEY, "212", false));
     builder.queryFilter(noBirds);
   }
 

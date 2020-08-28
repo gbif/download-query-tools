@@ -70,7 +70,7 @@ public class HumanPredicateBuilderTest {
     for (int i = 0; i<11000; i++) {
       bigList.add(""+i);
     }
-    Predicate bigIn = new InPredicate(OccurrenceSearchParameter.TAXON_KEY, bigList);
+    Predicate bigIn = new InPredicate(OccurrenceSearchParameter.TAXON_KEY, bigList, false);
 
     try {
       builder.humanFilter(bigIn);
