@@ -17,6 +17,8 @@ import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELE
 import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEOMETRY;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -94,7 +96,13 @@ public class HumanPredicateBuilder {
     // Enforce use of ISO-8601 format dates (http://wiki.fasterxml.com/JacksonFAQDateHandling)
     MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
+    // Add mixins
     MAPPER.addMixIn(Dataset.class, LicenseMixin.class);
+
+    // Improved custom pretty printer
+    DefaultPrettyPrinter pp = new DefaultPrettyPrinter();
+    pp.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+    MAPPER.setDefaultPrettyPrinter(pp);
   }
 
   public HumanPredicateBuilder(TitleLookupService titleLookupService) {
