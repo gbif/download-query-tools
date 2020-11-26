@@ -45,7 +45,7 @@
     <jdkLevel>1.8</jdkLevel>
 
     <commons-lang3.version>3.4</commons-lang3.version>
-    <gbif-api.version>0.121</gbif-api.version>
+    <gbif-api.version>0.129</gbif-api.version>
     <jackson.version>2.10.1</jackson.version>
     <jersey.version>1.18.3</jersey.version>
     <junit.version>4.11</junit.version>
