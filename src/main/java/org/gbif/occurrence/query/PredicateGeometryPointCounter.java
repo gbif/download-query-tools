@@ -38,23 +38,41 @@ public class PredicateGeometryPointCounter extends PredicateVisitor<Integer> {
     return visit(p);
   }
 
+  @Override
   protected Integer visit(ConjunctionPredicate and) {
     return and.getPredicates().stream().mapToInt(this::visit).max().orElse(0);
   }
 
+  @Override
   protected Integer visit(DisjunctionPredicate or) {
     return or.getPredicates().stream().mapToInt(this::visit).sum();
   }
 
+  @Override
   protected Integer visit(EqualsPredicate predicate) { return 0; }
+
+  @Override
   protected Integer visit(InPredicate predicate) { return 0; }
+
+  @Override
   protected Integer visit(GreaterThanOrEqualsPredicate predicate) { return 0; }
+
+  @Override
   protected Integer visit(GreaterThanPredicate predicate) { return 0; }
+
+  @Override
   protected Integer visit(LessThanOrEqualsPredicate predicate) { return 0; }
+
+  @Override
   protected Integer visit(LessThanPredicate predicate) { return 0; }
+
+  @Override
   protected Integer visit(LikePredicate predicate) { return 0; }
+
+  @Override
   protected Integer visit(IsNotNullPredicate predicate) { return 0; }
 
+  @Override
   protected Integer visit(WithinPredicate within) {
     try {
       Geometry geometry = new WKTReader().read(within.getGeometry());
@@ -65,6 +83,7 @@ public class PredicateGeometryPointCounter extends PredicateVisitor<Integer> {
     }
   }
 
+  @Override
   protected Integer visit(NotPredicate not) {
     return visit(not.getPredicate());
   }

@@ -64,6 +64,7 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
     }
   }
 
+  @Override
   protected Integer visit(ConjunctionPredicate and) {
     int count = 0;
     for (Predicate p : and.getPredicates()) {
@@ -72,6 +73,7 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
     return count;
   }
 
+  @Override
   protected Integer visit(DisjunctionPredicate or) {
     int count = 0;
     for (Predicate p : or.getPredicates()) {
@@ -80,38 +82,47 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
     return count;
   }
 
+  @Override
   protected Integer visit(EqualsPredicate predicate) {
     return getHumanValue(predicate.getKey());
   }
 
+  @Override
   protected Integer visit(InPredicate predicate) {
     return predicate.getValues().size() * getHumanValue(predicate.getKey());
   }
 
+  @Override
   protected Integer visit(GreaterThanOrEqualsPredicate predicate) {
     return 0;
   }
 
+  @Override
   protected Integer visit(GreaterThanPredicate predicate) {
     return 0;
   }
 
+  @Override
   protected Integer visit(LessThanOrEqualsPredicate predicate) {
     return 0;
   }
 
+  @Override
   protected Integer visit(LessThanPredicate predicate) {
     return 0;
   }
 
+  @Override
   protected Integer visit(LikePredicate predicate) {
     return 0;
   }
 
+  @Override
   protected Integer visit(IsNotNullPredicate predicate) {
     return 0;
   }
 
+  @Override
   protected Integer visit(WithinPredicate within) {
     return 0;
   }
@@ -120,6 +131,7 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
     return 0;
   }
 
+  @Override
   protected Integer visit(NotPredicate not) {
     return visit(not.getPredicate());
   }
