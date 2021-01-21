@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gbif.api.model.occurrence.predicate.InPredicate;
 import org.gbif.api.model.occurrence.predicate.Predicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,21 +15,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class HumanPredicateBuilderTest {
 
   private HumanPredicateBuilder builder;
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
-  @Before
+  @BeforeEach
   public void init() {
     TitleLookupServiceImpl tl = mock(TitleLookupServiceImpl.class);
-    when(tl.getDatasetTitle(Matchers.any())).thenReturn("The little Mermaid");
-    when(tl.getSpeciesName(Matchers.any())).thenReturn("Abies alba Mill.");
+    when(tl.getDatasetTitle(ArgumentMatchers.any())).thenReturn("The little Mermaid");
+    when(tl.getSpeciesName(ArgumentMatchers.any())).thenReturn("Abies alba Mill.");
     builder = new HumanPredicateBuilder(tl);
   }
 

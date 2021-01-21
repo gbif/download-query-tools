@@ -17,14 +17,15 @@ import org.gbif.api.vocabulary.Country;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class QueryParameterFilterBuilderTest {
 
   @Test
-  public void testMultiValues() throws Exception {
+  public void testMultiValues() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
 
     Predicate p = new EqualsPredicate(OccurrenceSearchParameter.COUNTRY, Country.AFGHANISTAN.getIso2LetterCode(), false);
@@ -42,27 +43,30 @@ public class QueryParameterFilterBuilderTest {
     assertEquals("YEAR=2000&YEAR=2001&YEAR=2002", query);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testNot() throws Exception {
+  @Test
+  public void testNot() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
-    NotPredicate noBirds = new NotPredicate(new EqualsPredicate(OccurrenceSearchParameter.TAXON_KEY, "212", false));
-    builder.queryFilter(noBirds);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testLess() throws Exception {
-    QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
-    builder.queryFilter(new LessThanPredicate(OccurrenceSearchParameter.YEAR, "1900"));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testGreater() throws Exception {
-    QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
-    builder.queryFilter(new GreaterThanPredicate(OccurrenceSearchParameter.YEAR, "1900"));
+    NotPredicate noBirds =
+        new NotPredicate(new EqualsPredicate(OccurrenceSearchParameter.TAXON_KEY, "212", false));
+    assertThrows(IllegalArgumentException.class, () -> builder.queryFilter(noBirds));
   }
 
   @Test
-  public void testPolygon() throws Exception {
+  public void testLess() {
+    QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
+    assertThrows(IllegalArgumentException.class,
+        () -> builder.queryFilter(new LessThanPredicate(OccurrenceSearchParameter.YEAR, "1900")));
+  }
+
+  @Test
+  public void testGreater() {
+    QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
+    assertThrows(IllegalArgumentException.class,
+        () -> builder.queryFilter(new GreaterThanPredicate(OccurrenceSearchParameter.YEAR, "1900")));
+  }
+
+  @Test
+  public void testPolygon() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
     final String wkt = "POLYGON((30 10,10 20,20 40,40 40,30 10))";
     String query = builder.queryFilter(new WithinPredicate(wkt));
@@ -70,7 +74,7 @@ public class QueryParameterFilterBuilderTest {
   }
 
   @Test
-  public void testRange() throws Exception {
+  public void testRange() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
 
     List<Predicate> rangeAnd = new ArrayList<>();
@@ -83,7 +87,7 @@ public class QueryParameterFilterBuilderTest {
   }
 
   @Test
-  public void testIsNotNull() throws Exception {
+  public void testIsNotNull() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
     String query = builder.queryFilter(new IsNotNullPredicate(OccurrenceSearchParameter.MEDIA_TYPE));
     assertEquals("MEDIA_TYPE=*", query);
