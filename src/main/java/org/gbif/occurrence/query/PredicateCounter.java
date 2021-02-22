@@ -35,50 +35,62 @@ public class PredicateCounter extends PredicateVisitor<Integer> {
     return visit(p);
   }
 
+  @Override
   protected Integer visit(ConjunctionPredicate and) {
     return and.getPredicates().stream().mapToInt(this::visit).sum();
   }
 
+  @Override
   protected Integer visit(DisjunctionPredicate or) {
     return or.getPredicates().stream().mapToInt(this::visit).sum();
   }
 
+  @Override
   protected Integer visit(EqualsPredicate predicate) {
     return 1;
   }
 
+  @Override
   protected Integer visit(InPredicate predicate) {
     return predicate.getValues().size();
   }
 
+  @Override
   protected Integer visit(GreaterThanOrEqualsPredicate predicate) {
     return 1;
   }
 
+  @Override
   protected Integer visit(GreaterThanPredicate predicate) {
     return 1;
   }
 
+  @Override
   protected Integer visit(LessThanOrEqualsPredicate predicate) {
     return 1;
   }
 
+  @Override
   protected Integer visit(LessThanPredicate predicate) {
     return 1;
   }
 
+  @Override
   protected Integer visit(LikePredicate predicate) {
     return 1;
   }
 
+  @Override
   protected Integer visit(IsNotNullPredicate predicate) {
     return 1;
   }
 
+  @Override
   protected Integer visit(WithinPredicate within) {
     return 1;
   }
 
+  @Override
   protected Integer visit(NotPredicate not) {
     return visit(not.getPredicate());
   }
