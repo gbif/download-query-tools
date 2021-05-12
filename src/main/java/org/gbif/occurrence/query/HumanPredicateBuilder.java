@@ -39,6 +39,7 @@ import org.gbif.api.model.occurrence.predicate.GreaterThanOrEqualsPredicate;
 import org.gbif.api.model.occurrence.predicate.GreaterThanPredicate;
 import org.gbif.api.model.occurrence.predicate.InPredicate;
 import org.gbif.api.model.occurrence.predicate.IsNotNullPredicate;
+import org.gbif.api.model.occurrence.predicate.IsNullPredicate;
 import org.gbif.api.model.occurrence.predicate.LessThanOrEqualsPredicate;
 import org.gbif.api.model.occurrence.predicate.LessThanPredicate;
 import org.gbif.api.model.occurrence.predicate.LikePredicate;
@@ -79,6 +80,7 @@ public class HumanPredicateBuilder {
 
   private static final String NOT_OPERATOR = "not";
   private static final String IS_NOT_NULL_OPERATOR = "is not null";
+  private static final String IS_NULL_OPERATOR = "is null";
 
   private static final String LIKE_OPERATOR = "~";
   private static final String ENUM_MONTH = "enum.month.";
@@ -337,6 +339,10 @@ public class HumanPredicateBuilder {
 
   private void visit(IsNotNullPredicate predicate, JsonNode node) {
     addParamValue(predicate.getParameter(), IS_NOT_NULL_OPERATOR, node);
+  }
+
+  private void visit(IsNullPredicate predicate, JsonNode node) {
+    addParamValue(predicate.getParameter(), IS_NULL_OPERATOR, node);
   }
 
 

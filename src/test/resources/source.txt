@@ -13,6 +13,7 @@
 "{"type":"and","predicates":[{"type":"equals","key":"TAXON_KEY","value":"6"},{"type":"equals","key":"COUNTRY","value":"US"},{"type":"equals","key":"HAS_COORDINATE","value":"true"}]}"
 "{"type":"and","predicates":[{"type":"equals","key":"TAXON_KEY","value":"2717077"},{"type":"within","geometry":"POLYGON((-92.109374 13.923403,-92.109374 -60.239811,-23.203125 -60.239811,-23.203125 13.923403,-92.109374 13.923403))"}]}"
 "{"type":"and","predicates":[{"type":"equals","key":"TAXON_KEY","value":"1340278"},{"type":"isNotNull","parameter":"COUNTRY"}]}"
+"{"type":"and","predicates":[{"type":"equals","key":"TAXON_KEY","value":"1340278"},{"type":"isNull","parameter":"COUNTRY"}]}"
 "{"type":"and","predicates":[{"type":"equals","key":"HAS_COORDINATE","value":"true"},{"type":"equals","key":"HAS_GEOSPATIAL_ISSUE","value":"false"},{"type":"greaterThanOrEquals","key":"YEAR","value":"2014"},{"type":"greaterThanOrEquals","key":"MONTH","value":"12"},{"type":"equals","key":"COUNTRY","value":"MX"},{"type":"equals","key":"TAXON_KEY","value":"6109637"}]}"
 "{"type":"and","predicates":[{"type":"equals","key":"TAXON_KEY","value":"2285942"},{"type":"equals","key":"HAS_COORDINATE","value":"true"}]}"
 "{"type":"and","predicates":[{"type":"and","predicates":[{"type":"greaterThanOrEquals","key":"YEAR","value":"1988"},{"type":"lessThanOrEquals","key":"YEAR","value":"2018"}]},{"type":"equals","key":"HAS_COORDINATE","value":"true"},{"type":"equals","key":"TAXON_KEY","value":"2432933"},{"type":"equals","key":"HAS_GEOSPATIAL_ISSUE","value":"false"}]}"
