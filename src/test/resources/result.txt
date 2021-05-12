@@ -120,6 +120,13 @@
 ---------------------------------------------
 {
   "and" : [
+    "TaxonKey is Abies alba Mill.",
+    "Country is null"
+  ]
+}
+---------------------------------------------
+{
+  "and" : [
     "HasCoordinate is true",
     "HasGeospatialIssue is false",
     "Year is greater than or equal to 2014",
