@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.gbif</groupId>
     <artifactId>motherpom</artifactId>
-    <version>50</version>
+    <version>55</version>
   </parent>
 
   <groupId>org.gbif.occurrence</groupId>
@@ -14,7 +14,7 @@
 
   <name>Download Query Tools</name>
   <description />
-  <url>http://github.org/gbif/download-query-tools</url>
+  <url>https://github.org/gbif/download-query-tools</url>
 
   <scm>
     <connection>scm:git:git@github.com:gbif/download-query-tools.git</connection>
@@ -26,24 +26,22 @@
   <distributionManagement>
     <site>
       <id>gh-pages</id>
-      <url>http://gbif.github.io/download-query-tools/</url>
+      <url>https://gbif.github.io/download-query-tools/</url>
     </site>
   </distributionManagement>
 
   <repositories>
     <repository>
       <id>gbif-all</id>
-      <url>http://repository.gbif.org/content/groups/gbif</url>
+      <url>https://repository.gbif.org/content/groups/gbif/</url>
     </repository>
     <repository>
       <id>gbif-thirdparty</id>
-      <url>http://repository.gbif.org/content/repositories/thirdparty/</url>
+      <url>https://repository.gbif.org/content/repositories/thirdparty/</url>
     </repository>
   </repositories>
 
   <properties>
-    <jdkLevel>1.8</jdkLevel>
-
     <commons-lang3.version>3.10</commons-lang3.version>
     <gbif-api.version>0.138</gbif-api.version>
     <jackson.version>2.11.3</jackson.version>
