@@ -1,9 +1,12 @@
 /*
- * Copyright 2012 Global Biodiversity Information Facility (GBIF)
+ * Copyright 2021 Global Biodiversity Information Facility (GBIF)
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,14 +15,6 @@
  */
 package org.gbif.occurrence.query;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
@@ -34,6 +29,16 @@ import org.gbif.api.model.occurrence.predicate.NotPredicate;
 import org.gbif.api.model.occurrence.predicate.Predicate;
 import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,18 +52,19 @@ public class QueryParameterFilterBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(QueryParameterFilterBuilder.class);
   private static final String WILDCARD = "*";
-  private static final Pattern POLYGON_PATTERN = Pattern.compile("POLYGON\\s*\\(\\s*\\((.+)\\)\\s*\\)",
-      Pattern.CASE_INSENSITIVE);
+  private static final Pattern POLYGON_PATTERN =
+      Pattern.compile("POLYGON\\s*\\(\\s*\\((.+)\\)\\s*\\)", Pattern.CASE_INSENSITIVE);
 
   private Map<OccurrenceSearchParameter, LinkedList<String>> filter;
 
   private enum State {
-    ROOT, AND, OR
+    ROOT,
+    AND,
+    OR
   }
 
   private State state;
   private OccurrenceSearchParameter lastParam;
-
 
   public synchronized String queryFilter(Predicate p) {
     StringBuilder b = new StringBuilder();
@@ -162,7 +168,8 @@ public class QueryParameterFilterBuilder {
   }
 
   private void visit(GreaterThanPredicate predicate) {
-    throw new IllegalArgumentException("GREATER_THAN_OPERATOR operator not supported in web queries");
+    throw new IllegalArgumentException(
+        "GREATER_THAN_OPERATOR operator not supported in web queries");
   }
 
   private void visit(GreaterThanOrEqualsPredicate p) {
@@ -215,13 +222,12 @@ public class QueryParameterFilterBuilder {
   private void visit(Predicate p) throws IllegalStateException {
     Method method = null;
     try {
-      method = getClass().getDeclaredMethod("visit", new Class[]{p.getClass()});
+      method = getClass().getDeclaredMethod("visit", new Class[] {p.getClass()});
     } catch (NoSuchMethodException e) {
-      LOG
-          .warn(
-              "Visit method could not be found. That means a Predicate has been passed in that is unknown to this "
-                  + "class",
-              e);
+      LOG.warn(
+          "Visit method could not be found. That means a Predicate has been passed in that is unknown to this "
+              + "class",
+          e);
       throw new IllegalArgumentException("Unknown Predicate", e);
     }
     try {
@@ -229,7 +235,8 @@ public class QueryParameterFilterBuilder {
       method.invoke(this, p);
     } catch (IllegalAccessException e) {
       LOG.error(
-          "This should never happen as we set accessible to true explicitly before. Probably a programming error", e);
+          "This should never happen as we set accessible to true explicitly before. Probably a programming error",
+          e);
       throw new RuntimeException("Programming error", e);
     } catch (InvocationTargetException e) {
       LOG.info("Exception thrown while building the Hive Download", e);

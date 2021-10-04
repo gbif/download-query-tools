@@ -1,6 +1,20 @@
+/*
+ * Copyright 2021 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.occurrence.query;
 
-import java.util.ArrayList;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
@@ -15,6 +29,7 @@ import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.vocabulary.Country;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -28,7 +43,9 @@ public class QueryParameterFilterBuilderTest {
   public void testMultiValues() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
 
-    Predicate p = new EqualsPredicate(OccurrenceSearchParameter.COUNTRY, Country.AFGHANISTAN.getIso2LetterCode(), false);
+    Predicate p =
+        new EqualsPredicate(
+            OccurrenceSearchParameter.COUNTRY, Country.AFGHANISTAN.getIso2LetterCode(), false);
 
     String query = builder.queryFilter(p);
     assertEquals("COUNTRY=AF", query);
@@ -54,15 +71,18 @@ public class QueryParameterFilterBuilderTest {
   @Test
   public void testLess() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> builder.queryFilter(new LessThanPredicate(OccurrenceSearchParameter.YEAR, "1900")));
   }
 
   @Test
   public void testGreater() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
-    assertThrows(IllegalArgumentException.class,
-        () -> builder.queryFilter(new GreaterThanPredicate(OccurrenceSearchParameter.YEAR, "1900")));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            builder.queryFilter(new GreaterThanPredicate(OccurrenceSearchParameter.YEAR, "1900")));
   }
 
   @Test
@@ -89,7 +109,8 @@ public class QueryParameterFilterBuilderTest {
   @Test
   public void testIsNotNull() {
     QueryParameterFilterBuilder builder = new QueryParameterFilterBuilder();
-    String query = builder.queryFilter(new IsNotNullPredicate(OccurrenceSearchParameter.MEDIA_TYPE));
+    String query =
+        builder.queryFilter(new IsNotNullPredicate(OccurrenceSearchParameter.MEDIA_TYPE));
     assertEquals("MEDIA_TYPE=*", query);
   }
 }

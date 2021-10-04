@@ -1,9 +1,12 @@
 /*
- * Copyright 2014 Global Biodiversity Information Facility (GBIF)
+ * Copyright 2021 Global Biodiversity Information Facility (GBIF)
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,26 +15,6 @@
  */
 package org.gbif.occurrence.query;
 
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEOMETRY;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
 import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
@@ -53,8 +36,31 @@ import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 import org.gbif.api.vocabulary.MediaType;
 import org.gbif.api.ws.mixin.LicenseMixin;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEOMETRY;
 
 /**
  * This class builds a human readable filter from a {@link Predicate} hierarchy.
@@ -91,8 +97,10 @@ public class HumanPredicateBuilder {
 
   static {
     MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    // determines whether encountering of unknown properties (ones that do not map to a property, and there is no
-    // "any setter" or handler that can handle it) should result in a failure (throwing a JsonMappingException) or not.
+    // determines whether encountering of unknown properties (ones that do not map to a property,
+    // and there is no
+    // "any setter" or handler that can handle it) should result in a failure (throwing a
+    // JsonMappingException) or not.
     MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     // Enforce use of ISO-8601 format dates (http://wiki.fasterxml.com/JacksonFAQDateHandling)
@@ -166,11 +174,19 @@ public class HumanPredicateBuilder {
     }
   }
 
-  private void addParamValue(OccurrenceSearchParameter param, String op, Collection<String> values, JsonNode node) {
-    addParamValue(param, op + "(" + values.stream().map(p -> getHumanValue(param, p)).collect(Collectors.joining(", ")) + ")", node);
+  private void addParamValue(
+      OccurrenceSearchParameter param, String op, Collection<String> values, JsonNode node) {
+    addParamValue(
+        param,
+        op
+            + "("
+            + values.stream().map(p -> getHumanValue(param, p)).collect(Collectors.joining(", "))
+            + ")",
+        node);
   }
 
-  private void addParamValue(OccurrenceSearchParameter param, String op, String value, JsonNode node) {
+  private void addParamValue(
+      OccurrenceSearchParameter param, String op, String value, JsonNode node) {
     addParamValue(param, op + getHumanValue(param, value), node);
   }
 
@@ -240,21 +256,22 @@ public class HumanPredicateBuilder {
     }
   }
 
-  private String toCamelCase(String string){
+  private String toCamelCase(String string) {
     String[] parts = string.split("_");
 
-    return Stream.of(parts)
-        .map(this::toProperCase)
-        .collect(Collectors.joining());
+    return Stream.of(parts).map(this::toProperCase).collect(Collectors.joining());
   }
 
   private String toProperCase(String s) {
-    return s.substring(0, 1).toUpperCase() +
-        s.substring(1).toLowerCase();
+    return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
   }
 
   private String lookupEnum(Class clazz, String value) {
-    return resourceBundle.getString("enum." + clazz.getSimpleName().toLowerCase() + "." + (clazz == MediaType.class ? value.trim() : value.trim().toUpperCase()));
+    return resourceBundle.getString(
+        "enum."
+            + clazz.getSimpleName().toLowerCase()
+            + "."
+            + (clazz == MediaType.class ? value.trim() : value.trim().toUpperCase()));
   }
 
   private String lookupCountryCode(String code) {
@@ -266,10 +283,12 @@ public class HumanPredicateBuilder {
   }
 
   private String lookupMonth(String month) {
-    //It's a range
+    // It's a range
     String[] monthRange = month.split("-");
     if (monthRange.length == 2) {
-      return resourceBundle.getString(ENUM_MONTH + Integer.parseInt(monthRange[0])) + "-" + resourceBundle.getString(ENUM_MONTH + Integer.parseInt(monthRange[1]));
+      return resourceBundle.getString(ENUM_MONTH + Integer.parseInt(monthRange[0]))
+          + "-"
+          + resourceBundle.getString(ENUM_MONTH + Integer.parseInt(monthRange[1]));
     }
     return resourceBundle.getString(ENUM_MONTH + Integer.parseInt(month));
   }
@@ -345,14 +364,14 @@ public class HumanPredicateBuilder {
     addParamValue(predicate.getParameter(), IS_NULL_OPERATOR, node);
   }
 
-
   private void visit(Predicate p, JsonNode node) {
     Method method;
     try {
       method = getClass().getDeclaredMethod("visit", p.getClass(), JsonNode.class);
     } catch (NoSuchMethodException e) {
       LOG.warn(
-          "Visit method could not be found. That means a Predicate has been passed in that is unknown to this class", e);
+          "Visit method could not be found. That means a Predicate has been passed in that is unknown to this class",
+          e);
       throw new IllegalArgumentException("Unknown Predicate", e);
     }
 
@@ -361,7 +380,8 @@ public class HumanPredicateBuilder {
       method.invoke(this, p, node);
     } catch (IllegalAccessException e) {
       LOG.error(
-          "This should never happen as we set accessible to true explicitly before. Probably a programming error", e);
+          "This should never happen as we set accessible to true explicitly before. Probably a programming error",
+          e);
       throw new RuntimeException(e);
     } catch (InvocationTargetException e) {
       LOG.info("Exception thrown while building the human query string", e);
