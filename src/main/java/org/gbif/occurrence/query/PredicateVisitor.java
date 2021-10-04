@@ -19,6 +19,7 @@ import org.gbif.api.model.occurrence.predicate.GreaterThanOrEqualsPredicate;
 import org.gbif.api.model.occurrence.predicate.GreaterThanPredicate;
 import org.gbif.api.model.occurrence.predicate.InPredicate;
 import org.gbif.api.model.occurrence.predicate.IsNotNullPredicate;
+import org.gbif.api.model.occurrence.predicate.IsNullPredicate;
 import org.gbif.api.model.occurrence.predicate.LessThanOrEqualsPredicate;
 import org.gbif.api.model.occurrence.predicate.LessThanPredicate;
 import org.gbif.api.model.occurrence.predicate.LikePredicate;
@@ -54,6 +55,8 @@ public abstract class PredicateVisitor<T> {
   protected abstract T visit(LikePredicate predicate);
 
   protected abstract T visit(IsNotNullPredicate predicate);
+
+  protected abstract T visit(IsNullPredicate predicate);
 
   protected abstract T visit(WithinPredicate within);
 
