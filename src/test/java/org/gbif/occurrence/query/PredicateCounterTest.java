@@ -72,7 +72,7 @@ public class PredicateCounterTest {
         if (p == OccurrenceSearchParameter.GEOMETRY) {
           ands.add(new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"));
         } else if (p == OccurrenceSearchParameter.GEO_DISTANCE) {
-          ands.add(new GeoDistancePredicate("90","100","5km"));
+          ands.add(new GeoDistancePredicate("90", "100", "5km"));
         } else {
           ands.add(new EqualsPredicate(p, "Bernd Neumann", false));
         }
