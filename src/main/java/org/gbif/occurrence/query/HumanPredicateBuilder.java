@@ -29,6 +29,9 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -39,8 +42,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
 import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
@@ -351,12 +352,14 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(GeoDistancePredicate predicate, JsonNode node) {
-    addParamValue(OccurrenceSearchParameter.GEO_DISTANCE,
-                  String.format(GEO_DISTANCE_OPERATOR,
-                                predicate.getGeoDistance().getDistance(),
-                                predicate.getGeoDistance().getLatitude(),
-                                predicate.getGeoDistance().getLongitude()),
-                  node);
+    addParamValue(
+        OccurrenceSearchParameter.GEO_DISTANCE,
+        String.format(
+            GEO_DISTANCE_OPERATOR,
+            predicate.getGeoDistance().getDistance(),
+            predicate.getGeoDistance().getLatitude(),
+            predicate.getGeoDistance().getLongitude()),
+        node);
   }
 
   private void visit(Predicate p, JsonNode node) {
