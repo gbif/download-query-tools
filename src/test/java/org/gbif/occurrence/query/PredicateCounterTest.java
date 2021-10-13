@@ -13,12 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.InPredicate;
-import org.gbif.api.model.occurrence.predicate.Predicate;
-import org.gbif.api.model.occurrence.predicate.WithinPredicate;
+import org.gbif.api.model.occurrence.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
@@ -76,6 +71,8 @@ public class PredicateCounterTest {
       } else if (p.type() == String.class) {
         if (p == OccurrenceSearchParameter.GEOMETRY) {
           ands.add(new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"));
+        } else if (p == OccurrenceSearchParameter.GEO_DISTANCE) {
+          ands.add(new GeoDistancePredicate("90","100","5km"));
         } else {
           ands.add(new EqualsPredicate(p, "Bernd Neumann", false));
         }
@@ -93,7 +90,7 @@ public class PredicateCounterTest {
     ConjunctionPredicate and = new ConjunctionPredicate(ands);
 
     int c = counter.count(and);
-    assertEquals(227, c);
+    assertEquals(229, c);
   }
 
   @Test

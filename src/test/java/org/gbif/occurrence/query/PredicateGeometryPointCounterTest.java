@@ -13,20 +13,12 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.Predicate;
-import org.gbif.api.model.occurrence.predicate.WithinPredicate;
+import org.gbif.api.model.occurrence.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.jupiter.api.Test;
@@ -75,6 +67,8 @@ public class PredicateGeometryPointCounterTest {
       } else if (p.type() == String.class) {
         if (p == OccurrenceSearchParameter.GEOMETRY) {
           ands.add(new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"));
+        } else if (p == OccurrenceSearchParameter.GEO_DISTANCE) {
+          ands.add(new GeoDistancePredicate("90", "100", "5km"));
         } else {
           ands.add(new EqualsPredicate(p, "Bernd Neumann", false));
         }

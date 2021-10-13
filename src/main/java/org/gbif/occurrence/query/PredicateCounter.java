@@ -91,6 +91,6 @@ public class PredicateCounter extends PredicateVisitor<Integer> {
 
   @Override
   protected Integer visit(GeoDistancePredicate predicate) {
-    return 0;
+    return 1;
   }
 }
