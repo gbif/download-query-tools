@@ -13,20 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.GreaterThanOrEqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.GreaterThanPredicate;
-import org.gbif.api.model.occurrence.predicate.InPredicate;
-import org.gbif.api.model.occurrence.predicate.IsNotNullPredicate;
-import org.gbif.api.model.occurrence.predicate.IsNullPredicate;
-import org.gbif.api.model.occurrence.predicate.LessThanOrEqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.LessThanPredicate;
-import org.gbif.api.model.occurrence.predicate.LikePredicate;
-import org.gbif.api.model.occurrence.predicate.NotPredicate;
-import org.gbif.api.model.occurrence.predicate.Predicate;
-import org.gbif.api.model.occurrence.predicate.WithinPredicate;
+import org.gbif.api.model.occurrence.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 
 import org.slf4j.Logger;
@@ -142,5 +129,10 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
   @Override
   protected Integer visit(NotPredicate not) {
     return visit(not.getPredicate());
+  }
+
+  @Override
+  protected Integer visit(GeoDistancePredicate predicate) {
+    return 0;
   }
 }

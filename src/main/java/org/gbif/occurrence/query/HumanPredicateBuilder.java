@@ -13,20 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.GreaterThanOrEqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.GreaterThanPredicate;
-import org.gbif.api.model.occurrence.predicate.InPredicate;
-import org.gbif.api.model.occurrence.predicate.IsNotNullPredicate;
-import org.gbif.api.model.occurrence.predicate.IsNullPredicate;
-import org.gbif.api.model.occurrence.predicate.LessThanOrEqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.LessThanPredicate;
-import org.gbif.api.model.occurrence.predicate.LikePredicate;
-import org.gbif.api.model.occurrence.predicate.NotPredicate;
-import org.gbif.api.model.occurrence.predicate.Predicate;
-import org.gbif.api.model.occurrence.predicate.WithinPredicate;
+import org.gbif.api.model.occurrence.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.registry.Dataset;
 import org.gbif.api.util.VocabularyUtils;
@@ -42,9 +29,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -55,6 +39,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
 import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
@@ -88,6 +74,8 @@ public class HumanPredicateBuilder {
 
   private static final String LIKE_OPERATOR = "~";
   private static final String ENUM_MONTH = "enum.month.";
+
+  private static final String GEO_DISTANCE_OPERATOR = "is in a distance of %s from (%s,%s)";
 
   private final PredicateLookupCounter filterLookupCounter = new PredicateLookupCounter();
   private final TitleLookupService titleLookupService;
@@ -360,6 +348,15 @@ public class HumanPredicateBuilder {
 
   private void visit(IsNullPredicate predicate, JsonNode node) {
     addParamValue(predicate.getParameter(), IS_NULL_OPERATOR, node);
+  }
+
+  private void visit(GeoDistancePredicate predicate, JsonNode node) {
+    addParamValue(OccurrenceSearchParameter.GEO_DISTANCE,
+                  String.format(GEO_DISTANCE_OPERATOR,
+                                predicate.getGeoDistance().getDistance(),
+                                predicate.getGeoDistance().getLatitude(),
+                                predicate.getGeoDistance().getLongitude()),
+                  node);
   }
 
   private void visit(Predicate p, JsonNode node) {

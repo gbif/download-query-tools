@@ -99,6 +99,7 @@ public class PredicateGeometryPointCounter extends PredicateVisitor<Integer> {
     return visit(not.getPredicate());
   }
 
+  @Override
   protected Integer visit(GeoDistancePredicate predicate) {
     return 0;
   }
