@@ -34,7 +34,7 @@ public class PredicateGeometryPointCounterTest {
   @Test
   public void testAllParams() {
 
-    final String date = DateFormatUtils.ISO_DATE_FORMAT.format(new Date());
+    final String date = DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date());
     List<Predicate> ands = new ArrayList<>();
     for (OccurrenceSearchParameter p : OccurrenceSearchParameter.values()) {
       if (p.type().isEnum()) {

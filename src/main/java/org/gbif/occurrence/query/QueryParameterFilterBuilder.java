@@ -28,11 +28,13 @@ import org.gbif.api.model.occurrence.predicate.Predicate;
 import org.gbif.api.model.occurrence.predicate.WithinPredicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +55,7 @@ public class QueryParameterFilterBuilder {
   private static final Pattern POLYGON_PATTERN =
       Pattern.compile("POLYGON\\s*\\(\\s*\\((.+)\\)\\s*\\)", Pattern.CASE_INSENSITIVE);
 
-  private Map<OccurrenceSearchParameter, LinkedList<String>> filter;
+  private Map<OccurrenceSearchParameter, ArrayList<String>> filter;
 
   private enum State {
     ROOT,
@@ -75,7 +77,7 @@ public class QueryParameterFilterBuilder {
     visit(p);
 
     // transform filter map into query string
-    for (Map.Entry<OccurrenceSearchParameter, LinkedList<String>> entry : filter.entrySet()) {
+    for (Map.Entry<OccurrenceSearchParameter, ArrayList<String>> entry : filter.entrySet()) {
       for (String val : entry.getValue()) {
         if (first) {
           first = false;
@@ -84,10 +86,19 @@ public class QueryParameterFilterBuilder {
         }
         b.append(entry.getKey().name());
         b.append("=");
-        b.append(URLEncoder.encode(val));
+        b.append(encode(val));
       }
     }
     return b.toString();
+  }
+
+  /** Encodes a URL String using StandardCharsets.UTF_8. */
+  private static String encode(String val) {
+    try {
+      return URLEncoder.encode(val, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   private void visit(ConjunctionPredicate and) throws IllegalStateException {
@@ -211,7 +222,7 @@ public class QueryParameterFilterBuilder {
     }
 
     if (!filter.containsKey(param)) {
-      filter.put(param, new LinkedList<>());
+      filter.put(param, new ArrayList<>());
     }
     filter.get(param).add(value);
     lastParam = param;
