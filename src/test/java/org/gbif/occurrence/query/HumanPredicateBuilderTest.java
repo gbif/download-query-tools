@@ -62,8 +62,9 @@ public class HumanPredicateBuilderTest {
   public void humanPredicateFilterTest() throws Exception {
     String expected =
         new String(
-          Files.readAllBytes(
-                Paths.get(getClass().getClassLoader().getResource("result.txt").getPath())), StandardCharsets.UTF_8);
+            Files.readAllBytes(
+                Paths.get(getClass().getClassLoader().getResource("result.txt").getPath())),
+            StandardCharsets.UTF_8);
     try (Stream<String> stream =
         Files.lines(Paths.get(getClass().getClassLoader().getResource("source.txt").getPath()))) {
       String actual =
