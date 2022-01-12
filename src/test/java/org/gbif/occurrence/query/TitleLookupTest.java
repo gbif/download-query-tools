@@ -22,7 +22,7 @@ public class TitleLookupTest {
   @Test
   public void lookupDatasetTitleTest() {
     TitleLookupService service =
-        TitleLookupServiceFactory.getInstance("http://api.gbif-dev.org/v1/");
+        TitleLookupServiceFactory.getInstance("http://api.gbif-uat.org/v1/");
 
     assertEquals(
         "FBIP: Identification of viruses infecting indigenous ornamental bulbous plants in South Africa using NGS",
@@ -38,7 +38,7 @@ public class TitleLookupTest {
   @Test
   public void lookupSpeciesNameTest() {
     TitleLookupService service =
-        TitleLookupServiceFactory.getInstance("http://api.gbif-dev.org/v1/");
+        TitleLookupServiceFactory.getInstance("http://api.gbif-uat.org/v1/");
 
     assertEquals("incertae sedis", service.getSpeciesName("0"));
     assertEquals("Animalia", service.getSpeciesName("1"));
