@@ -31,7 +31,7 @@ public class TitleLookupTest {
         "FBIP: Mycorrhizal associations of Erica hair roots in South African fynbos",
         service.getDatasetTitle("417276eb-5082-4da3-b410-fe5680da65d9"));
     assertEquals(
-        "FBIP: plantae_magnoliophyta_collection",
+        "FBIP: Magnoliophyta collection",
         service.getDatasetTitle("7abad3fc-068a-4f34-8b3d-bfe03155ccde"));
   }
 
