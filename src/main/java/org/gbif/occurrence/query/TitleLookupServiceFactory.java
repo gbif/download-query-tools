@@ -18,6 +18,10 @@ import org.gbif.api.ws.mixin.Mixins;
 import java.net.URI;
 import java.util.Objects;
 
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.client.JerseyWebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +30,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 import static org.gbif.api.util.PreconditionUtils.checkArgument;
 
@@ -49,12 +49,10 @@ public final class TitleLookupServiceFactory {
     objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     Mixins.getPredefinedMixins().forEach(objectMapper::addMixIn);
+    ClientConfig config = new ClientConfig(new JacksonJsonProvider(objectMapper));
+    JerseyClient client = JerseyClientBuilder.createClient(config);
 
-    ClientConfig realClientConfig = new DefaultClientConfig();
-    realClientConfig.getSingletons().add(new JacksonJsonProvider(objectMapper));
-
-    Client client = Client.create(realClientConfig);
-    WebResource api = client.resource(apiRoot);
+    JerseyWebTarget api = client.target(apiRoot);
 
     return new TitleLookupServiceImpl(api);
   }
