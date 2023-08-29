@@ -13,6 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.predicate.ConjunctionPredicate;
 import org.gbif.api.model.predicate.DisjunctionPredicate;
@@ -23,11 +24,13 @@ import org.gbif.api.model.predicate.Predicate;
 import org.gbif.api.model.predicate.WithinPredicate;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
-
-import java.util.*;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

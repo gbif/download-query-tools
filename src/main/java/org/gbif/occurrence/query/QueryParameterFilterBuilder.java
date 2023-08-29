@@ -13,6 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
+import org.gbif.api.model.common.search.SearchParameter;
 import org.gbif.api.model.predicate.ConjunctionPredicate;
 import org.gbif.api.model.predicate.DisjunctionPredicate;
 import org.gbif.api.model.predicate.EqualsPredicate;
@@ -55,7 +56,7 @@ public class QueryParameterFilterBuilder {
   private static final Pattern POLYGON_PATTERN =
       Pattern.compile("POLYGON\\s*\\(\\s*\\((.+)\\)\\s*\\)", Pattern.CASE_INSENSITIVE);
 
-  private Map<OccurrenceSearchParameter, ArrayList<String>> filter;
+  private Map<SearchParameter, ArrayList<String>> filter;
 
   private enum State {
     ROOT,
@@ -64,7 +65,7 @@ public class QueryParameterFilterBuilder {
   }
 
   private State state;
-  private OccurrenceSearchParameter lastParam;
+  private SearchParameter lastParam;
 
   public synchronized String queryFilter(Predicate p) {
     StringBuilder b = new StringBuilder();
@@ -77,7 +78,7 @@ public class QueryParameterFilterBuilder {
     visit(p);
 
     // transform filter map into query string
-    for (Map.Entry<OccurrenceSearchParameter, ArrayList<String>> entry : filter.entrySet()) {
+    for (Map.Entry<SearchParameter, ArrayList<String>> entry : filter.entrySet()) {
       for (String val : entry.getValue()) {
         if (first) {
           first = false;
@@ -206,8 +207,8 @@ public class QueryParameterFilterBuilder {
   }
 
   private void visit(InPredicate in) {
-    for (String val : in.getValues()) {
-      addQueryParam(in.getKey(), val);
+    for (Object val : in.getValues()) {
+      addQueryParam(in.getKey(), (String) val);
     }
   }
 
@@ -215,7 +216,7 @@ public class QueryParameterFilterBuilder {
     throw new IllegalArgumentException("NOT operator not supported in web queries");
   }
 
-  private void addQueryParam(OccurrenceSearchParameter param, String value) {
+  private void addQueryParam(SearchParameter param, String value) {
     // verify that last param if existed was the same
     if (lastParam != null && param != lastParam) {
       throw new IllegalArgumentException("Mix of search params not supported");

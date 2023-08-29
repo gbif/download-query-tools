@@ -13,6 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
+import org.gbif.api.model.common.search.SearchParameter;
 import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 
@@ -33,24 +34,28 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
     return visit(p);
   }
 
-  protected Integer getHumanValue(OccurrenceSearchParameter param) {
+  protected Integer getHumanValue(SearchParameter param) {
     // lookup values
-    switch (param) {
-      case SCIENTIFIC_NAME:
-      case ACCEPTED_TAXON_KEY:
-      case TAXON_KEY:
-      case KINGDOM_KEY:
-      case PHYLUM_KEY:
-      case CLASS_KEY:
-      case ORDER_KEY:
-      case FAMILY_KEY:
-      case GENUS_KEY:
-      case SUBGENUS_KEY:
-      case SPECIES_KEY:
-      case DATASET_KEY:
-        return 1;
-      default:
-        return 0;
+    if (param instanceof OccurrenceSearchParameter) {
+      switch ((OccurrenceSearchParameter) param) {
+        case SCIENTIFIC_NAME:
+        case ACCEPTED_TAXON_KEY:
+        case TAXON_KEY:
+        case KINGDOM_KEY:
+        case PHYLUM_KEY:
+        case CLASS_KEY:
+        case ORDER_KEY:
+        case FAMILY_KEY:
+        case GENUS_KEY:
+        case SUBGENUS_KEY:
+        case SPECIES_KEY:
+        case DATASET_KEY:
+          return 1;
+        default:
+          return 0;
+      }
+    } else {
+      return 0;
     }
   }
 

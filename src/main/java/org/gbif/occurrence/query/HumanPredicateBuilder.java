@@ -13,6 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
+import org.gbif.api.model.common.search.SearchParameter;
 import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.registry.Dataset;
@@ -162,7 +163,7 @@ public class HumanPredicateBuilder {
   }
 
   private void addParamValue(
-      OccurrenceSearchParameter param, String op, Collection<String> values, JsonNode node) {
+    SearchParameter param, String op, Collection<String> values, JsonNode node) {
     addParamValue(
         param,
         op
@@ -173,49 +174,57 @@ public class HumanPredicateBuilder {
   }
 
   private void addParamValue(
-      OccurrenceSearchParameter param, String op, String value, JsonNode node) {
+      SearchParameter param, String op, String value, JsonNode node) {
     addParamValue(param, op + getHumanValue(param, value), node);
   }
 
   /**
    * Gets the human readable value of the parameter value.
    */
-  private String getHumanValue(OccurrenceSearchParameter param, String value) {
+  private String getHumanValue(SearchParameter param, String value) {
     String humanValue;
     // lookup values
-    switch (param) {
-      case ACCEPTED_TAXON_KEY:
-      case TAXON_KEY:
-      case KINGDOM_KEY:
-      case PHYLUM_KEY:
-      case CLASS_KEY:
-      case ORDER_KEY:
-      case FAMILY_KEY:
-      case GENUS_KEY:
-      case SUBGENUS_KEY:
-      case SPECIES_KEY:
-        humanValue = titleLookupService.getSpeciesName(value);
-        break;
-      case DATASET_KEY:
-        humanValue = titleLookupService.getDatasetTitle(value);
-        break;
-      case COUNTRY:
-      case PUBLISHING_COUNTRY:
-        humanValue = lookupCountryCode(value);
-        break;
-      case CONTINENT:
-        humanValue = lookupContinent(value);
-        break;
-      case MONTH:
-        humanValue = lookupMonth(value);
-        break;
+    if (param instanceof OccurrenceSearchParameter) {
+      switch ((OccurrenceSearchParameter) param) {
+        case ACCEPTED_TAXON_KEY:
+        case TAXON_KEY:
+        case KINGDOM_KEY:
+        case PHYLUM_KEY:
+        case CLASS_KEY:
+        case ORDER_KEY:
+        case FAMILY_KEY:
+        case GENUS_KEY:
+        case SUBGENUS_KEY:
+        case SPECIES_KEY:
+          humanValue = titleLookupService.getSpeciesName(value);
+          break;
+        case DATASET_KEY:
+          humanValue = titleLookupService.getDatasetTitle(value);
+          break;
+        case COUNTRY:
+        case PUBLISHING_COUNTRY:
+          humanValue = lookupCountryCode(value);
+          break;
+        case CONTINENT:
+          humanValue = lookupContinent(value);
+          break;
+        case MONTH:
+          humanValue = lookupMonth(value);
+          break;
 
-      default:
-        if (param.type().isEnum()) {
-          humanValue = lookupEnum(param.type(), value);
-        } else {
-          humanValue = value;
-        }
+        default:
+          if (param.type().isEnum()) {
+            humanValue = lookupEnum(param.type(), value);
+          } else {
+            humanValue = value;
+          }
+      }
+    } else {
+      if (param.type().isEnum()) {
+        humanValue = lookupEnum(param.type(), value);
+      } else {
+        humanValue = value;
+      }
     }
     // add unit symbol
     if (param == DEPTH || param == ELEVATION) {
@@ -229,7 +238,7 @@ public class HumanPredicateBuilder {
     return c.getTitle();
   }
 
-  private void addParamValue(OccurrenceSearchParameter param, String op, JsonNode node) {
+  private void addParamValue(SearchParameter param, String op, JsonNode node) {
     // verify that last param if existed was the same
 
     String paramName = toCamelCase(param.name());
