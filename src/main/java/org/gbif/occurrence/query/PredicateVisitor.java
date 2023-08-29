@@ -13,7 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.*;
+import org.gbif.api.model.predicate.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -13,9 +13,9 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.InPredicate;
-import org.gbif.api.model.occurrence.predicate.Predicate;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import org.gbif.api.model.predicate.InPredicate;
+import org.gbif.api.model.predicate.Predicate;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
