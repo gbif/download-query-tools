@@ -21,6 +21,7 @@ import org.gbif.api.model.predicate.EqualsPredicate;
 import org.gbif.api.model.predicate.GeoDistancePredicate;
 import org.gbif.api.model.predicate.Predicate;
 import org.gbif.api.model.predicate.WithinPredicate;
+import org.gbif.api.util.IsoDateInterval;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ public class PredicateGeometryPointCounterTest {
   public void testAllParams() {
 
     final String date = DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date());
+    final String dateRange = "2023-08-23,2023-09-24";
     List<Predicate> ands = new ArrayList<>();
     for (OccurrenceSearchParameter p : OccurrenceSearchParameter.values()) {
       if (p.type().isEnum()) {
@@ -65,6 +67,9 @@ public class PredicateGeometryPointCounterTest {
 
       } else if (p.type() == Date.class) {
         ands.add(new EqualsPredicate(p, date, false));
+
+      } else if (p.type() == IsoDateInterval.class) {
+        ands.add(new EqualsPredicate(p, dateRange, false));
 
       } else if (p.type() == Double.class) {
         ands.add(new EqualsPredicate(p, "12.478", false));
