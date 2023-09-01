@@ -46,14 +46,17 @@ public class PredicateCounterTest {
 
     final String date = DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(new Date());
     final String dateRange = "2023-08-23,2023-09-24";
+    int expectedCount = 0;
     List<Predicate> ands = new ArrayList<>();
     for (OccurrenceSearchParameter p : OccurrenceSearchParameter.values()) {
       if (p.type().isEnum()) {
         if (p.type() == Country.class) {
           ands.add(new EqualsPredicate(p, Country.DENMARK.getIso2LetterCode(), false));
+          expectedCount++;
 
         } else if (p.type() == Continent.class) {
           ands.add(new EqualsPredicate(p, Continent.AFRICA.getTitle(), false));
+          expectedCount++;
 
         } else {
           Class<Enum<?>> vocab = (Class<Enum<?>>) p.type();
@@ -62,45 +65,61 @@ public class PredicateCounterTest {
           List<Predicate> ors = new ArrayList<>();
           for (Enum<?> e : vocab.getEnumConstants()) {
             ors.add(new EqualsPredicate(p, e.toString(), false));
+            expectedCount++;
           }
           ands.add(new DisjunctionPredicate(ors));
+          //expectedCount++;
         }
 
       } else if (p.type() == Date.class) {
         ands.add(new EqualsPredicate(p, date, false));
+        expectedCount++;
 
       } else if (p.type() == IsoDateInterval.class) {
         ands.add(new EqualsPredicate(p, dateRange, false));
+        expectedCount++;
 
       } else if (p.type() == Double.class) {
         ands.add(new EqualsPredicate(p, "12.478", false));
+        expectedCount++;
 
       } else if (p.type() == Integer.class) {
         ands.add(new EqualsPredicate(p, "10", false));
+        expectedCount++;
 
       } else if (p.type() == String.class) {
         if (p == OccurrenceSearchParameter.GEOMETRY) {
           ands.add(new WithinPredicate("POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))"));
+          expectedCount++;
         } else if (p == OccurrenceSearchParameter.GEO_DISTANCE) {
           ands.add(new GeoDistancePredicate("90", "100", "5km"));
+          expectedCount++;
         } else {
           ands.add(new EqualsPredicate(p, "Bernd Neumann", false));
+          expectedCount++;
         }
 
       } else if (p.type() == Boolean.class) {
         ands.add(new EqualsPredicate(p, "true", false));
+        expectedCount++;
 
       } else if (p.type() == UUID.class) {
         ands.add(new EqualsPredicate(p, UUID.randomUUID().toString(), false));
+        expectedCount++;
 
       } else {
         throw new IllegalStateException("Unknown SearchParameter type " + p.type());
       }
     }
+
+    //for (Predicate x : ands) {
+    //  System.out.println(" " + counter.count(x) + " = " + x.toString());
+    //}
+
     ConjunctionPredicate and = new ConjunctionPredicate(ands);
 
     int c = counter.count(and);
-    assertEquals(238, c);
+    assertEquals(expectedCount, c);
   }
 
   @Test
