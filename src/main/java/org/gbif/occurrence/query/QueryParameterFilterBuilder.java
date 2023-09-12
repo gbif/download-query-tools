@@ -13,19 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.ConjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.DisjunctionPredicate;
-import org.gbif.api.model.occurrence.predicate.EqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.GreaterThanOrEqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.GreaterThanPredicate;
-import org.gbif.api.model.occurrence.predicate.InPredicate;
-import org.gbif.api.model.occurrence.predicate.IsNotNullPredicate;
-import org.gbif.api.model.occurrence.predicate.LessThanOrEqualsPredicate;
-import org.gbif.api.model.occurrence.predicate.LessThanPredicate;
-import org.gbif.api.model.occurrence.predicate.LikePredicate;
-import org.gbif.api.model.occurrence.predicate.NotPredicate;
-import org.gbif.api.model.occurrence.predicate.Predicate;
-import org.gbif.api.model.occurrence.predicate.WithinPredicate;
+import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 
 import java.io.UnsupportedEncodingException;
@@ -138,7 +126,7 @@ public class QueryParameterFilterBuilder {
     if (lower == null || upper == null || lower.getKey() != upper.getKey()) {
       throw new IllegalArgumentException("no valid range");
     }
-    addQueryParam(lower.getKey(), range(lower.getValue(), upper.getValue()));
+    addQueryParam((OccurrenceSearchParameter) lower.getKey(), range(lower.getValue(), upper.getValue()));
   }
 
   private String range(String from, String to) {
@@ -165,11 +153,11 @@ public class QueryParameterFilterBuilder {
   }
 
   private void visit(EqualsPredicate predicate) {
-    addQueryParam(predicate.getKey(), predicate.getValue());
+    addQueryParam((OccurrenceSearchParameter) predicate.getKey(), predicate.getValue());
   }
 
   private void visit(IsNotNullPredicate predicate) {
-    addQueryParam(predicate.getParameter(), "*");
+    addQueryParam((OccurrenceSearchParameter) predicate.getParameter(), "*");
   }
 
   private void visit(LikePredicate predicate) {
@@ -182,7 +170,7 @@ public class QueryParameterFilterBuilder {
   }
 
   private void visit(GreaterThanOrEqualsPredicate p) {
-    addQueryParam(p.getKey(), range(p.getValue(), null));
+    addQueryParam((OccurrenceSearchParameter) p.getKey(), range(p.getValue(), null));
   }
 
   private void visit(LessThanPredicate predicate) {
@@ -190,7 +178,7 @@ public class QueryParameterFilterBuilder {
   }
 
   private void visit(LessThanOrEqualsPredicate p) {
-    addQueryParam(p.getKey(), range(null, p.getValue()));
+    addQueryParam( (OccurrenceSearchParameter)p.getKey(), range(null, p.getValue()));
   }
 
   private void visit(WithinPredicate within) {
@@ -206,8 +194,8 @@ public class QueryParameterFilterBuilder {
   }
 
   private void visit(InPredicate in) {
-    for (String val : in.getValues()) {
-      addQueryParam(in.getKey(), val);
+    for (Object val : in.getValues()) {
+      addQueryParam((OccurrenceSearchParameter) in.getKey(), val.toString());
     }
   }
 

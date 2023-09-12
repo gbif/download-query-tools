@@ -13,7 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.*;
+import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 
 import org.slf4j.Logger;
@@ -74,12 +74,12 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
 
   @Override
   protected Integer visit(EqualsPredicate predicate) {
-    return getHumanValue(predicate.getKey());
+    return getHumanValue((OccurrenceSearchParameter) predicate.getKey());
   }
 
   @Override
   protected Integer visit(InPredicate predicate) {
-    return predicate.getValues().size() * getHumanValue(predicate.getKey());
+    return predicate.getValues().size() * getHumanValue((OccurrenceSearchParameter) predicate.getKey());
   }
 
   @Override

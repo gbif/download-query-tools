@@ -13,7 +13,6 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.occurrence.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.registry.Dataset;
 import org.gbif.api.util.VocabularyUtils;
@@ -21,7 +20,7 @@ import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
 import org.gbif.api.vocabulary.MediaType;
 import org.gbif.api.ws.mixin.LicenseMixin;
-
+import org.gbif.api.model.predicate.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -310,31 +309,31 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(EqualsPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(GreaterThanOrEqualsPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), GREATER_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), GREATER_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(GreaterThanPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), GREATER_THAN_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), GREATER_THAN_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(InPredicate in, JsonNode node) {
-    addParamValue(in.getKey(), IN_OPERATOR, in.getValues(), node);
+    addParamValue( (OccurrenceSearchParameter) in.getKey(), IN_OPERATOR, in.getValues(), node);
   }
 
   private void visit(LessThanOrEqualsPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), LESS_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LESS_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(LessThanPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), LESS_THAN_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LESS_THAN_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(LikePredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), LIKE_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LIKE_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(NotPredicate not, JsonNode node) {
@@ -344,11 +343,11 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(IsNotNullPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getParameter(), IS_NOT_NULL_OPERATOR, node);
+    addParamValue((OccurrenceSearchParameter) predicate.getParameter(), IS_NOT_NULL_OPERATOR, node);
   }
 
   private void visit(IsNullPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getParameter(), IS_NULL_OPERATOR, node);
+    addParamValue((OccurrenceSearchParameter) predicate.getParameter(), IS_NULL_OPERATOR, node);
   }
 
   private void visit(GeoDistancePredicate predicate, JsonNode node) {
@@ -407,6 +406,6 @@ public class HumanPredicateBuilder {
     if (lower == null || upper == null || lower.getKey() != upper.getKey()) {
       throw new IllegalArgumentException("no valid range");
     }
-    addParamValue(lower.getKey(), "", lower.getValue() + "-" + upper.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) lower.getKey(), "", lower.getValue() + "-" + upper.getValue(), node);
   }
 }

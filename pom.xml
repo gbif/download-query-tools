@@ -37,7 +37,7 @@
 
   <properties>
     <commons-lang3.version>3.12.0</commons-lang3.version>
-    <gbif-api.version>1.0.0</gbif-api.version>
+    <gbif-api.version>1.13.0-SNAPSHOT</gbif-api.version>
     <jackson.version>2.11.3</jackson.version>
     <jersey.version>3.0.11</jersey.version>
     <jts.version>1.16.1</jts.version>
