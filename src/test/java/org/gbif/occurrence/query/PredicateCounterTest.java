@@ -13,7 +13,6 @@
  */
 package org.gbif.occurrence.query;
 
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.predicate.ConjunctionPredicate;
 import org.gbif.api.model.predicate.DisjunctionPredicate;
@@ -25,13 +24,15 @@ import org.gbif.api.model.predicate.WithinPredicate;
 import org.gbif.api.util.IsoDateInterval;
 import org.gbif.api.vocabulary.Continent;
 import org.gbif.api.vocabulary.Country;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -68,7 +69,7 @@ public class PredicateCounterTest {
             expectedCount++;
           }
           ands.add(new DisjunctionPredicate(ors));
-          //expectedCount++;
+          // expectedCount++;
         }
 
       } else if (p.type() == Date.class) {
@@ -112,9 +113,9 @@ public class PredicateCounterTest {
       }
     }
 
-    //for (Predicate x : ands) {
+    // for (Predicate x : ands) {
     //  System.out.println(" " + counter.count(x) + " = " + x.toString());
-    //}
+    // }
 
     ConjunctionPredicate and = new ConjunctionPredicate(ands);
 

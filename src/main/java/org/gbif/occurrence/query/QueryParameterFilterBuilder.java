@@ -14,6 +14,7 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.api.model.common.search.SearchParameter;
+import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.predicate.ConjunctionPredicate;
 import org.gbif.api.model.predicate.DisjunctionPredicate;
 import org.gbif.api.model.predicate.EqualsPredicate;
@@ -27,7 +28,6 @@ import org.gbif.api.model.predicate.LikePredicate;
 import org.gbif.api.model.predicate.NotPredicate;
 import org.gbif.api.model.predicate.Predicate;
 import org.gbif.api.model.predicate.WithinPredicate;
-import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;

@@ -14,8 +14,8 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.api.model.common.search.SearchParameter;
-import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.registry.Dataset;
 import org.gbif.api.util.VocabularyUtils;
 import org.gbif.api.vocabulary.Continent;
@@ -163,7 +163,7 @@ public class HumanPredicateBuilder {
   }
 
   private void addParamValue(
-    SearchParameter param, String op, Collection<String> values, JsonNode node) {
+      SearchParameter param, String op, Collection<String> values, JsonNode node) {
     addParamValue(
         param,
         op
@@ -173,8 +173,7 @@ public class HumanPredicateBuilder {
         node);
   }
 
-  private void addParamValue(
-      SearchParameter param, String op, String value, JsonNode node) {
+  private void addParamValue(SearchParameter param, String op, String value, JsonNode node) {
     addParamValue(param, op + getHumanValue(param, value), node);
   }
 

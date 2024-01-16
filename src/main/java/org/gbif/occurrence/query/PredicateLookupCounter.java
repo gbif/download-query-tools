@@ -14,8 +14,8 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.api.model.common.search.SearchParameter;
-import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import org.gbif.api.model.predicate.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
