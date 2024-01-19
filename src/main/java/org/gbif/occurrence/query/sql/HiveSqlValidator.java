@@ -131,7 +131,7 @@ public class HiveSqlValidator {
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
       SqlNode validatedSqlNode = validator.validate(sqlNode);
-      System.out.println("Validated: «" + validatedSqlNode.toSqlString(dialect) + "»");
+      LOG.debug("Validated as {}", validatedSqlNode.toSqlString(dialect));
 
       if (validatedSqlNode.getKind() != SqlKind.SELECT) {
         LOG.warn("Rejected as only SELECT statements are supported; {} → {}.", sql, validatedSqlNode.getKind());
@@ -139,45 +139,40 @@ public class HiveSqlValidator {
       }
 
       SqlSelect select = (SqlSelect) validatedSqlNode;
-      System.out.println("- Operator: " + select.getOperator());
+      LOG.trace("- Operator: " + select.getOperator());
 
       if (select.hasHints()) {
-        System.out.println("- Hints: " + select.getHints());
         LOG.warn("Rejected as hints supported; {} → {}.", sql, select.getHints());
         throw new RuntimeException("SQL hints are not supported.");
       }
 
       if (select.getModifierNode(SqlSelectKeyword.STREAM) != null) {
-        System.out.println("- ModNod: " + select.getModifierNode(SqlSelectKeyword.STREAM));
         LOG.warn("Rejected as streams are not supported; {} → {}.", sql, select.getModifierNode(SqlSelectKeyword.STREAM));
         throw new RuntimeException("SQL streams are not supported.");
       }
 
-      System.out.println("- ModNod-ALL: " + select.getModifierNode(SqlSelectKeyword.ALL));
-      System.out.println("- ModNod-DISTINCT: " + select.getModifierNode(SqlSelectKeyword.DISTINCT));
+      LOG.trace("- ModNod-ALL: " + select.getModifierNode(SqlSelectKeyword.ALL));
+      LOG.trace("- ModNod-DISTINCT: " + select.getModifierNode(SqlSelectKeyword.DISTINCT));
 
-      System.out.println("- SelectList: " + select.getSelectList());
-      System.out.println("- From: " + select.getFrom());
-      System.out.println("- Where: " + select.getWhere());
-      System.out.println("- Group: " + select.getGroup());
+      LOG.trace("- SelectList: " + select.getSelectList());
+      LOG.trace("- From: " + select.getFrom());
+      LOG.trace("- Where: " + select.getWhere());
+      LOG.trace("- Group: " + select.getGroup());
 
       if (select.getHaving() != null) {
-        System.out.println("- Having: " + select.getHaving());
         LOG.warn("Rejected as having clauses are not supported; {} → {}.", sql, select.getHaving());
         throw new RuntimeException("SQL having clauses are not supported.");
       }
 
       if (!select.getWindowList().isEmpty() || select.getQualify() != null) {
-        System.out.println("- WindowList: " + select.getWindowList());
-        System.out.println("- Qualify: " + select.getQualify());
         LOG.warn("Rejected as window functions are not supported; {} → {} / {}.", sql, select.getWindowList(), select.getQualify());
         throw new RuntimeException("SQL window functions are not supported.");
       }
 
-      System.out.println("- OrderList: " + select.getOrderList());
-      System.out.println("- Fetch: " + select.getFetch());
-      System.out.println("- Offset: " + select.getOffset());
-      //System.out.println("- OpList: " + select.getOperandList());
+      LOG.trace("- OrderList: " + select.getOrderList());
+      LOG.trace("- Fetch: " + select.getFetch());
+      LOG.trace("- Offset: " + select.getOffset());
+      //LOG.trace("- OpList: " + select.getOperandList());
 
       for (SqlNode n : select.getSelectList().getList()) {
         if (n instanceof SqlIdentifier) {
@@ -190,7 +185,7 @@ public class HiveSqlValidator {
       }
 
       Map<SqlKind,Integer> count = select.accept(new KindCounterVisitor());
-      System.err.println("Count: " + count);
+      LOG.debug("Count: " + count);
       if (count.getOrDefault(SqlKind.SELECT, -1) != 1) {
         LOG.warn("Rejected as multiple selects present; {} → {}.", sql);
         throw new RuntimeException("Must be exactly one SQL select statement.");
