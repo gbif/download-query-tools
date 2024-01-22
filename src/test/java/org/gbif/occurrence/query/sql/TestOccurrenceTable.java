@@ -17,8 +17,18 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.impl.AbstractTable;
+import org.apache.calcite.sql.SqlFunction;
+import org.apache.calcite.sql.SqlFunctionCategory;
+import org.apache.calcite.sql.SqlKind;
+import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.type.OperandTypes;
+import org.apache.calcite.sql.type.ReturnTypes;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
+import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Table definition for testing
@@ -57,5 +67,25 @@ class TestOccurrenceTable extends AbstractTable {
 
   public String getTableName() {
     return tableName;
+  }
+
+  public List<SqlOperator> additionalOperators() {
+    List<SqlOperator> list = new ArrayList<>();
+
+    list.add(new SqlFunction("stringArrayContains",
+      SqlKind.OTHER_FUNCTION,
+      ReturnTypes.BOOLEAN,
+      null,
+      OperandTypes.family(SqlTypeFamily.ARRAY, SqlTypeFamily.CHARACTER, SqlTypeFamily.BOOLEAN),
+      SqlFunctionCategory.USER_DEFINED_FUNCTION));
+
+    list.add(new SqlFunction("eeaCellCode",
+      SqlKind.OTHER_FUNCTION,
+      ReturnTypes.CHAR,
+      null,
+      OperandTypes.family(SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC),
+      SqlFunctionCategory.USER_DEFINED_FUNCTION));
+
+    return list;
   }
 }

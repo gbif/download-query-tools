@@ -35,7 +35,7 @@ public class HiveSqlQueryTest {
     TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
     rootSchema.add(testTable.getTableName(), testTable);
 
-    hiveSqlValidator = new HiveSqlValidator(rootSchema);
+    hiveSqlValidator = new HiveSqlValidator(rootSchema, testTable.additionalOperators());
   }
 
   @ParameterizedTest

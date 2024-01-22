@@ -26,14 +26,13 @@ import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDataTypeSpec;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlDynamicParam;
-import org.apache.calcite.sql.SqlFunction;
-import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlIntervalQualifier;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlSelectKeyword;
@@ -41,10 +40,7 @@ import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.impl.SqlParserImpl;
-import org.apache.calcite.sql.type.OperandTypes;
-import org.apache.calcite.sql.type.ReturnTypes;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
-import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.util.SqlOperatorTables;
 import org.apache.calcite.sql.util.SqlVisitor;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
@@ -57,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -75,7 +72,7 @@ public class HiveSqlValidator {
   private final SqlOperatorTable sqlOperatorTable;
   private final SqlValidator validator;
 
-  public HiveSqlValidator(SchemaPlus rootSchema) {
+  public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
     dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
 
     parserConfig = SqlParser.Config.DEFAULT
@@ -90,21 +87,7 @@ public class HiveSqlValidator {
 
     // Custom functions
     SqlStdOperatorTable sqlStdOperatorTable = SqlStdOperatorTable.instance();
-    SqlFunction stringArrayContainsFunction = new SqlFunction("stringArrayContains",
-      SqlKind.OTHER_FUNCTION,
-      ReturnTypes.BOOLEAN,
-      null,
-      OperandTypes.family(SqlTypeFamily.ARRAY, SqlTypeFamily.CHARACTER, SqlTypeFamily.BOOLEAN),
-      SqlFunctionCategory.USER_DEFINED_FUNCTION);
-    sqlStdOperatorTable.register(stringArrayContainsFunction);
-
-    SqlFunction eeaCellCodeFunction = new SqlFunction("eeaCellCode",
-      SqlKind.OTHER_FUNCTION,
-      ReturnTypes.CHAR,
-      null,
-      OperandTypes.family(SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC),
-      SqlFunctionCategory.USER_DEFINED_FUNCTION);
-    sqlStdOperatorTable.register(eeaCellCodeFunction);
+    additionalOperators.stream().forEach(sqlStdOperatorTable::register);
 
     this.rootSchema = rootSchema;
     this.frameworkConfig =  Frameworks.newConfigBuilder()
