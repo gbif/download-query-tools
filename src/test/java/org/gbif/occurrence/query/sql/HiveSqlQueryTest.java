@@ -117,7 +117,12 @@ public class HiveSqlQueryTest {
         "occurrence.countrycode = 'DK' AND occurrence.month > occurrence.day",
         Arrays.asList("datasetkey", "gbifid > 10000", "- gbifid", "TRUE", "5", "countrycode IS NULL", "gbifid * 2",
           "ROUND(decimallatitude, 1)", "EXTRACT(HOUR FROM eventdate)", "CAST(gbifid AS CHAR)",
-          "EEACELLCODE(1000, decimallatitude, decimallongitude, CASE WHEN coordinateuncertaintyinmeters IS NOT NULL THEN coordinateuncertaintyinmeters ELSE 1000 END)"))
+          "EEACELLCODE(1000, decimallatitude, decimallongitude, CASE WHEN coordinateuncertaintyinmeters IS NOT NULL THEN coordinateuncertaintyinmeters ELSE 1000 END)")),
+
+      // No where clause
+      Arguments.of("SELECT gbifid FROM occurrence",
+        "1 = 1",
+        Arrays.asList("gbifid"))
     );
   }
 }

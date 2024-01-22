@@ -44,7 +44,11 @@ public class HiveSqlQuery {
     SqlSelect node = sqlValidator.validate(unvalidatedSql);
 
     this.sql = node.toSqlString(sqlDialect).getSql();
-    this.sqlWhere = node.getWhere().toSqlString(sqlDialect).getSql();
+    if (node.getWhere() != null) {
+      this.sqlWhere = node.getWhere().toSqlString(sqlDialect).getSql();
+    } else {
+      this.sqlWhere = "1 = 1";
+    }
 
     sqlSelectColumnNames = new ArrayList<>();
 
