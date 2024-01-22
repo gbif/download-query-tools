@@ -48,7 +48,7 @@
     <jersey.version>1.18.3</jersey.version>
     <jts.version>1.16.1</jts.version>
     <junit.version>5.8.2</junit.version>
-    <logback.version>1.2.3</logback.version>
+    <logback.version>1.2.13</logback.version>
     <mockito.version>3.3.3</mockito.version>
     <slf4j.version>1.7.30</slf4j.version>
   </properties>
