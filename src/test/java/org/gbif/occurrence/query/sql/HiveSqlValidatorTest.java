@@ -93,6 +93,9 @@ public class HiveSqlValidatorTest {
       Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey LIMIT 10 OFFSET 20"),
       Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey LIMIT 10 OFFSET 20"),
 
+      // Cope with semicolons at line endings.
+      Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
+
       // Probably not what was intended, stricter AS?
       Arguments.of("SELECT countrycode datasetkey FROM occurrence"));
   }

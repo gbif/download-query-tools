@@ -56,11 +56,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
+
+  private static final Pattern SEMICOLON_END = Pattern.compile("[;\\s]*;\\s*$");
 
   private final SqlDialect dialect;
   private final SqlParser.Config parserConfig;
@@ -109,7 +113,12 @@ public class HiveSqlValidator {
   }
 
   public SqlSelect validate(String sql) {
-    LOG.debug("Parsing {}", sql);
+    LOG.debug("Parsing «{}»", sql);
+    Matcher m = SEMICOLON_END.matcher(sql);
+    if (m.find()) {
+      sql = m.replaceAll("");
+      LOG.debug("Stripped trailing semicolon(s) «{}»", sql);
+    }
     SqlParser sqlParser = SqlParser.create(sql, frameworkConfig.getParserConfig());
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
