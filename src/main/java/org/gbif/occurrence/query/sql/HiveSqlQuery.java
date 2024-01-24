@@ -36,6 +36,7 @@ public class HiveSqlQuery {
   final String sqlWhere;
   final List<String> sqlSelectColumnNames;
   final Integer predicateCount;
+  final Integer pointsCount;
 
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
@@ -68,11 +69,14 @@ public class HiveSqlQuery {
       }
     }
 
+    // Count predicates
     Map<SqlKind,Integer> count = node.accept(new KindCounterVisitor());
     predicateCount = count.getOrDefault(SqlKind.LITERAL, 0)
       + count.getOrDefault(SqlKind.AND, 0)
-      + count.getOrDefault(SqlKind.OR, 0)
-      + node.accept(new GeometryPointCounterVisitor());
+      + count.getOrDefault(SqlKind.OR, 0);
+
+    // Count points in geometry within queries
+    pointsCount = node.accept(new GeometryPointCounterVisitor());
   }
 
   public String getSql() {
@@ -89,5 +93,9 @@ public class HiveSqlQuery {
 
   public Integer getPredicateCount() {
     return predicateCount;
+  }
+
+  public Integer getPointsCount() {
+    return pointsCount;
   }
 }

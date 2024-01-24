@@ -45,11 +45,13 @@ public class SqlCounterTest {
   public void testSqlWithinCount() {
     String withinSql = "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)";
     HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, withinSql);
-    assertEquals(5+1, q.getPredicateCount());
+    assertEquals(1, q.getPredicateCount());
+    assertEquals(5, q.getPointsCount());
 
     withinSql = "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude) OR gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)";
     q = new HiveSqlQuery(hiveSqlValidator, withinSql);
-    assertEquals(5+1+1+5+1, q.getPredicateCount());
+    assertEquals(1+1+1, q.getPredicateCount());
+    assertEquals(5+5, q.getPointsCount());
   }
 
   @Test
