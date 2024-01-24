@@ -23,6 +23,7 @@ import org.apache.calcite.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A parsed, validated Hive SQL query.
@@ -34,6 +35,7 @@ public class HiveSqlQuery {
   final String sql;
   final String sqlWhere;
   final List<String> sqlSelectColumnNames;
+  final Integer predicateCount;
 
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
@@ -65,6 +67,12 @@ public class HiveSqlQuery {
         sqlSelectColumnNames.add(n.toSqlString(sqlDialect).getSql());
       }
     }
+
+    Map<SqlKind,Integer> count = node.accept(new KindCounterVisitor());
+    predicateCount = count.getOrDefault(SqlKind.LITERAL, 0)
+      + count.getOrDefault(SqlKind.AND, 0)
+      + count.getOrDefault(SqlKind.OR, 0)
+      + node.accept(new GeometryPointCounterVisitor());
   }
 
   public String getSql() {
@@ -77,5 +85,9 @@ public class HiveSqlQuery {
 
   public List<String> getSqlSelectColumnNames() {
     return sqlSelectColumnNames;
+  }
+
+  public Integer getPredicateCount() {
+    return predicateCount;
   }
 }

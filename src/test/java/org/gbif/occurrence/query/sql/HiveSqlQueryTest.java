@@ -51,7 +51,7 @@ public class HiveSqlQueryTest {
     return Stream.of(
       Arguments.of("SELECT " +
         "  \"year\", " +
-        "  eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, " + // with AS
+        "  gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, " + // with AS
         "  occurrence.speciesKey, " +
         "  COUNT(*), " + // no AS
         "  MIN(COALESCE(coordinateUncertaintyInMeters, 1000)) AS \"minCoordinateUncertaintyInMeters\" " + // keeping case
@@ -59,10 +59,10 @@ public class HiveSqlQueryTest {
         "WHERE " +
         "  occurrenceStatus = 'PRESENT' " +
         "  AND speciesKey IS NOT NULL " +
-        "  AND NOT stringArrayContains(issue, 'ZERO_COORDINATE', false) " +
-        "  AND NOT stringArrayContains(issue, 'COORDINATE_OUT_OF_RANGE', false) " +
-        "  AND NOT stringArrayContains(issue, 'COORDINATE_INVALID', false) " +
-        "  AND NOT stringArrayContains(issue, 'COUNTRY_COORDINATE_MISMATCH', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'ZERO_COORDINATE', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_OUT_OF_RANGE', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_INVALID', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'COUNTRY_COORDINATE_MISMATCH', false) " +
         "  AND (identificationVerificationStatus IS NULL " +
         "    OR NOT (LOWER(identificationVerificationStatus) LIKE '%unverified%' " +
         "         OR LOWER(identificationVerificationStatus) LIKE '%unvalidated%' " +
@@ -81,10 +81,10 @@ public class HiveSqlQueryTest {
         "ORDER BY \"year\" DESC, eeaCellCode ASC, speciesKey ASC",
         ("occurrence.occurrencestatus    = 'PRESENT' " +
         "  AND occurrence.specieskey IS NOT NULL " +
-        "  AND NOT STRINGARRAYCONTAINS(occurrence.issue, 'ZERO_COORDINATE', FALSE) " +
-        "  AND NOT STRINGARRAYCONTAINS(occurrence.issue, 'COORDINATE_OUT_OF_RANGE', FALSE) " +
-        "  AND NOT STRINGARRAYCONTAINS(occurrence.issue, 'COORDINATE_INVALID', FALSE) " +
-        "  AND NOT STRINGARRAYCONTAINS(occurrence.issue, 'COUNTRY_COORDINATE_MISMATCH', FALSE) " +
+        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'ZERO_COORDINATE', FALSE) " +
+        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'COORDINATE_OUT_OF_RANGE', FALSE) " +
+        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'COORDINATE_INVALID', FALSE) " +
+        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'COUNTRY_COORDINATE_MISMATCH', FALSE) " +
         "  AND (occurrence.identificationverificationstatus IS NULL " +
         "    OR NOT (LOWER(occurrence.identificationverificationstatus) LIKE '%unverified%' " +
         "         OR LOWER(occurrence.identificationverificationstatus) LIKE '%unvalidated%' " +
@@ -112,12 +112,12 @@ public class HiveSqlQueryTest {
 
       Arguments.of("SELECT datasetkey, gbifid > 10000, -gbifid, TRUE, 5, countrycode IS NULL, " +
           "gbifid * 2, round(decimallatitude, 1), hour(eventdate), CAST(gbifid AS char), " +
-          "eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) " +
+          "gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) " +
           "FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\"",
         "occurrence.countrycode = 'DK' AND occurrence.month > occurrence.day",
         Arrays.asList("datasetkey", "gbifid > 10000", "- gbifid", "TRUE", "5", "countrycode IS NULL", "gbifid * 2",
           "ROUND(decimallatitude, 1)", "EXTRACT(HOUR FROM eventdate)", "CAST(gbifid AS CHAR)",
-          "EEACELLCODE(1000, decimallatitude, decimallongitude, CASE WHEN coordinateuncertaintyinmeters IS NOT NULL THEN coordinateuncertaintyinmeters ELSE 1000 END)")),
+          "GBIF_EEACELLCODE(1000, decimallatitude, decimallongitude, CASE WHEN coordinateuncertaintyinmeters IS NOT NULL THEN coordinateuncertaintyinmeters ELSE 1000 END)")),
 
       // No where clause
       Arguments.of("SELECT gbifid FROM occurrence",

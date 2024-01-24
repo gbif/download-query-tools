@@ -59,7 +59,7 @@ public class HiveSqlValidatorTest {
     return Stream.of(
       Arguments.of("SELECT " +
         "  \"year\", " +
-        "  eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, " +
+        "  gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, " +
         "  speciesKey, " +
         "  COUNT(*) AS n, " +
         "  MIN(COALESCE(coordinateUncertaintyInMeters, 1000)) AS minCoordinateUncertaintyInMeters " +
@@ -67,10 +67,10 @@ public class HiveSqlValidatorTest {
         "WHERE " +
         "  occurrenceStatus = 'PRESENT' " +
         "  AND speciesKey IS NOT NULL " +
-        "  AND NOT stringArrayContains(issue, 'ZERO_COORDINATE', false) " +
-        "  AND NOT stringArrayContains(issue, 'COORDINATE_OUT_OF_RANGE', false) " +
-        "  AND NOT stringArrayContains(issue, 'COORDINATE_INVALID', false) " +
-        "  AND NOT stringArrayContains(issue, 'COUNTRY_COORDINATE_MISMATCH', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'ZERO_COORDINATE', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_OUT_OF_RANGE', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_INVALID', false) " +
+        "  AND NOT gbif_stringArrayContains(issue, 'COUNTRY_COORDINATE_MISMATCH', false) " +
         "  AND (identificationVerificationStatus IS NULL " +
         "    OR NOT (LOWER(identificationVerificationStatus) LIKE '%unverified%' " +
         "         OR LOWER(identificationVerificationStatus) LIKE '%unvalidated%' " +
@@ -92,6 +92,7 @@ public class HiveSqlValidatorTest {
       Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey"),
       Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey LIMIT 10 OFFSET 20"),
       Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey LIMIT 10 OFFSET 20"),
+      Arguments.of("SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)"),
 
       // Cope with semicolons at line endings.
       Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),

@@ -22,16 +22,10 @@ import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.sql.SqlCall;
-import org.apache.calcite.sql.SqlDataTypeSpec;
 import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.SqlDynamicParam;
 import org.apache.calcite.sql.SqlIdentifier;
-import org.apache.calcite.sql.SqlIntervalQualifier;
 import org.apache.calcite.sql.SqlKind;
-import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSelect;
@@ -42,7 +36,6 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.impl.SqlParserImpl;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.util.SqlOperatorTables;
-import org.apache.calcite.sql.util.SqlVisitor;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorImpl;
@@ -52,10 +45,10 @@ import org.apache.calcite.tools.Frameworks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -188,81 +181,13 @@ public class HiveSqlValidator {
         throw new RuntimeException("Joins are not supported.");
       }
 
+      // Validate WKT strings.
+      select.accept(new GeometryPointCounterVisitor());
+
       return select;
     } catch (Exception e) {
       LOG.warn("Rejected for another reason; {} → {}.", sql, e.getMessage());
       throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Counts parts of SQL queries
-   */
-  class KindCounterVisitor implements SqlVisitor<Map<SqlKind,Integer>> {
-
-    Map<SqlKind, Integer> incMap(Map<SqlKind,Integer> m, SqlKind k) {
-      if (m == null) {
-        m = new HashMap<>();
-      }
-      m.put(k, m.getOrDefault(k, 0) + 1);
-      return m;
-    }
-
-    Map<SqlKind, Integer> addMaps(Map<SqlKind,Integer> m1, Map<SqlKind,Integer> m2) {
-      Map<SqlKind, Integer> result = Stream.concat(m1.entrySet().stream(), m2.entrySet().stream())
-        .collect(Collectors.toMap(
-          Map.Entry::getKey,
-          Map.Entry::getValue,
-          Integer::sum));
-      return result;
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visit(SqlCall call) {
-      Map<SqlKind, Integer> m = new HashMap<>();
-      for (SqlNode n : call.getOperandList()) {
-        if (n != null) m = addMaps(m, n.accept(this));
-      }
-      return incMap(m, call.getKind());
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visit(SqlNodeList nodeList) {
-      Map<SqlKind, Integer> m = new HashMap<>();
-      for (SqlNode n : nodeList.getList()) {
-        if (n != null) m = addMaps(m, n.accept(this));
-      }
-      return incMap(m, nodeList.getKind());
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visit(SqlLiteral literal) {
-      return incMap(null, literal.getKind());
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visit(SqlIdentifier id) {
-      return incMap(null, id.getKind());
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visit(SqlDataTypeSpec type) {
-      return incMap(null, type.getKind());
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visit(SqlDynamicParam param) {
-      return incMap(null, param.getKind());
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visit(SqlIntervalQualifier intervalQualifier) {
-      return incMap(null, intervalQualifier.getKind());
-    }
-
-    @Override
-    public Map<SqlKind,Integer> visitNode(SqlNode n) {
-      return n.accept(this);
     }
   }
 

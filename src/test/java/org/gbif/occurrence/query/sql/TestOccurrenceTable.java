@@ -72,18 +72,25 @@ class TestOccurrenceTable extends AbstractTable {
   public List<SqlOperator> additionalOperators() {
     List<SqlOperator> list = new ArrayList<>();
 
-    list.add(new SqlFunction("stringArrayContains",
+    list.add(new SqlFunction("gbif_stringArrayContains",
       SqlKind.OTHER_FUNCTION,
       ReturnTypes.BOOLEAN,
       null,
       OperandTypes.family(SqlTypeFamily.ARRAY, SqlTypeFamily.CHARACTER, SqlTypeFamily.BOOLEAN),
       SqlFunctionCategory.USER_DEFINED_FUNCTION));
 
-    list.add(new SqlFunction("eeaCellCode",
+    list.add(new SqlFunction("gbif_eeaCellCode",
       SqlKind.OTHER_FUNCTION,
       ReturnTypes.CHAR,
       null,
       OperandTypes.family(SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC),
+      SqlFunctionCategory.USER_DEFINED_FUNCTION));
+
+    list.add(new SqlFunction("gbif_within",
+      SqlKind.OTHER_FUNCTION,
+      ReturnTypes.BOOLEAN,
+      null,
+      OperandTypes.family(SqlTypeFamily.CHARACTER, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC),
       SqlFunctionCategory.USER_DEFINED_FUNCTION));
 
     return list;
