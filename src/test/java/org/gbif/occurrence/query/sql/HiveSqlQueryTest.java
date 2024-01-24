@@ -59,10 +59,10 @@ public class HiveSqlQueryTest {
         "WHERE " +
         "  occurrenceStatus = 'PRESENT' " +
         "  AND speciesKey IS NOT NULL " +
-        "  AND NOT gbif_stringArrayContains(issue, 'ZERO_COORDINATE', false) " +
-        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_OUT_OF_RANGE', false) " +
-        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_INVALID', false) " +
-        "  AND NOT gbif_stringArrayContains(issue, 'COUNTRY_COORDINATE_MISMATCH', false) " +
+        "  AND NOT array_contains(issue, 'ZERO_COORDINATE') " +
+        "  AND NOT array_contains(issue, 'COORDINATE_OUT_OF_RANGE') " +
+        "  AND NOT array_contains(issue, 'COORDINATE_INVALID') " +
+        "  AND NOT array_contains(issue, 'COUNTRY_COORDINATE_MISMATCH') " +
         "  AND (identificationVerificationStatus IS NULL " +
         "    OR NOT (LOWER(identificationVerificationStatus) LIKE '%unverified%' " +
         "         OR LOWER(identificationVerificationStatus) LIKE '%unvalidated%' " +
@@ -81,10 +81,10 @@ public class HiveSqlQueryTest {
         "ORDER BY \"year\" DESC, eeaCellCode ASC, speciesKey ASC",
         ("occurrence.occurrencestatus    = 'PRESENT' " +
         "  AND occurrence.specieskey IS NOT NULL " +
-        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'ZERO_COORDINATE', FALSE) " +
-        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'COORDINATE_OUT_OF_RANGE', FALSE) " +
-        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'COORDINATE_INVALID', FALSE) " +
-        "  AND NOT GBIF_STRINGARRAYCONTAINS(occurrence.issue, 'COUNTRY_COORDINATE_MISMATCH', FALSE) " +
+        "  AND NOT ARRAY_CONTAINS(occurrence.issue, 'ZERO_COORDINATE') " +
+        "  AND NOT ARRAY_CONTAINS(occurrence.issue, 'COORDINATE_OUT_OF_RANGE') " +
+        "  AND NOT ARRAY_CONTAINS(occurrence.issue, 'COORDINATE_INVALID') " +
+        "  AND NOT ARRAY_CONTAINS(occurrence.issue, 'COUNTRY_COORDINATE_MISMATCH') " +
         "  AND (occurrence.identificationverificationstatus IS NULL " +
         "    OR NOT (LOWER(occurrence.identificationverificationstatus) LIKE '%unverified%' " +
         "         OR LOWER(occurrence.identificationverificationstatus) LIKE '%unvalidated%' " +

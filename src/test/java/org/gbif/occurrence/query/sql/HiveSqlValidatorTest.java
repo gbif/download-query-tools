@@ -67,10 +67,10 @@ public class HiveSqlValidatorTest {
         "WHERE " +
         "  occurrenceStatus = 'PRESENT' " +
         "  AND speciesKey IS NOT NULL " +
-        "  AND NOT gbif_stringArrayContains(issue, 'ZERO_COORDINATE', false) " +
-        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_OUT_OF_RANGE', false) " +
-        "  AND NOT gbif_stringArrayContains(issue, 'COORDINATE_INVALID', false) " +
-        "  AND NOT gbif_stringArrayContains(issue, 'COUNTRY_COORDINATE_MISMATCH', false) " +
+        "  AND NOT array_contains(issue, 'ZERO_COORDINATE') " +
+        "  AND NOT array_contains(issue, 'COORDINATE_OUT_OF_RANGE') " +
+        "  AND NOT array_contains(issue, 'COORDINATE_INVALID') " +
+        "  AND NOT array_contains(issue, 'COUNTRY_COORDINATE_MISMATCH') " +
         "  AND (identificationVerificationStatus IS NULL " +
         "    OR NOT (LOWER(identificationVerificationStatus) LIKE '%unverified%' " +
         "         OR LOWER(identificationVerificationStatus) LIKE '%unvalidated%' " +
@@ -93,6 +93,7 @@ public class HiveSqlValidatorTest {
       Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey LIMIT 10 OFFSET 20"),
       Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey LIMIT 10 OFFSET 20"),
       Arguments.of("SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)"),
+      Arguments.of("SELECT DISTINCT datasetkey FROM occurrence WHERE array_contains(issue, 'COORDINATE_INVALID')"),
 
       // Cope with semicolons at line endings.
       Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
