@@ -9,7 +9,7 @@
 
   <groupId>org.gbif.occurrence</groupId>
   <artifactId>download-query-tools</artifactId>
-  <version>1.50.2-SNAPSHOT</version>
+  <version>1.51.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Download Query Tools</name>
@@ -20,7 +20,6 @@
     <connection>scm:git:git@github.com:gbif/download-query-tools.git</connection>
     <url>https://github.com/gbif/download-query-tools</url>
     <developerConnection>scm:git:git@github.com:gbif/download-query-tools.git</developerConnection>
-    <tag>download-query-tools-1.41</tag>
   </scm>
 
   <distributionManagement>
@@ -42,8 +41,11 @@
   </repositories>
 
   <properties>
+    <!-- Note Calcite 1.36.0 may hit a bug in asm when shading occurrence-download.
+         See https://github.com/sbt/sbt-assembly/issues/475 -->
+    <calcite.version>1.35.0</calcite.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
-    <gbif-api.version>1.13.0</gbif-api.version>
+    <gbif-api.version>1.14.0</gbif-api.version>
     <jackson.version>2.11.3</jackson.version>
     <jersey.version>1.18.3</jersey.version>
     <jts.version>1.16.1</jts.version>
@@ -60,7 +62,32 @@
       <version>${gbif-api.version}</version>
     </dependency>
 
-    <!-- jersey, jackson -->
+    <!-- Calcite -->
+    <dependency>
+      <groupId>org.apache.calcite</groupId>
+      <artifactId>calcite-core</artifactId>
+      <version>${calcite.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents.client5</groupId>
+          <artifactId>httpclient5</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents.core5</groupId>
+          <artifactId>httpcore5</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Jersey, Jackson -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
@@ -92,7 +119,7 @@
       <version>${jersey.version}</version>
     </dependency>
 
-    <!-- logging -->
+    <!-- Logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -119,6 +146,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
@@ -137,4 +170,58 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <!-- Guava shaded to avoid conflict with Hadoop version. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>com.google.guava:*</include>
+                  <include>org.apache.calcite:*</include>
+                  <include>org.apache.calcite.avatica:*</include>
+                </includes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/LICENSE</exclude>
+                    <exclude>META-INF/LICENSE.txt</exclude>
+                    <exclude>META-INF/NOTICE</exclude>
+                    <exclude>META-INF/NOTICE.txt</exclude>
+                    <exclude>META-INF/MANIFEST.MF</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <relocations>
+                <relocation>
+                  <pattern>com.google.common</pattern>
+                  <shadedPattern>calcite_gbif_shaded/com/google/common</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.calcite</pattern>
+                  <shadedPattern>calcite_gbif_shaded/org/apache/calcite</shadedPattern>
+                </relocation>
+              </relocations>
+              <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
