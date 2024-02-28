@@ -16,6 +16,7 @@ package org.gbif.occurrence.query.sql;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.rel.type.StructKind;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.sql.SqlFunction;
 import org.apache.calcite.sql.SqlFunctionCategory;
@@ -28,6 +29,7 @@ import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,8 +62,20 @@ class TestOccurrenceTable extends AbstractTable {
     builder.add("hascoordinate", SqlTypeName.BOOLEAN);
 
     RelDataTypeFactory tdf = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
-    RelDataType issue = tdf.createArrayType(tdf.createSqlType(SqlTypeName.CHAR), -1);
-    builder.add("issue", issue);
+    RelDataType varChar = tdf.createSqlType(SqlTypeName.VARCHAR);
+
+    // Array type
+    RelDataType varCharArray = tdf.createArrayType(varChar, -1);
+    builder.add("issue", varCharArray);
+
+    // Vocabulary (struct) type
+    RelDataType vocabulary = tdf.createStructType(StructKind.PEEK_FIELDS,
+      Arrays.asList(varChar, varCharArray),
+      Arrays.asList("concept", "lineage"));
+
+    // Vocabulary definition: "STRUCT<concept: STRING,lineage: ARRAY<STRING>>"
+    builder.add("lifestage", vocabulary);
+
     return builder.build();
   }
 

@@ -95,6 +95,11 @@ public class HiveSqlValidatorTest {
       Arguments.of("SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)"),
       Arguments.of("SELECT DISTINCT datasetkey FROM occurrence WHERE array_contains(issue, 'COORDINATE_INVALID')"),
 
+      // Vocabulary (struct) fields
+      Arguments.of("SELECT lifestage.concept, lifestage.lineage, COUNT(*) " +
+        "FROM occurrence WHERE lifestage.concept IS NOT NULL " +
+        "GROUP BY concept, lineage"),
+
       // Cope with semicolons at line endings.
       Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
 
