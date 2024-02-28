@@ -13,13 +13,13 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import java.util.stream.Stream;
+
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.tools.Frameworks;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -57,104 +57,121 @@ public class HiveSqlValidatorTest {
 
   private static Stream<Arguments> provideStringsForAllowedSql() {
     return Stream.of(
-      Arguments.of("SELECT " +
-        "  \"year\", " +
-        "  gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, " +
-        "  speciesKey, " +
-        "  COUNT(*) AS n, " +
-        "  MIN(COALESCE(coordinateUncertaintyInMeters, 1000)) AS minCoordinateUncertaintyInMeters " +
-        "FROM occurrence " +
-        "WHERE " +
-        "  occurrenceStatus = 'PRESENT' " +
-        "  AND speciesKey IS NOT NULL " +
-        "  AND NOT array_contains(issue, 'ZERO_COORDINATE') " +
-        "  AND NOT array_contains(issue, 'COORDINATE_OUT_OF_RANGE') " +
-        "  AND NOT array_contains(issue, 'COORDINATE_INVALID') " +
-        "  AND NOT array_contains(issue, 'COUNTRY_COORDINATE_MISMATCH') " +
-        "  AND (identificationVerificationStatus IS NULL " +
-        "    OR NOT (LOWER(identificationVerificationStatus) LIKE '%unverified%' " +
-        "         OR LOWER(identificationVerificationStatus) LIKE '%unvalidated%' " +
-        "         OR LOWER(identificationVerificationStatus) LIKE '%not able to validate%' " +
-        "         OR LOWER(identificationVerificationStatus) LIKE '%control could not be conclusive due to insufficient knowledge%' " +
-        "         OR LOWER(identificationVerificationStatus) LIKE '%unconfirmed%' " +
-        "         OR LOWER(identificationVerificationStatus) LIKE '%unconfirmed - not reviewed%' " +
-        "         OR LOWER(identificationVerificationStatus) LIKE '%validation requested%')) " +
-        "  AND countryCode = 'SI' " +
-        "  AND \"year\" > 1000 " +
-        "  AND hasCoordinate " +
-        "GROUP BY " +
-        "  \"year\", " +
-        "  eeaCellCode, " +
-        "  speciesKey " +
-        "ORDER BY \"year\" DESC, eeaCellCode ASC, speciesKey ASC"),
+        Arguments.of(
+            "SELECT "
+                + "  \"year\", "
+                + "  gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, "
+                + "  speciesKey, "
+                + "  COUNT(*) AS n, "
+                + "  MIN(COALESCE(coordinateUncertaintyInMeters, 1000)) AS minCoordinateUncertaintyInMeters "
+                + "FROM occurrence "
+                + "WHERE "
+                + "  occurrenceStatus = 'PRESENT' "
+                + "  AND speciesKey IS NOT NULL "
+                + "  AND NOT array_contains(issue, 'ZERO_COORDINATE') "
+                + "  AND NOT array_contains(issue, 'COORDINATE_OUT_OF_RANGE') "
+                + "  AND NOT array_contains(issue, 'COORDINATE_INVALID') "
+                + "  AND NOT array_contains(issue, 'COUNTRY_COORDINATE_MISMATCH') "
+                + "  AND (identificationVerificationStatus IS NULL "
+                + "    OR NOT (LOWER(identificationVerificationStatus) LIKE '%unverified%' "
+                + "         OR LOWER(identificationVerificationStatus) LIKE '%unvalidated%' "
+                + "         OR LOWER(identificationVerificationStatus) LIKE '%not able to validate%' "
+                + "         OR LOWER(identificationVerificationStatus) LIKE '%control could not be conclusive due to insufficient knowledge%' "
+                + "         OR LOWER(identificationVerificationStatus) LIKE '%unconfirmed%' "
+                + "         OR LOWER(identificationVerificationStatus) LIKE '%unconfirmed - not reviewed%' "
+                + "         OR LOWER(identificationVerificationStatus) LIKE '%validation requested%')) "
+                + "  AND countryCode = 'SI' "
+                + "  AND \"year\" > 1000 "
+                + "  AND hasCoordinate "
+                + "GROUP BY "
+                + "  \"year\", "
+                + "  eeaCellCode, "
+                + "  speciesKey "
+                + "ORDER BY \"year\" DESC, eeaCellCode ASC, speciesKey ASC"),
+        Arguments.of(
+            "SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey"),
+        Arguments.of(
+            "SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey"),
+        Arguments.of(
+            "SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey LIMIT 10 OFFSET 20"),
+        Arguments.of(
+            "SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey LIMIT 10 OFFSET 20"),
+        Arguments.of(
+            "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)"),
+        Arguments.of(
+            "SELECT DISTINCT datasetkey FROM occurrence WHERE array_contains(issue, 'COORDINATE_INVALID')"),
 
-      Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey"),
-      Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey"),
-      Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey LIMIT 10 OFFSET 20"),
-      Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey ORDER BY datasetkey LIMIT 10 OFFSET 20"),
-      Arguments.of("SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)"),
-      Arguments.of("SELECT DISTINCT datasetkey FROM occurrence WHERE array_contains(issue, 'COORDINATE_INVALID')"),
+        // Vocabulary (struct) fields
+        Arguments.of(
+            "SELECT lifestage.concept, lifestage.lineage, COUNT(*) "
+                + "FROM occurrence WHERE lifestage.concept IS NOT NULL "
+                + "GROUP BY concept, lineage"),
 
-      // Vocabulary (struct) fields
-      Arguments.of("SELECT lifestage.concept, lifestage.lineage, COUNT(*) " +
-        "FROM occurrence WHERE lifestage.concept IS NOT NULL " +
-        "GROUP BY concept, lineage"),
+        // Cope with semicolons at line endings.
+        Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
 
-      // Cope with semicolons at line endings.
-      Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
-
-      // Probably not what was intended, stricter AS?
-      Arguments.of("SELECT countrycode datasetkey FROM occurrence"));
+        // Probably not what was intended, stricter AS?
+        Arguments.of("SELECT countrycode datasetkey FROM occurrence"));
   }
 
   private static Stream<Arguments> provideStringsForForbiddenSql() {
     return Stream.of(
-      // Block subselect
-      Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence " +
-        "WHERE countryCode IN (SELECT DISTINCT countryCode FROM occurrence WHERE \"month\" = 12)"),
-      // Block having
-      Arguments.of("SELECT datasetkey, COUNT(*) FROM occurrence " +
-        "GROUP BY countrycode " +
-        "HAVING COUNT(*) > 2"),
-      // Block partitioning
-      Arguments.of("SELECT datasetkey, COUNT(DISTINCT \"day\") FROM occurrence " +
-        "GROUP BY datasetkey " +
-        "OVER (PARTITION BY \"month\" ORDER BY datasetkey) = 1"),
-      Arguments.of("SELECT datasetkey, COUNT(DISTINCT \"day\") FROM occurrence " +
-        "GROUP BY datasetkey " +
-        "QUALIFY ROW_NUMBER() OVER (PARTITION BY \"month\" ORDER BY datasetkey) = 1"),
-      // Block query hints
-      Arguments.of("SELECT /*+ MAPJOIN(time_dim) */ datasetkey FROM occurrence"),
-      // Block joins
-      Arguments.of("SELECT o1.datasetkey, COUNT(DISTINCT o1.\"month\") FROM occurrence o1 INNER JOIN occurrence o2 ON o1.datasetkey = o2.datasetkey " +
-        "GROUP BY o1.datasetkey"),
-      Arguments.of("SELECT o1.datasetkey, COUNT(DISTINCT o1.\"month\") FROM occurrence o1, occurrence o2 " +
-        "WHERE o1.datasetkey = o2.datasetkey " +
-        "GROUP BY o1.datasetkey"),
-      Arguments.of("SELECT o1.datasetkey, COUNT(DISTINCT o1.\"month\") FROM occurrence o1, occurrence o2 " +
-        "GROUP BY o1.datasetkey"),
-      // Block * select
-      Arguments.of("SELECT o1.* FROM occurrence o1"),
-      // Block with
-      Arguments.of("WITH subquery AS (SELECT DISTINCT datasetkey FROM occurrence) SELECT sq.datasetkey FROM subquery sq"),
-      Arguments.of("WITH subquery AS (SELECT DISTINCT datasetkey FROM occurrence) SELECT sq.datasetkey FROM subquery sq, occurrence o"),
-      // Block modification of data
-      Arguments.of("DELETE FROM occurrence"),
-      Arguments.of("INSERT INTO occurrence (datasetkey, countrycode, \"month\", \"day\") VALUES ('aoeuaoeuaoeu', 'XX', 0, 0)"),
-      Arguments.of("UPDATE occurrence SET datasetkey = 'AOEU'"),
-      Arguments.of("TRUNCATE occurrence"),
-      Arguments.of("DROP TABLE occurrence"),
+        // Block subselect
+        Arguments.of(
+            "SELECT datasetkey, COUNT(*) FROM occurrence "
+                + "WHERE countryCode IN (SELECT DISTINCT countryCode FROM occurrence WHERE \"month\" = 12)"),
+        // Block having
+        Arguments.of(
+            "SELECT datasetkey, COUNT(*) FROM occurrence "
+                + "GROUP BY countrycode "
+                + "HAVING COUNT(*) > 2"),
+        // Block partitioning
+        Arguments.of(
+            "SELECT datasetkey, COUNT(DISTINCT \"day\") FROM occurrence "
+                + "GROUP BY datasetkey "
+                + "OVER (PARTITION BY \"month\" ORDER BY datasetkey) = 1"),
+        Arguments.of(
+            "SELECT datasetkey, COUNT(DISTINCT \"day\") FROM occurrence "
+                + "GROUP BY datasetkey "
+                + "QUALIFY ROW_NUMBER() OVER (PARTITION BY \"month\" ORDER BY datasetkey) = 1"),
+        // Block query hints
+        Arguments.of("SELECT /*+ MAPJOIN(time_dim) */ datasetkey FROM occurrence"),
+        // Block joins
+        Arguments.of(
+            "SELECT o1.datasetkey, COUNT(DISTINCT o1.\"month\") FROM occurrence o1 INNER JOIN occurrence o2 ON o1.datasetkey = o2.datasetkey "
+                + "GROUP BY o1.datasetkey"),
+        Arguments.of(
+            "SELECT o1.datasetkey, COUNT(DISTINCT o1.\"month\") FROM occurrence o1, occurrence o2 "
+                + "WHERE o1.datasetkey = o2.datasetkey "
+                + "GROUP BY o1.datasetkey"),
+        Arguments.of(
+            "SELECT o1.datasetkey, COUNT(DISTINCT o1.\"month\") FROM occurrence o1, occurrence o2 "
+                + "GROUP BY o1.datasetkey"),
+        // Block * select
+        Arguments.of("SELECT o1.* FROM occurrence o1"),
+        // Block with
+        Arguments.of(
+            "WITH subquery AS (SELECT DISTINCT datasetkey FROM occurrence) SELECT sq.datasetkey FROM subquery sq"),
+        Arguments.of(
+            "WITH subquery AS (SELECT DISTINCT datasetkey FROM occurrence) SELECT sq.datasetkey FROM subquery sq, occurrence o"),
+        // Block modification of data
+        Arguments.of("DELETE FROM occurrence"),
+        Arguments.of(
+            "INSERT INTO occurrence (datasetkey, countrycode, \"month\", \"day\") VALUES ('aoeuaoeuaoeu', 'XX', 0, 0)"),
+        Arguments.of("UPDATE occurrence SET datasetkey = 'AOEU'"),
+        Arguments.of("TRUNCATE occurrence"),
+        Arguments.of("DROP TABLE occurrence"),
 
-      // Block incorrect table and column names, commands and syntax
-      Arguments.of("SELECT datasetkey FROM wrongTable occurrence"),
-      Arguments.of("SELECT wrongColumn FROM occurrence"),
-      Arguments.of("WRONGCOMMAND datasetkey FROM occurrence"),
-      Arguments.of("FROM occurrence SELECT datasetkey"),
-      Arguments.of("SELECT datasetkey FROM occurrence; SELECT datasetkey FROM occurrence"));
+        // Block incorrect table and column names, commands and syntax
+        Arguments.of("SELECT datasetkey FROM wrongTable occurrence"),
+        Arguments.of("SELECT wrongColumn FROM occurrence"),
+        Arguments.of("WRONGCOMMAND datasetkey FROM occurrence"),
+        Arguments.of("FROM occurrence SELECT datasetkey"),
+        Arguments.of("SELECT datasetkey FROM occurrence; SELECT datasetkey FROM occurrence"));
 
-      // TODO: Block GROUP BY gbifid
-      //Arguments.of("SELECT gbifid FROM occurrence GROUP BY gbifid"),
-      // TODO: Block ORDER BY gbifid
-      //Arguments.of("SELECT gbifid FROM occurrence ORDER BY gbifid"),
+    // TODO: Block GROUP BY gbifid
+    // Arguments.of("SELECT gbifid FROM occurrence GROUP BY gbifid"),
+    // TODO: Block ORDER BY gbifid
+    // Arguments.of("SELECT gbifid FROM occurrence ORDER BY gbifid"),
   }
 }

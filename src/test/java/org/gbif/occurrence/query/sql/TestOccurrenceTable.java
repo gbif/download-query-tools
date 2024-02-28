@@ -13,6 +13,10 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
@@ -27,10 +31,6 @@ import org.apache.calcite.sql.type.ReturnTypes;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Table definition for testing
@@ -69,9 +69,11 @@ class TestOccurrenceTable extends AbstractTable {
     builder.add("issue", varCharArray);
 
     // Vocabulary (struct) type
-    RelDataType vocabulary = tdf.createStructType(StructKind.PEEK_FIELDS,
-      Arrays.asList(varChar, varCharArray),
-      Arrays.asList("concept", "lineage"));
+    RelDataType vocabulary =
+        tdf.createStructType(
+            StructKind.PEEK_FIELDS,
+            Arrays.asList(varChar, varCharArray),
+            Arrays.asList("concept", "lineage"));
 
     // Vocabulary definition: "STRUCT<concept: STRING,lineage: ARRAY<STRING>>"
     builder.add("lifestage", vocabulary);
@@ -86,26 +88,37 @@ class TestOccurrenceTable extends AbstractTable {
   public List<SqlOperator> additionalOperators() {
     List<SqlOperator> list = new ArrayList<>();
 
-    list.add(new SqlFunction("array_contains",
-      SqlKind.OTHER_FUNCTION,
-      ReturnTypes.BOOLEAN,
-      null,
-      OperandTypes.family(SqlTypeFamily.ARRAY, SqlTypeFamily.ANY),
-      SqlFunctionCategory.USER_DEFINED_FUNCTION));
+    list.add(
+        new SqlFunction(
+            "array_contains",
+            SqlKind.OTHER_FUNCTION,
+            ReturnTypes.BOOLEAN,
+            null,
+            OperandTypes.family(SqlTypeFamily.ARRAY, SqlTypeFamily.ANY),
+            SqlFunctionCategory.USER_DEFINED_FUNCTION));
 
-    list.add(new SqlFunction("gbif_eeaCellCode",
-      SqlKind.OTHER_FUNCTION,
-      ReturnTypes.CHAR,
-      null,
-      OperandTypes.family(SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC),
-      SqlFunctionCategory.USER_DEFINED_FUNCTION));
+    list.add(
+        new SqlFunction(
+            "gbif_eeaCellCode",
+            SqlKind.OTHER_FUNCTION,
+            ReturnTypes.CHAR,
+            null,
+            OperandTypes.family(
+                SqlTypeFamily.NUMERIC,
+                SqlTypeFamily.NUMERIC,
+                SqlTypeFamily.NUMERIC,
+                SqlTypeFamily.NUMERIC),
+            SqlFunctionCategory.USER_DEFINED_FUNCTION));
 
-    list.add(new SqlFunction("gbif_within",
-      SqlKind.OTHER_FUNCTION,
-      ReturnTypes.BOOLEAN,
-      null,
-      OperandTypes.family(SqlTypeFamily.CHARACTER, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC),
-      SqlFunctionCategory.USER_DEFINED_FUNCTION));
+    list.add(
+        new SqlFunction(
+            "gbif_within",
+            SqlKind.OTHER_FUNCTION,
+            ReturnTypes.BOOLEAN,
+            null,
+            OperandTypes.family(
+                SqlTypeFamily.CHARACTER, SqlTypeFamily.NUMERIC, SqlTypeFamily.NUMERIC),
+            SqlFunctionCategory.USER_DEFINED_FUNCTION));
 
     return list;
   }

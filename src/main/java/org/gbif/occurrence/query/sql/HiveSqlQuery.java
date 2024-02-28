@@ -13,6 +13,10 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -20,10 +24,6 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.util.Util;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A parsed, validated Hive SQL query.
@@ -55,7 +55,8 @@ public class HiveSqlQuery {
 
     sqlSelectColumnNames = new ArrayList<>();
 
-    // Finds suitable column names from the SQL select part.  Rather than the typical database naming of "c0" etc
+    // Finds suitable column names from the SQL select part.  Rather than the typical database
+    // naming of "c0" etc
     // for expressions, we return the expression. They might need further cleaning!
     for (SqlNode n : node.getSelectList().getList()) {
       if (SqlKind.IDENTIFIER == n.getKind()) {
@@ -70,10 +71,11 @@ public class HiveSqlQuery {
     }
 
     // Count predicates
-    Map<SqlKind,Integer> count = node.accept(new KindCounterVisitor());
-    predicateCount = count.getOrDefault(SqlKind.LITERAL, 0)
-      + count.getOrDefault(SqlKind.AND, 0)
-      + count.getOrDefault(SqlKind.OR, 0);
+    Map<SqlKind, Integer> count = node.accept(new KindCounterVisitor());
+    predicateCount =
+        count.getOrDefault(SqlKind.LITERAL, 0)
+            + count.getOrDefault(SqlKind.AND, 0)
+            + count.getOrDefault(SqlKind.OR, 0);
 
     // Count points in geometry within queries
     pointsCount = node.accept(new GeometryPointCounterVisitor());

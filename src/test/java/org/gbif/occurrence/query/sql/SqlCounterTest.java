@@ -35,23 +35,26 @@ public class SqlCounterTest {
   public void testSqlCount() {
     // AND/ORs should count one each.
     // Literals should count one each.
-    final String sql = "SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode IN('DK', 'FO', 'GL') AND speciesKey = 1 OR speciesKey = 2 GROUP BY datasetkey ORDER BY datasetkey LIMIT 10 OFFSET 20";
+    final String sql =
+        "SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode IN('DK', 'FO', 'GL') AND speciesKey = 1 OR speciesKey = 2 GROUP BY datasetkey ORDER BY datasetkey LIMIT 10 OFFSET 20";
 
     HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, sql);
-    assertEquals(3+1+1+1+1+1+1, q.getPredicateCount());
+    assertEquals(3 + 1 + 1 + 1 + 1 + 1 + 1, q.getPredicateCount());
   }
 
   @Test
   public void testSqlWithinCount() {
-    String withinSql = "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)";
+    String withinSql =
+        "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)";
     HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, withinSql);
     assertEquals(1, q.getPredicateCount());
     assertEquals(5, q.getPointsCount());
 
-    withinSql = "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude) OR gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)";
+    withinSql =
+        "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude) OR gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)";
     q = new HiveSqlQuery(hiveSqlValidator, withinSql);
-    assertEquals(1+1+1, q.getPredicateCount());
-    assertEquals(5+5, q.getPointsCount());
+    assertEquals(1 + 1 + 1, q.getPredicateCount());
+    assertEquals(5 + 5, q.getPointsCount());
   }
 
   @Test

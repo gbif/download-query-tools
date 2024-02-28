@@ -13,6 +13,11 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDataTypeSpec;
 import org.apache.calcite.sql.SqlDynamicParam;
@@ -23,11 +28,6 @@ import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.util.SqlVisitor;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Counts parts of SQL queries
@@ -43,11 +43,9 @@ class KindCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>> {
   }
 
   Map<SqlKind, Integer> addMaps(Map<SqlKind, Integer> m1, Map<SqlKind, Integer> m2) {
-    Map<SqlKind, Integer> result = Stream.concat(m1.entrySet().stream(), m2.entrySet().stream())
-      .collect(Collectors.toMap(
-        Map.Entry::getKey,
-        Map.Entry::getValue,
-        Integer::sum));
+    Map<SqlKind, Integer> result =
+        Stream.concat(m1.entrySet().stream(), m2.entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
     return result;
   }
 

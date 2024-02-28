@@ -13,6 +13,12 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
@@ -45,15 +51,6 @@ import org.apache.calcite.tools.Frameworks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
 
@@ -72,37 +69,47 @@ public class HiveSqlValidator {
   public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
     dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
 
-    parserConfig = SqlParser.Config.DEFAULT
-      .withParserFactory(SqlParserImpl.FACTORY)
-      .withQuoting(Quoting.DOUBLE_QUOTE)
-      .withUnquotedCasing(Casing.TO_LOWER)
-      .withConformance(SqlConformanceEnum.LENIENT);
+    parserConfig =
+        SqlParser.Config.DEFAULT
+            .withParserFactory(SqlParserImpl.FACTORY)
+            .withQuoting(Quoting.DOUBLE_QUOTE)
+            .withUnquotedCasing(Casing.TO_LOWER)
+            .withConformance(SqlConformanceEnum.LENIENT);
 
-    validatorConfig = SqlValidatorImpl.Config.DEFAULT
-      .withConformance(SqlConformanceEnum.LENIENT)
-      .withColumnReferenceExpansion(false);
+    validatorConfig =
+        SqlValidatorImpl.Config.DEFAULT
+            .withConformance(SqlConformanceEnum.LENIENT)
+            .withColumnReferenceExpansion(false);
 
     // Custom functions
     SqlStdOperatorTable sqlStdOperatorTable = SqlStdOperatorTable.instance();
     additionalOperators.stream().forEach(sqlStdOperatorTable::register);
 
     this.rootSchema = rootSchema;
-    this.frameworkConfig =  Frameworks.newConfigBuilder()
-      .parserConfig(parserConfig)
-      .sqlValidatorConfig(validatorConfig)
-      .defaultSchema(rootSchema)
-      .operatorTable(sqlStdOperatorTable)
-      .build();
+    this.frameworkConfig =
+        Frameworks.newConfigBuilder()
+            .parserConfig(parserConfig)
+            .sqlValidatorConfig(validatorConfig)
+            .defaultSchema(rootSchema)
+            .operatorTable(sqlStdOperatorTable)
+            .build();
     this.relDataTypeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     Properties properties = new Properties();
     properties.setProperty(CalciteConnectionProperty.CASE_SENSITIVE.camelName(), "true");
-    this.catalogReader = new CalciteCatalogReader(
-      CalciteSchema.from(rootSchema),
-      CalciteSchema.from(rootSchema).path(rootSchema.getName()),
-      relDataTypeFactory,
-      new CalciteConnectionConfigImpl(properties));
-    this.sqlOperatorTable = SqlOperatorTables.chain(frameworkConfig.getOperatorTable(), catalogReader);
-    this.validator = SqlValidatorUtil.newValidator(sqlOperatorTable, catalogReader, relDataTypeFactory, frameworkConfig.getSqlValidatorConfig());
+    this.catalogReader =
+        new CalciteCatalogReader(
+            CalciteSchema.from(rootSchema),
+            CalciteSchema.from(rootSchema).path(rootSchema.getName()),
+            relDataTypeFactory,
+            new CalciteConnectionConfigImpl(properties));
+    this.sqlOperatorTable =
+        SqlOperatorTables.chain(frameworkConfig.getOperatorTable(), catalogReader);
+    this.validator =
+        SqlValidatorUtil.newValidator(
+            sqlOperatorTable,
+            catalogReader,
+            relDataTypeFactory,
+            frameworkConfig.getSqlValidatorConfig());
   }
 
   public SqlSelect validate(String sql) {
@@ -119,7 +126,10 @@ public class HiveSqlValidator {
       LOG.debug("Validated as {}", validatedSqlNode.toSqlString(dialect));
 
       if (validatedSqlNode.getKind() != SqlKind.SELECT) {
-        LOG.warn("Rejected as only SELECT statements are supported; {} → {}.", sql, validatedSqlNode.getKind());
+        LOG.warn(
+            "Rejected as only SELECT statements are supported; {} → {}.",
+            sql,
+            validatedSqlNode.getKind());
         throw new RuntimeException("Only SQL SELECT statements are supported.");
       }
 
@@ -132,7 +142,10 @@ public class HiveSqlValidator {
       }
 
       if (select.getModifierNode(SqlSelectKeyword.STREAM) != null) {
-        LOG.warn("Rejected as streams are not supported; {} → {}.", sql, select.getModifierNode(SqlSelectKeyword.STREAM));
+        LOG.warn(
+            "Rejected as streams are not supported; {} → {}.",
+            sql,
+            select.getModifierNode(SqlSelectKeyword.STREAM));
         throw new RuntimeException("SQL streams are not supported.");
       }
 
@@ -150,14 +163,18 @@ public class HiveSqlValidator {
       }
 
       if (!select.getWindowList().isEmpty() || select.getQualify() != null) {
-        LOG.warn("Rejected as window functions are not supported; {} → {} / {}.", sql, select.getWindowList(), select.getQualify());
+        LOG.warn(
+            "Rejected as window functions are not supported; {} → {} / {}.",
+            sql,
+            select.getWindowList(),
+            select.getQualify());
         throw new RuntimeException("SQL window functions are not supported.");
       }
 
       LOG.trace("- OrderList: " + select.getOrderList());
       LOG.trace("- Fetch: " + select.getFetch());
       LOG.trace("- Offset: " + select.getOffset());
-      //LOG.trace("- OpList: " + select.getOperandList());
+      // LOG.trace("- OpList: " + select.getOperandList());
 
       for (SqlNode n : select.getSelectList().getList()) {
         if (n instanceof SqlIdentifier) {
@@ -169,7 +186,7 @@ public class HiveSqlValidator {
         }
       }
 
-      Map<SqlKind,Integer> count = select.accept(new KindCounterVisitor());
+      Map<SqlKind, Integer> count = select.accept(new KindCounterVisitor());
       LOG.debug("Count: " + count);
       if (count.getOrDefault(SqlKind.SELECT, -1) != 1) {
         LOG.warn("Rejected as multiple selects present; {} → {}.", sql);
