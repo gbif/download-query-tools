@@ -61,9 +61,11 @@ public class HiveSqlValidatorTest {
             "SELECT "
                 + "  \"year\", "
                 + "  gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, "
+                + "  familyKey, "
                 + "  speciesKey, "
                 + "  COUNT(*) AS n, "
-                + "  MIN(COALESCE(coordinateUncertaintyInMeters, 1000)) AS minCoordinateUncertaintyInMeters "
+                + "  MIN(COALESCE(coordinateUncertaintyInMeters, 1000)) AS minCoordinateUncertaintyInMeters, "
+                + "  IF(ISNULL(familyKey), NULL, SUM(COUNT(*)) OVER (PARTITION BY familyKey)) AS familyCount "
                 + "FROM occurrence "
                 + "WHERE "
                 + "  occurrenceStatus = 'PRESENT' "
@@ -86,6 +88,7 @@ public class HiveSqlValidatorTest {
                 + "GROUP BY "
                 + "  \"year\", "
                 + "  eeaCellCode, "
+                + "  familyKey, "
                 + "  speciesKey "
                 + "ORDER BY \"year\" DESC, eeaCellCode ASC, speciesKey ASC"),
         Arguments.of(
@@ -101,11 +104,28 @@ public class HiveSqlValidatorTest {
         Arguments.of(
             "SELECT DISTINCT datasetkey FROM occurrence WHERE array_contains(issue, 'COORDINATE_INVALID')"),
 
+      // Windowing/partitioning needed for B-cubed queries. May as well allow QUALIFY too.
+      Arguments.of(
+        "SELECT datasetkey, COUNT(DISTINCT \"day\"), SUM(COUNT(*)) OVER (PARTITION BY \"month\" ORDER BY datasetkey) "
+          + "FROM occurrence "
+          + "GROUP BY datasetkey, \"month\""),
+      Arguments.of(
+        "SELECT datasetkey, COUNT(DISTINCT \"day\"), SUM(COUNT(*)) OVER (PARTITION BY \"month\" ORDER BY datasetkey) AS month_count "
+          + "FROM occurrence "
+          + "GROUP BY datasetkey, \"month\" "
+          + "QUALIFY month_count > 100"),
+
         // Vocabulary (struct) fields
         Arguments.of(
             "SELECT lifestage.concept, lifestage.lineage, COUNT(*) "
                 + "FROM occurrence WHERE lifestage.concept IS NOT NULL "
                 + "GROUP BY concept, lineage"),
+
+      // Allow having
+        Arguments.of(
+        "SELECT datasetkey, COUNT(*) FROM occurrence "
+          + "GROUP BY datasetkey, countrycode "
+          + "HAVING COUNT(*) > 2"),
 
         // Cope with semicolons at line endings.
         Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
@@ -120,20 +140,6 @@ public class HiveSqlValidatorTest {
         Arguments.of(
             "SELECT datasetkey, COUNT(*) FROM occurrence "
                 + "WHERE countryCode IN (SELECT DISTINCT countryCode FROM occurrence WHERE \"month\" = 12)"),
-        // Block having
-        Arguments.of(
-            "SELECT datasetkey, COUNT(*) FROM occurrence "
-                + "GROUP BY countrycode "
-                + "HAVING COUNT(*) > 2"),
-        // Block partitioning
-        Arguments.of(
-            "SELECT datasetkey, COUNT(DISTINCT \"day\") FROM occurrence "
-                + "GROUP BY datasetkey "
-                + "OVER (PARTITION BY \"month\" ORDER BY datasetkey) = 1"),
-        Arguments.of(
-            "SELECT datasetkey, COUNT(DISTINCT \"day\") FROM occurrence "
-                + "GROUP BY datasetkey "
-                + "QUALIFY ROW_NUMBER() OVER (PARTITION BY \"month\" ORDER BY datasetkey) = 1"),
         // Block query hints
         Arguments.of("SELECT /*+ MAPJOIN(time_dim) */ datasetkey FROM occurrence"),
         // Block joins

@@ -49,6 +49,7 @@ class TestOccurrenceTable extends AbstractTable {
     builder.add("gbifid", SqlTypeName.INTEGER);
     builder.add("datasetkey", SqlTypeName.CHAR);
     builder.add("countrycode", SqlTypeName.CHAR);
+    builder.add("familykey", SqlTypeName.INTEGER);
     builder.add("specieskey", SqlTypeName.INTEGER);
     builder.add("eventdate", SqlTypeName.TIMESTAMP);
     builder.add("year", SqlTypeName.INTEGER);
@@ -95,6 +96,24 @@ class TestOccurrenceTable extends AbstractTable {
             ReturnTypes.BOOLEAN,
             null,
             OperandTypes.family(SqlTypeFamily.ARRAY, SqlTypeFamily.ANY),
+            SqlFunctionCategory.USER_DEFINED_FUNCTION));
+
+    list.add(
+        new SqlFunction(
+            "if",
+            SqlKind.OTHER_FUNCTION,
+            ReturnTypes.BOOLEAN,
+            null,
+            OperandTypes.family(SqlTypeFamily.BOOLEAN, SqlTypeFamily.ANY, SqlTypeFamily.ANY),
+            SqlFunctionCategory.USER_DEFINED_FUNCTION));
+
+    list.add(
+        new SqlFunction(
+            "isnull",
+            SqlKind.OTHER_FUNCTION,
+            ReturnTypes.BOOLEAN,
+            null,
+            OperandTypes.family(SqlTypeFamily.ANY),
             SqlFunctionCategory.USER_DEFINED_FUNCTION));
 
     list.add(

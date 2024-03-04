@@ -134,7 +134,7 @@ public class HiveSqlValidator {
       }
 
       SqlSelect select = (SqlSelect) validatedSqlNode;
-      LOG.trace("- Operator: " + select.getOperator());
+      LOG.trace("- Operator: {}", select.getOperator());
 
       if (select.hasHints()) {
         LOG.warn("Rejected as hints supported; {} → {}.", sql, select.getHints());
@@ -149,31 +149,19 @@ public class HiveSqlValidator {
         throw new RuntimeException("SQL streams are not supported.");
       }
 
-      LOG.trace("- ModNod-ALL: " + select.getModifierNode(SqlSelectKeyword.ALL));
-      LOG.trace("- ModNod-DISTINCT: " + select.getModifierNode(SqlSelectKeyword.DISTINCT));
+      LOG.trace("- ModNod-ALL: {}", select.getModifierNode(SqlSelectKeyword.ALL));
+      LOG.trace("- ModNod-DISTINCT: {}", select.getModifierNode(SqlSelectKeyword.DISTINCT));
 
-      LOG.trace("- SelectList: " + select.getSelectList());
-      LOG.trace("- From: " + select.getFrom());
-      LOG.trace("- Where: " + select.getWhere());
-      LOG.trace("- Group: " + select.getGroup());
-
-      if (select.getHaving() != null) {
-        LOG.warn("Rejected as having clauses are not supported; {} → {}.", sql, select.getHaving());
-        throw new RuntimeException("SQL having clauses are not supported.");
-      }
-
-      if (!select.getWindowList().isEmpty() || select.getQualify() != null) {
-        LOG.warn(
-            "Rejected as window functions are not supported; {} → {} / {}.",
-            sql,
-            select.getWindowList(),
-            select.getQualify());
-        throw new RuntimeException("SQL window functions are not supported.");
-      }
-
-      LOG.trace("- OrderList: " + select.getOrderList());
-      LOG.trace("- Fetch: " + select.getFetch());
-      LOG.trace("- Offset: " + select.getOffset());
+      LOG.trace("- SelectList: {}", select.getSelectList());
+      LOG.trace("- From: {}", select.getFrom());
+      LOG.trace("- Where: {}", select.getWhere());
+      LOG.trace("- Group: {}", select.getGroup());
+      LOG.trace("- Having: {}", select.getHaving());
+      LOG.trace("- WindowList: {}", select.getWindowList());
+      LOG.trace("- Qualify: {}", select.getQualify());
+      LOG.trace("- OrderList: {}", select.getOrderList());
+      LOG.trace("- Fetch: {}", select.getFetch());
+      LOG.trace("- Offset: {}", select.getOffset());
       // LOG.trace("- OpList: " + select.getOperandList());
 
       for (SqlNode n : select.getSelectList().getList()) {
