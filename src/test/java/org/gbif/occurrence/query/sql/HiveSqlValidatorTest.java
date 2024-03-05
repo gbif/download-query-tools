@@ -104,28 +104,17 @@ public class HiveSqlValidatorTest {
         Arguments.of(
             "SELECT DISTINCT datasetkey FROM occurrence WHERE array_contains(issue, 'COORDINATE_INVALID')"),
 
-      // Windowing/partitioning needed for B-cubed queries. May as well allow QUALIFY too.
-      Arguments.of(
-        "SELECT datasetkey, COUNT(DISTINCT \"day\"), SUM(COUNT(*)) OVER (PARTITION BY \"month\" ORDER BY datasetkey) "
-          + "FROM occurrence "
-          + "GROUP BY datasetkey, \"month\""),
-      Arguments.of(
-        "SELECT datasetkey, COUNT(DISTINCT \"day\"), SUM(COUNT(*)) OVER (PARTITION BY \"month\" ORDER BY datasetkey) AS month_count "
-          + "FROM occurrence "
-          + "GROUP BY datasetkey, \"month\" "
-          + "QUALIFY month_count > 100"),
+        // Windowing/partitioning needed for B-cubed queries.
+        Arguments.of(
+            "SELECT datasetkey, COUNT(DISTINCT \"day\"), SUM(COUNT(*)) OVER (PARTITION BY \"month\" ORDER BY datasetkey) "
+                + "FROM occurrence "
+                + "GROUP BY datasetkey, \"month\""),
 
         // Vocabulary (struct) fields
         Arguments.of(
             "SELECT lifestage.concept, lifestage.lineage, COUNT(*) "
                 + "FROM occurrence WHERE lifestage.concept IS NOT NULL "
                 + "GROUP BY concept, lineage"),
-
-      // Allow having
-        Arguments.of(
-        "SELECT datasetkey, COUNT(*) FROM occurrence "
-          + "GROUP BY datasetkey, countrycode "
-          + "HAVING COUNT(*) > 2"),
 
         // Cope with semicolons at line endings.
         Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
@@ -167,6 +156,21 @@ public class HiveSqlValidatorTest {
         Arguments.of("UPDATE occurrence SET datasetkey = 'AOEU'"),
         Arguments.of("TRUNCATE occurrence"),
         Arguments.of("DROP TABLE occurrence"),
+
+        // Block having, due to citation difficulty.
+        Arguments.of(
+            "SELECT datasetkey, COUNT(*) FROM occurrence "
+                + "GROUP BY datasetkey, countrycode "
+                + "HAVING COUNT(*) > 2"),
+        // Block qualify for the same reason
+        Arguments.of(
+            "SELECT datasetkey, COUNT(DISTINCT \"day\"), SUM(COUNT(*)) OVER (PARTITION BY \"month\" ORDER BY datasetkey) AS month_count "
+                + "FROM occurrence "
+                + "GROUP BY datasetkey, \"month\" "
+                + "QUALIFY month_count > 100"),
+
+        // SQL array constructor, not supported by Hive
+        Arguments.of("SELECT DISTINCT datasetkey FROM occurrence WHERE issue = array['ZERO_COORDINATE']"),
 
         // Block incorrect table and column names, commands and syntax
         Arguments.of("SELECT datasetkey FROM wrongTable occurrence"),

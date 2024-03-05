@@ -156,9 +156,22 @@ public class HiveSqlValidator {
       LOG.trace("- From: {}", select.getFrom());
       LOG.trace("- Where: {}", select.getWhere());
       LOG.trace("- Group: {}", select.getGroup());
-      LOG.trace("- Having: {}", select.getHaving());
+
+      if (select.getHaving() != null) {
+        LOG.warn("Rejected as having clauses are not supported; {} → {}.", sql, select.getHaving());
+        throw new RuntimeException("SQL having clauses are not supported.");
+      }
+
       LOG.trace("- WindowList: {}", select.getWindowList());
-      LOG.trace("- Qualify: {}", select.getQualify());
+
+      if (select.getQualify() != null) {
+        LOG.warn(
+          "SQL qualify clauses are not supported; {} → {}.",
+          sql,
+          select.getQualify());
+        throw new RuntimeException("SQL qualify clauses are not supported.");
+      }
+
       LOG.trace("- OrderList: {}", select.getOrderList());
       LOG.trace("- Fetch: {}", select.getFetch());
       LOG.trace("- Offset: {}", select.getOffset());
@@ -184,6 +197,11 @@ public class HiveSqlValidator {
       if (count.getOrDefault(SqlKind.JOIN, 0) > 0) {
         LOG.warn("Rejected as joins present; {} → {}.", sql);
         throw new RuntimeException("Joins are not supported.");
+      }
+
+      if (count.getOrDefault(SqlKind.ARRAY_VALUE_CONSTRUCTOR, 0) > 0) {
+        LOG.warn("Rejected as arrays must use array('value') syntax; {} → {}.", sql);
+        throw new RuntimeException("Array constructors should use array(), not array[].");
       }
 
       // Validate WKT strings.
