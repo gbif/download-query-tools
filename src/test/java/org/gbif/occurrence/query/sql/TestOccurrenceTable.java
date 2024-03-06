@@ -15,6 +15,7 @@ package org.gbif.occurrence.query.sql;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.apache.calcite.rel.type.RelDataType;
@@ -26,6 +27,9 @@ import org.apache.calcite.sql.SqlFunction;
 import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.SqlOperatorTable;
+import org.apache.calcite.sql.fun.SqlLibrary;
+import org.apache.calcite.sql.fun.SqlLibraryOperatorTableFactory;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.type.ReturnTypes;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
@@ -88,6 +92,11 @@ class TestOccurrenceTable extends AbstractTable {
 
   public List<SqlOperator> additionalOperators() {
     List<SqlOperator> list = new ArrayList<>();
+
+    SqlOperatorTable opTab =
+      SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(
+        EnumSet.of(SqlLibrary.HIVE));
+    list.addAll(opTab.getOperatorList());
 
     list.add(
         new SqlFunction(

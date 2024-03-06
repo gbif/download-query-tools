@@ -13,12 +13,6 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
@@ -26,7 +20,6 @@ import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
-import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -51,6 +44,12 @@ import org.apache.calcite.tools.Frameworks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
 
@@ -67,6 +66,7 @@ public class HiveSqlValidator {
   private final SqlValidator validator;
 
   public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
+    //dialect = SqlDialect.DatabaseProduct.HIVE.getDialect();
     dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
 
     parserConfig =
@@ -81,8 +81,10 @@ public class HiveSqlValidator {
             .withConformance(SqlConformanceEnum.LENIENT)
             .withColumnReferenceExpansion(false);
 
-    // Custom functions
     SqlStdOperatorTable sqlStdOperatorTable = SqlStdOperatorTable.instance();
+    // Built-in Hive functions
+    HiveSqlOperatorTable.instance().getAdditionalOperators().stream().forEach(sqlStdOperatorTable::register);
+    // Custom functions
     additionalOperators.stream().forEach(sqlStdOperatorTable::register);
 
     this.rootSchema = rootSchema;
@@ -93,7 +95,7 @@ public class HiveSqlValidator {
             .defaultSchema(rootSchema)
             .operatorTable(sqlStdOperatorTable)
             .build();
-    this.relDataTypeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
+    this.relDataTypeFactory = new SqlTypeFactoryImpl(dialect.getTypeSystem());
     Properties properties = new Properties();
     properties.setProperty(CalciteConnectionProperty.CASE_SENSITIVE.camelName(), "true");
     this.catalogReader =

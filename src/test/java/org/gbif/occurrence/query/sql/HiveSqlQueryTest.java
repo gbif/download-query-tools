@@ -51,7 +51,7 @@ public class HiveSqlQueryTest {
     return Stream.of(
         Arguments.of(
             "SELECT "
-                + "  \"year\", "
+                + "  CONCAT_WS('-', \"year\", \"month\") AS yearMonth, "
                 + "  gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eeaCellCode, "
                 + // with AS
                 "  occurrence.speciesKey, "
@@ -79,7 +79,7 @@ public class HiveSqlQueryTest {
                 + "  AND \"year\" > 1000 "
                 + "  AND hasCoordinate "
                 + "GROUP BY "
-                + "  \"year\", "
+                + "  \"year\", \"month\", "
                 + "  eeaCellCode, "
                 + "  speciesKey "
                 + "ORDER BY \"year\" DESC, eeaCellCode ASC, speciesKey ASC",
@@ -102,7 +102,7 @@ public class HiveSqlQueryTest {
                     + "  AND occurrence.hascoordinate")
                 .replaceAll(" +", " "),
             Arrays.asList(
-                "year",
+                "yearmonth",
                 "eeacellcode",
                 "specieskey",
                 "COUNT(*)",
@@ -137,6 +137,20 @@ public class HiveSqlQueryTest {
                 "EXTRACT(HOUR FROM eventdate)",
                 "CAST(gbifid AS CHAR)",
                 "GBIF_EEACELLCODE(1000, decimallatitude, decimallongitude, CASE WHEN coordinateuncertaintyinmeters IS NOT NULL THEN coordinateuncertaintyinmeters ELSE 1000 END)")),
+
+        // Check functions (to fit the other tests, put them in the WHERE clause).
+        Arguments.of(
+              "SELECT gbifid FROM occurrence \n"
+                + "WHERE gbifid > 10000 AND (-gbifid) > 10 AND countrycode IS NULL AND \n"
+                + "gbifid * 2 > 1 AND round(decimallatitude, 1) > 1 AND hour(eventdate) > 1 AND CAST(gbifid AS char) = 'X' AND \n"
+                + "gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) IS NOT NULL \n"
+                + "AND countryCode = 'DK' and \"month\" > \"day\" AND "
+                + "PRINTF('%04d-%02d', \"year\", \"month\") = '2024-03'",
+            "occurrence.gbifid > 10000 AND - occurrence.gbifid > 10 AND occurrence.countrycode IS NULL AND occurrence.gbifid * 2 > 1 AND "
+                + "ROUND(occurrence.decimallatitude, 1) > 1 AND EXTRACT(HOUR FROM occurrence.eventdate) > 1 AND CAST(occurrence.gbifid AS CHAR) = 'X' "
+                + "AND GBIF_EEACELLCODE(1000, occurrence.decimallatitude, occurrence.decimallongitude, CASE WHEN occurrence.coordinateuncertaintyinmeters IS NOT NULL THEN occurrence.coordinateuncertaintyinmeters ELSE 1000 END) IS NOT NULL "
+                + "AND occurrence.countrycode = 'DK' AND occurrence.month > occurrence.day AND PRINTF('%04d-%02d', occurrence.year, occurrence.month) = '2024-03'",
+            Arrays.asList("gbifid")),
 
         // No where clause
         Arguments.of("SELECT gbifid FROM occurrence", "1 = 1", Arrays.asList("gbifid")));
