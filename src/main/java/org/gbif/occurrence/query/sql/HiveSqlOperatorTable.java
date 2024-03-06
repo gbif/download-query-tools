@@ -11,7 +11,6 @@ import org.apache.calcite.sql.SqlSyntax;
 import org.apache.calcite.sql.fun.SqlDatePartFunction;
 import org.apache.calcite.sql.fun.SqlLibrary;
 import org.apache.calcite.sql.fun.SqlLibraryOperatorTableFactory;
-import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.InferTypes;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.type.ReturnTypes;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import static org.apache.calcite.sql.fun.SqlLibraryOperators.ARRAY;
 import static org.apache.calcite.sql.fun.SqlLibraryOperators.ARRAY_CONTAINS;
 import static org.apache.calcite.sql.fun.SqlLibraryOperators.ARRAY_SIZE;
 import static org.apache.calcite.sql.fun.SqlLibraryOperators.CHR;
@@ -62,6 +62,9 @@ public class HiveSqlOperatorTable {
       SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(
         EnumSet.of(SqlLibrary.HIVE));
     additionalOperators.addAll(opTab.getOperatorList());
+
+    // Complex type constructors
+    additionalOperators.add(ARRAY);
 
     // Mathematical functions
     final SqlFunction LOG2 =
@@ -385,12 +388,11 @@ public class HiveSqlOperatorTable {
     additionalOperators.add(AES_ENCRYPT);
     additionalOperators.add(AES_ENCRYPT.withName("AES_DECRYPT"));
 
-/*    // Aggregate functions
+    // Aggregate functions
 
     // Table-generating functions
 
     // Utility functions
-*/
   }
 
   public List<SqlOperator> getAdditionalOperators() {

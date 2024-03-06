@@ -13,13 +13,13 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import java.util.stream.Stream;
-
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.tools.Frameworks;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -169,7 +169,13 @@ public class HiveSqlValidatorTest {
       Arguments.of("SELECT 'a' || 'b' FROM occurrence;"),
 
       // Complex type constructors
-      //Arguments.of("SELECT MAP('x', 'y'), STRUCT('x', 'y'), NAMED_STRUCT('x', 'y'), ARRAY('a'), CREATE_UNION('a', 'b') FROM occurrence;"),
+      Arguments.of("SELECT " +
+        //"MAP('x', 'y') " +
+        //"STRUCT('x', 'y'), " +
+        //"NAMED_STRUCT('x', 'y'), " +
+        "ARRAY('a') " +
+        //"CREATE_UNION('a', 'b') " +
+        "FROM occurrence;"),
 
       // Operators on complex types (not done: map[key])
       Arguments.of("SELECT issue[0], lifestage.concept FROM occurrence;"),
@@ -229,10 +235,33 @@ public class HiveSqlValidatorTest {
 
       // Misc functions
       Arguments.of("SELECT HASH('x'), MD5('A'), SHA1('A'), SHA2('A'), CRC32('A'), " +
-        "AES_ENCRYPT('A', 'A'), AES_DECRYPT('A', 'B') FROM occurrence")
+        "AES_ENCRYPT('A', 'A'), AES_DECRYPT('A', 'B') FROM occurrence"),
 
-      // TODO: Aggregate functions.
-
+      // Aggregate functions.
+      Arguments.of("SELECT "
+        + "COUNT(datasetkey), "
+        + "COUNT(DISTINCT datasetkey, decimallatitude), "
+        + "SUM(decimallatitude), "
+        + "SUM(DISTINCT decimallatitude), "
+        + "AVG(decimallatitude), "
+        + "AVG(DISTINCT decimallatitude), "
+        + "MIN(decimallatitude), "
+        + "MAX(decimallatitude), "
+        + "VARIANCE(decimallatitude), "
+        + "VAR_SAMP(decimallatitude), "
+        + "STDDEV_POP(decimallatitude), "
+        + "STDDEV_SAMP(decimallatitude), "
+        + "COVAR_POP(decimallatitude, decimallongitude), "
+        + "COVAR_SAMP(decimallatitude, decimallongitude) "
+        //+ "CORR(decimallatitude, decimallongitude), "
+        //+ "PERCENTILE(\"year\", array(25, 50, 75)), "
+        //+ "PERCENTILE_APPROX(decimallatitude, 50), "
+        //+ "PERCENTILE_APPROX(decimallatitude, array(25, 50, 75)), "
+        //+ "HISTOGRAM_NUMERIC(decimallatitude, 5), "
+        //+ "COLLECT_SET(decimallatitude), "
+        //+ "COLLECT_LIST(decimallatitude), "
+        //+ "NTILE(5) "
+        + "FROM occurrence")
     );
   }
 
@@ -291,7 +320,6 @@ public class HiveSqlValidatorTest {
         Arguments.of("WRONGCOMMAND datasetkey FROM occurrence"),
         Arguments.of("FROM occurrence SELECT datasetkey"),
         Arguments.of("SELECT datasetkey FROM occurrence; SELECT datasetkey FROM occurrence")
-    //    Arguments.of("SELECT CURRENT_USER FROM occurrence")
     );
 
     // TODO: Block GROUP BY gbifid
@@ -318,9 +346,24 @@ public class HiveSqlValidatorTest {
 
       Arguments.of("SELECT VERSION() FROM occurrence", "No match found for function signature version"),
 
-      Arguments.of("SELECT SURROGATE_KEY() FROM occurrence", "No match found for function signature surrogate_key")
+      Arguments.of("SELECT BUILDVERSION() FROM occurrence", "No match found for function signature buildversion"),
 
-      // TODO version, buildversion, explode and other UDTFs.
+      // Table-Generating Functions (UDTF)
+      Arguments.of("SELECT SURROGATE_KEY() FROM occurrence", "No match found for function signature surrogate_key"),
+
+      Arguments.of("SELECT EXPLODE(issue) FROM occurrence", "No match found for function signature explode"),
+
+      //Arguments.of("SELECT EXPLODE(map_type?) FROM occurrence", "No match found for function signature explode"),
+
+      Arguments.of("SELECT POSEXPLODE(issue) FROM occurrence", "No match found for function signature posexplode"),
+
+      Arguments.of("SELECT INLINE(issue) FROM occurrence", "No match found for function signature inline"),
+
+      Arguments.of("SELECT STACK(2, 'a', 'b') FROM occurrence", "No match found for function signature stack"),
+
+      Arguments.of("SELECT JSON_TUPLE('{}', 'a') FROM occurrence", "No match found for function signature json_tuple"),
+
+      Arguments.of("SELECT PARSE_URL_TUPLE('x', 'HOST') FROM occurrence", "No match found for function signature parse_url_tuple")
     );
   }
 }
