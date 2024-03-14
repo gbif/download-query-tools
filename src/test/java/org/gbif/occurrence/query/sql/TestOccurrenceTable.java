@@ -94,8 +94,7 @@ class TestOccurrenceTable extends AbstractTable {
     List<SqlOperator> list = new ArrayList<>();
 
     SqlOperatorTable opTab =
-      SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(
-        EnumSet.of(SqlLibrary.HIVE));
+        SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(EnumSet.of(SqlLibrary.HIVE));
     list.addAll(opTab.getOperatorList());
 
     list.add(

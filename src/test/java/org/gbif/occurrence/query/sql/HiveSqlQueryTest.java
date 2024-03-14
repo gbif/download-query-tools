@@ -140,7 +140,7 @@ public class HiveSqlQueryTest {
 
         // Check functions (to fit the other tests, put them in the WHERE clause).
         Arguments.of(
-              "SELECT gbifid FROM occurrence \n"
+            "SELECT gbifid FROM occurrence \n"
                 + "WHERE gbifid > 10000 AND (-gbifid) > 10 AND countrycode IS NULL AND \n"
                 + "gbifid * 2 > 1 AND round(decimallatitude, 1) > 1 AND hour(eventdate) > 1 AND CAST(gbifid AS char) = 'X' AND \n"
                 + "gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) IS NOT NULL \n"

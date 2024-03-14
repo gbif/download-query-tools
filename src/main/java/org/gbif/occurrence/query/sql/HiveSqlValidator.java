@@ -66,7 +66,7 @@ public class HiveSqlValidator {
   private final SqlValidator validator;
 
   public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
-    //dialect = SqlDialect.DatabaseProduct.HIVE.getDialect();
+    // dialect = SqlDialect.DatabaseProduct.HIVE.getDialect();
     dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
 
     parserConfig =
@@ -83,7 +83,8 @@ public class HiveSqlValidator {
 
     SqlStdOperatorTable sqlStdOperatorTable = SqlStdOperatorTable.instance();
     // Built-in Hive functions
-    HiveSqlOperatorTable.instance().getAdditionalOperators().stream().forEach(sqlStdOperatorTable::register);
+    HiveSqlOperatorTable.instance().getAdditionalOperators().stream()
+        .forEach(sqlStdOperatorTable::register);
     // Custom functions
     additionalOperators.stream().forEach(sqlStdOperatorTable::register);
 
@@ -167,10 +168,7 @@ public class HiveSqlValidator {
       LOG.trace("- WindowList: {}", select.getWindowList());
 
       if (select.getQualify() != null) {
-        LOG.warn(
-          "SQL qualify clauses are not supported; {} → {}.",
-          sql,
-          select.getQualify());
+        LOG.warn("SQL qualify clauses are not supported; {} → {}.", sql, select.getQualify());
         throw new RuntimeException("SQL qualify clauses are not supported.");
       }
 

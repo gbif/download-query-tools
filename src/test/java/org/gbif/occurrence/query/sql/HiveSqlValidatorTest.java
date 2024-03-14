@@ -150,119 +150,131 @@ public class HiveSqlValidatorTest {
 
   private static Stream<Arguments> provideStringsForHiveBuiltInFunctions() {
     return Stream.of(
-      // Relational operators
-      // Not included: gbifid == gbifid, gbifid <=> gbifid, gbifid RLIKE 'x', gbifid REGEXP 'x'
-      Arguments.of("SELECT gbifid = gbifid, gbifid <> gbifid, \n" +
-        "gbifid != gbifid, gbifid < gbifid, gbifid <= gbifid, gbifid > gbifid, gbifid >= gbifid, \n" +
-        "gbifid NOT BETWEEN 1 AND 2, gbifid IS NULL, gbifid IS NOT NULL, TRUE IS TRUE, gbifid LIKE 'abcd%' \n" +
-        " FROM occurrence;"),
+        // Relational operators
+        // Not included: gbifid == gbifid, gbifid <=> gbifid, gbifid RLIKE 'x', gbifid REGEXP 'x'
+        Arguments.of(
+            "SELECT gbifid = gbifid, gbifid <> gbifid, \n"
+                + "gbifid != gbifid, gbifid < gbifid, gbifid <= gbifid, gbifid > gbifid, gbifid >= gbifid, \n"
+                + "gbifid NOT BETWEEN 1 AND 2, gbifid IS NULL, gbifid IS NOT NULL, TRUE IS TRUE, gbifid LIKE 'abcd%' \n"
+                + " FROM occurrence;"),
 
-      // Arithmetic operators
-      // Not included: 1 DIV 1, 1 & 1, 1 | 1, 1 ^ 1, ~1
-      Arguments.of("SELECT 1 + 1, 1 - 1, 1 * 1, 1 / 1, 1 % 1 FROM occurrence;"),
+        // Arithmetic operators
+        // Not included: 1 DIV 1, 1 & 1, 1 | 1, 1 ^ 1, ~1
+        Arguments.of("SELECT 1 + 1, 1 - 1, 1 * 1, 1 / 1, 1 % 1 FROM occurrence;"),
 
-      // Logical operators
-      // Not included: ! TRUE,
-      Arguments.of("SELECT TRUE AND TRUE, TRUE OR TRUE, NOT TRUE, gbifid IN('1234', '5678') FROM occurrence;"),
+        // Logical operators
+        // Not included: ! TRUE,
+        Arguments.of(
+            "SELECT TRUE AND TRUE, TRUE OR TRUE, NOT TRUE, gbifid IN('1234', '5678') FROM occurrence;"),
 
-      // String operators
-      Arguments.of("SELECT 'a' || 'b' FROM occurrence;"),
+        // String operators
+        Arguments.of("SELECT 'a' || 'b' FROM occurrence;"),
 
-      // Complex type constructors
-      Arguments.of("SELECT " +
-        //"MAP('x', 'y') " +
-        //"STRUCT('x', 'y'), " +
-        //"NAMED_STRUCT('x', 'y'), " +
-        "ARRAY('a') " +
-        //"CREATE_UNION('a', 'b') " +
-        "FROM occurrence;"),
+        // Complex type constructors
+        Arguments.of(
+            "SELECT "
+                +
+                // "MAP('x', 'y') " +
+                // "STRUCT('x', 'y'), " +
+                // "NAMED_STRUCT('x', 'y'), " +
+                "ARRAY('a') "
+                +
+                // "CREATE_UNION('a', 'b') " +
+                "FROM occurrence;"),
 
-      // Operators on complex types (not done: map[key])
-      Arguments.of("SELECT issue[0], lifestage.concept FROM occurrence;"),
+        // Operators on complex types (not done: map[key])
+        Arguments.of("SELECT issue[0], lifestage.concept FROM occurrence;"),
 
-      // Mathematical functions
-      // Not included: WIDTH_BUCKET(10, 50, 80, 15)
-      // Not our Hive: BROUND(decimalLatitude), BROUND(decimalLatitude, 2),
-      Arguments.of("SELECT ROUND(decimalLatitude), ROUND(decimalLatitude, 2), \n" +
-        "FLOOR(decimalLatitude), ceil(decimalLatitude), CEILING(decimalLatitude), \n" +
-        "RAND(), RAND(1234), EXP(2.0), LN(2.7), LOG10(100), LOG2(64), POWER(2, 3), SQRT(81), HEX(63), \n" +
-        "UNHEX('A'), CONV(32, 10, 16), CONV('32', 10, 16), ABS(-1), SIN(3.141/2), ASIN(0.5), COS(3.141/2), ACOS(0.5), \n" +
-        "TAN(3.141/2), ATAN(0.5), DEGREES(3.141/2), RADIANS(180), POSITIVE(-1), NEGATIVE(1), SIGN(-1), E(), PI(), \n" +
-        "FACTORIAL(6), CBRT(27), SHIFTLEFT(2, 2), SHIFTRIGHT(2, 2), SHIFTRIGHTUNSIGNED(2, 2), GREATEST(1, 2), \n" +
-        "LEAST(1, 2) FROM occurrence"),
+        // Mathematical functions
+        // Not included: WIDTH_BUCKET(10, 50, 80, 15)
+        // Not our Hive: BROUND(decimalLatitude), BROUND(decimalLatitude, 2),
+        Arguments.of(
+            "SELECT ROUND(decimalLatitude), ROUND(decimalLatitude, 2), \n"
+                + "FLOOR(decimalLatitude), ceil(decimalLatitude), CEILING(decimalLatitude), \n"
+                + "RAND(), RAND(1234), EXP(2.0), LN(2.7), LOG10(100), LOG2(64), POWER(2, 3), SQRT(81), HEX(63), \n"
+                + "UNHEX('A'), CONV(32, 10, 16), CONV('32', 10, 16), ABS(-1), SIN(3.141/2), ASIN(0.5), COS(3.141/2), ACOS(0.5), \n"
+                + "TAN(3.141/2), ATAN(0.5), DEGREES(3.141/2), RADIANS(180), POSITIVE(-1), NEGATIVE(1), SIGN(-1), E(), PI(), \n"
+                + "FACTORIAL(6), CBRT(27), SHIFTLEFT(2, 2), SHIFTRIGHT(2, 2), SHIFTRIGHTUNSIGNED(2, 2), GREATEST(1, 2), \n"
+                + "LEAST(1, 2) FROM occurrence"),
 
-      // Collection functions (TODO: Maps)
-      Arguments.of("SELECT size(issue), array_contains(issue, 'A'), sort_array(issue) FROM occurrence"),
+        // Collection functions (TODO: Maps)
+        Arguments.of(
+            "SELECT size(issue), array_contains(issue, 'A'), sort_array(issue) FROM occurrence"),
 
-      // Type conversion functions
-      // Not included: BINARY('A'),
-      Arguments.of("SELECT CAST('1' AS BIGINT) FROM occurrence"),
+        // Type conversion functions
+        // Not included: BINARY('A'),
+        Arguments.of("SELECT CAST('1' AS BIGINT) FROM occurrence"),
 
-      // Date functions
-      Arguments.of("SELECT FROM_UNIXTIME(0), FROM_UNIXTIME(0, 'uuuu-MM-dd'), UNIX_TIMESTAMP(), \n" +
-        "UNIX_TIMESTAMP('2024-03-05 15:13:00'), UNIX_TIMESTAMP('2024-03-05', 'uuuu-MM-dd'), TO_DATE('2024-03-05 15:13:00'), \n" +
-        "YEAR(CAST('2024-03-05 15:13:00' AS DATE)), QUARTER(CAST('2024-03-05 15:13:00' AS DATE)), MONTH(CAST('2024-03-05 15:13:00' AS DATE)), \n" +
-        "DAYOFMONTH(CAST('2024-03-05 15:13:00' AS DATE)), HOUR(CAST('2024-03-05 15:13:00' AS DATE)), \n" +
-        "MINUTE(CAST('2024-03-05 15:13:00' AS DATE)), SECOND(CAST('2024-03-05 15:13:00' AS DATE)), WEEKOFYEAR(CAST('2024-03-05 15:13:00' AS DATE)), \n" +
-        "EXTRACT(month FROM CAST('2024-03-05' AS DATE)), " +
-        "DATEDIFF('2024-03-05 15:13:00', '2024-03-05 15:13:00'), \n" +
-        "DATE_ADD('2024-03-05 15:13:00', 1), DATE_SUB('2024-03-05 15:13:00', 1), FROM_UTC_TIMESTAMP(1, 'UTC'), \n" +
-        "TO_UTC_TIMESTAMP('2024-03-05 15:13:00', 'Z'), CURRENT_DATE(), CURRENT_TIMESTAMP(), ADD_MONTHS('2024-03-05 15:13:00', 1), \n" +
-        "LAST_DAY(CAST('2024-03-05' AS DATE)), NEXT_DAY('2024-03-05 15:13:00', 'TU'), TRUNC('2024-03-05 15:13:00', 'MM'), \n" +
-        "MONTHS_BETWEEN('2024-03-05 15:13:00', '2024-03-05 15:13:00'), DATE_FORMAT('2024-03-05 15:13:00', 'D') FROM occurrence"),
+        // Date functions
+        Arguments.of(
+            "SELECT FROM_UNIXTIME(0), FROM_UNIXTIME(0, 'uuuu-MM-dd'), UNIX_TIMESTAMP(), \n"
+                + "UNIX_TIMESTAMP('2024-03-05 15:13:00'), UNIX_TIMESTAMP('2024-03-05', 'uuuu-MM-dd'), TO_DATE('2024-03-05 15:13:00'), \n"
+                + "YEAR(CAST('2024-03-05 15:13:00' AS DATE)), QUARTER(CAST('2024-03-05 15:13:00' AS DATE)), MONTH(CAST('2024-03-05 15:13:00' AS DATE)), \n"
+                + "DAYOFMONTH(CAST('2024-03-05 15:13:00' AS DATE)), HOUR(CAST('2024-03-05 15:13:00' AS DATE)), \n"
+                + "MINUTE(CAST('2024-03-05 15:13:00' AS DATE)), SECOND(CAST('2024-03-05 15:13:00' AS DATE)), WEEKOFYEAR(CAST('2024-03-05 15:13:00' AS DATE)), \n"
+                + "EXTRACT(month FROM CAST('2024-03-05' AS DATE)), "
+                + "DATEDIFF('2024-03-05 15:13:00', '2024-03-05 15:13:00'), \n"
+                + "DATE_ADD('2024-03-05 15:13:00', 1), DATE_SUB('2024-03-05 15:13:00', 1), FROM_UTC_TIMESTAMP(1, 'UTC'), \n"
+                + "TO_UTC_TIMESTAMP('2024-03-05 15:13:00', 'Z'), CURRENT_DATE(), CURRENT_TIMESTAMP(), ADD_MONTHS('2024-03-05 15:13:00', 1), \n"
+                + "LAST_DAY(CAST('2024-03-05' AS DATE)), NEXT_DAY('2024-03-05 15:13:00', 'TU'), TRUNC('2024-03-05 15:13:00', 'MM'), \n"
+                + "MONTHS_BETWEEN('2024-03-05 15:13:00', '2024-03-05 15:13:00'), DATE_FORMAT('2024-03-05 15:13:00', 'D') FROM occurrence"),
 
-      // Conditional functions
-      Arguments.of("SELECT IF(true, 1, 2), ISNULL(1), ISNOTNULL(1), NVL(1, 2), COALESCE(NULL, 1), \n" +
-        "CASE gbifid WHEN '1' THEN 2 ELSE 3 END, CASE WHEN TRUE THEN 2 ELSE 3 END, NULLIF(1, 2), \n" +
-        "ASSERT_TRUE(true) FROM occurrence"),
+        // Conditional functions
+        Arguments.of(
+            "SELECT IF(true, 1, 2), ISNULL(1), ISNOTNULL(1), NVL(1, 2), COALESCE(NULL, 1), \n"
+                + "CASE gbifid WHEN '1' THEN 2 ELSE 3 END, CASE WHEN TRUE THEN 2 ELSE 3 END, NULLIF(1, 2), \n"
+                + "ASSERT_TRUE(true) FROM occurrence"),
 
-      // String functions
-      // Not included: CONTEXT_NGRAMS(...), NGRAMS()
-      Arguments.of("SELECT ASCII('x'), BASE64('x'), CHARACTER_LENGTH('X'), CHR(60), CONCAT('A', 'B'), " +
-        "CONCAT_WS('-', 'A', 'B'), CONCAT_WS(' ', issue), DECODE('A', 'UTF-8'), ELT(2,'HELLO','WORLD'), " +
-        "ENCODE('A', 'UTF-8'), FIELD('WORLD', 'SAY', 'HELLO', 'WORLD'), FIND_IN_SET('ab', 'abc,b,ab,c,def'), " +
-        "FORMAT_NUMBER(1000, '#,###'), GET_JSON_OBJECT('{}', '.'), IN_FILE('A', '/A/B'), INSTR('A', 'CAT'), " +
-        "LENGTH('AOEU'), LOCATE('A', 'ABCDABCD', 2), LOWER('AOEU'), LPAD('A', 1, ' '), LTRIM('A '), " +
-        "OCTET_LENGTH('AOEU'), PARSE_URL('a', 'a', 'a'), PRINTF('Y', 'X'), QUOTE('A'), REGEXP_EXTRACT('abc', 'a(b)c', 1), " +
-        "REGEXP_REPLACE('abc', 'b', ''), REPEAT('a', 3), REPLACE('a', 'a', 'b'), REVERSE('abc'), RPAD('s', 1, ' '), " +
-        "RTRIM(' a '), SPACE(4), SPLIT('a,b', ','), SUBSTR('abc', 1), SUBSTRING('abc', 1), SUBSTRING_INDEX('abc', 'b', 1), " +
-        "TRANSLATE('a', 'b', 'c'), TRIM(' a '), UNBASE64('6'), UPPER('abcd'), INITCAP('ab cd'), LEVENSHTEIN('cat', 'mat')," +
-        "SOUNDEX('mouse') FROM occurrence;"),
+        // String functions
+        // Not included: CONTEXT_NGRAMS(...), NGRAMS()
+        Arguments.of(
+            "SELECT ASCII('x'), BASE64('x'), CHARACTER_LENGTH('X'), CHR(60), CONCAT('A', 'B'), "
+                + "CONCAT_WS('-', 'A', 'B'), CONCAT_WS(' ', issue), DECODE('A', 'UTF-8'), ELT(2,'HELLO','WORLD'), "
+                + "ENCODE('A', 'UTF-8'), FIELD('WORLD', 'SAY', 'HELLO', 'WORLD'), FIND_IN_SET('ab', 'abc,b,ab,c,def'), "
+                + "FORMAT_NUMBER(1000, '#,###'), GET_JSON_OBJECT('{}', '.'), IN_FILE('A', '/A/B'), INSTR('A', 'CAT'), "
+                + "LENGTH('AOEU'), LOCATE('A', 'ABCDABCD', 2), LOWER('AOEU'), LPAD('A', 1, ' '), LTRIM('A '), "
+                + "OCTET_LENGTH('AOEU'), PARSE_URL('a', 'a', 'a'), PRINTF('Y', 'X'), QUOTE('A'), REGEXP_EXTRACT('abc', 'a(b)c', 1), "
+                + "REGEXP_REPLACE('abc', 'b', ''), REPEAT('a', 3), REPLACE('a', 'a', 'b'), REVERSE('abc'), RPAD('s', 1, ' '), "
+                + "RTRIM(' a '), SPACE(4), SPLIT('a,b', ','), SUBSTR('abc', 1), SUBSTRING('abc', 1), SUBSTRING_INDEX('abc', 'b', 1), "
+                + "TRANSLATE('a', 'b', 'c'), TRIM(' a '), UNBASE64('6'), UPPER('abcd'), INITCAP('ab cd'), LEVENSHTEIN('cat', 'mat'),"
+                + "SOUNDEX('mouse') FROM occurrence;"),
 
-      // Data masking functions
-      Arguments.of("SELECT MASK('a', 'X', 'x', '#'), MASK_FIRST_N('a'), MASK_LAST_N('b'), " +
-        "MASK_SHOW_FIRST_N('a'), MASK_SHOW_LAST_N('B'), MASK_HASH('A') FROM occurrence"),
+        // Data masking functions
+        Arguments.of(
+            "SELECT MASK('a', 'X', 'x', '#'), MASK_FIRST_N('a'), MASK_LAST_N('b'), "
+                + "MASK_SHOW_FIRST_N('a'), MASK_SHOW_LAST_N('B'), MASK_HASH('A') FROM occurrence"),
 
-      // Misc functions
-      Arguments.of("SELECT HASH('x'), MD5('A'), SHA1('A'), SHA2('A'), CRC32('A'), " +
-        "AES_ENCRYPT('A', 'A'), AES_DECRYPT('A', 'B') FROM occurrence"),
+        // Misc functions
+        Arguments.of(
+            "SELECT HASH('x'), MD5('A'), SHA1('A'), SHA2('A'), CRC32('A'), "
+                + "AES_ENCRYPT('A', 'A'), AES_DECRYPT('A', 'B') FROM occurrence"),
 
-      // Aggregate functions.
-      Arguments.of("SELECT "
-        + "COUNT(datasetkey), "
-        + "COUNT(DISTINCT datasetkey, decimallatitude), "
-        + "SUM(decimallatitude), "
-        + "SUM(DISTINCT decimallatitude), "
-        + "AVG(decimallatitude), "
-        + "AVG(DISTINCT decimallatitude), "
-        + "MIN(decimallatitude), "
-        + "MAX(decimallatitude), "
-        + "VARIANCE(decimallatitude), "
-        + "VAR_SAMP(decimallatitude), "
-        + "STDDEV_POP(decimallatitude), "
-        + "STDDEV_SAMP(decimallatitude), "
-        + "COVAR_POP(decimallatitude, decimallongitude), "
-        + "COVAR_SAMP(decimallatitude, decimallongitude) "
-        //+ "CORR(decimallatitude, decimallongitude), "
-        //+ "PERCENTILE(\"year\", array(25, 50, 75)), "
-        //+ "PERCENTILE_APPROX(decimallatitude, 50), "
-        //+ "PERCENTILE_APPROX(decimallatitude, array(25, 50, 75)), "
-        //+ "HISTOGRAM_NUMERIC(decimallatitude, 5), "
-        //+ "COLLECT_SET(decimallatitude), "
-        //+ "COLLECT_LIST(decimallatitude), "
-        //+ "NTILE(5) "
-        + "FROM occurrence")
-    );
+        // Aggregate functions.
+        Arguments.of(
+            "SELECT "
+                + "COUNT(datasetkey), "
+                + "COUNT(DISTINCT datasetkey, decimallatitude), "
+                + "SUM(decimallatitude), "
+                + "SUM(DISTINCT decimallatitude), "
+                + "AVG(decimallatitude), "
+                + "AVG(DISTINCT decimallatitude), "
+                + "MIN(decimallatitude), "
+                + "MAX(decimallatitude), "
+                + "VARIANCE(decimallatitude), "
+                + "VAR_SAMP(decimallatitude), "
+                + "STDDEV_POP(decimallatitude), "
+                + "STDDEV_SAMP(decimallatitude), "
+                + "COVAR_POP(decimallatitude, decimallongitude), "
+                + "COVAR_SAMP(decimallatitude, decimallongitude) "
+                // + "CORR(decimallatitude, decimallongitude), "
+                // + "PERCENTILE(\"year\", array(25, 50, 75)), "
+                // + "PERCENTILE_APPROX(decimallatitude, 50), "
+                // + "PERCENTILE_APPROX(decimallatitude, array(25, 50, 75)), "
+                // + "HISTOGRAM_NUMERIC(decimallatitude, 5), "
+                // + "COLLECT_SET(decimallatitude), "
+                // + "COLLECT_LIST(decimallatitude), "
+                // + "NTILE(5) "
+                + "FROM occurrence"));
   }
 
   private static Stream<Arguments> provideStringsForForbiddenSql() {
@@ -312,15 +324,15 @@ public class HiveSqlValidatorTest {
                 + "QUALIFY month_count > 100"),
 
         // SQL array constructor, not supported by Hive
-        Arguments.of("SELECT DISTINCT datasetkey FROM occurrence WHERE issue = array['ZERO_COORDINATE']"),
+        Arguments.of(
+            "SELECT DISTINCT datasetkey FROM occurrence WHERE issue = array['ZERO_COORDINATE']"),
 
         // Block incorrect table and column names, commands and syntax
         Arguments.of("SELECT datasetkey FROM wrongTable occurrence"),
         Arguments.of("SELECT wrongColumn FROM occurrence"),
         Arguments.of("WRONGCOMMAND datasetkey FROM occurrence"),
         Arguments.of("FROM occurrence SELECT datasetkey"),
-        Arguments.of("SELECT datasetkey FROM occurrence; SELECT datasetkey FROM occurrence")
-    );
+        Arguments.of("SELECT datasetkey FROM occurrence; SELECT datasetkey FROM occurrence"));
 
     // TODO: Block GROUP BY gbifid
     // Arguments.of("SELECT gbifid FROM occurrence GROUP BY gbifid"),
@@ -330,40 +342,58 @@ public class HiveSqlValidatorTest {
 
   private static Stream<Arguments> provideStringsForBlockedHiveFunctions() {
     return Stream.of(
-      // Logical operators — block EXISTS(subquery)
-      Arguments.of("SELECT EXISTS(SELECT datasetkey FROM occurrence) FROM occurrence;", "exactly one SQL select statement"),
+        // Logical operators — block EXISTS(subquery)
+        Arguments.of(
+            "SELECT EXISTS(SELECT datasetkey FROM occurrence) FROM occurrence;",
+            "exactly one SQL select statement"),
 
-      // Misc functions
-      Arguments.of("SELECT JAVA_METHOD('org.gbif', 'X') FROM occurrence", "No match found for function signature java_method"),
+        // Misc functions
+        Arguments.of(
+            "SELECT JAVA_METHOD('org.gbif', 'X') FROM occurrence",
+            "No match found for function signature java_method"),
+        Arguments.of(
+            "SELECT REFLECT('org.gbif', 'X')  FROM occurrence",
+            "No match found for function signature reflect"),
 
-      Arguments.of("SELECT REFLECT('org.gbif', 'X')  FROM occurrence", "No match found for function signature reflect"),
+        // Arguments.of("SELECT CURRENT_USER FROM occurrence", "No match found for function
+        // signature current_user"),
 
-      //Arguments.of("SELECT CURRENT_USER FROM occurrence", "No match found for function signature current_user"),
+        Arguments.of(
+            "SELECT LOGGED_IN_USER() FROM occurrence",
+            "No match found for function signature logged_in_user"),
+        Arguments.of(
+            "SELECT CURRENT_DATABASE() FROM occurrence",
+            "No match found for function signature current_database"),
+        Arguments.of(
+            "SELECT VERSION() FROM occurrence", "No match found for function signature version"),
+        Arguments.of(
+            "SELECT BUILDVERSION() FROM occurrence",
+            "No match found for function signature buildversion"),
 
-      Arguments.of("SELECT LOGGED_IN_USER() FROM occurrence", "No match found for function signature logged_in_user"),
+        // Table-Generating Functions (UDTF)
+        Arguments.of(
+            "SELECT SURROGATE_KEY() FROM occurrence",
+            "No match found for function signature surrogate_key"),
+        Arguments.of(
+            "SELECT EXPLODE(issue) FROM occurrence",
+            "No match found for function signature explode"),
 
-      Arguments.of("SELECT CURRENT_DATABASE() FROM occurrence", "No match found for function signature current_database"),
+        // Arguments.of("SELECT EXPLODE(map_type?) FROM occurrence", "No match found for function
+        // signature explode"),
 
-      Arguments.of("SELECT VERSION() FROM occurrence", "No match found for function signature version"),
-
-      Arguments.of("SELECT BUILDVERSION() FROM occurrence", "No match found for function signature buildversion"),
-
-      // Table-Generating Functions (UDTF)
-      Arguments.of("SELECT SURROGATE_KEY() FROM occurrence", "No match found for function signature surrogate_key"),
-
-      Arguments.of("SELECT EXPLODE(issue) FROM occurrence", "No match found for function signature explode"),
-
-      //Arguments.of("SELECT EXPLODE(map_type?) FROM occurrence", "No match found for function signature explode"),
-
-      Arguments.of("SELECT POSEXPLODE(issue) FROM occurrence", "No match found for function signature posexplode"),
-
-      Arguments.of("SELECT INLINE(issue) FROM occurrence", "No match found for function signature inline"),
-
-      Arguments.of("SELECT STACK(2, 'a', 'b') FROM occurrence", "No match found for function signature stack"),
-
-      Arguments.of("SELECT JSON_TUPLE('{}', 'a') FROM occurrence", "No match found for function signature json_tuple"),
-
-      Arguments.of("SELECT PARSE_URL_TUPLE('x', 'HOST') FROM occurrence", "No match found for function signature parse_url_tuple")
-    );
+        Arguments.of(
+            "SELECT POSEXPLODE(issue) FROM occurrence",
+            "No match found for function signature posexplode"),
+        Arguments.of(
+            "SELECT INLINE(issue) FROM occurrence", "No match found for function signature inline"),
+        Arguments.of(
+            "SELECT STACK(2, 'a', 'b') FROM occurrence",
+            "No match found for function signature stack"),
+        Arguments.of(
+            "SELECT JSON_TUPLE('{}', 'a') FROM occurrence",
+            "No match found for function signature json_tuple"),
+        Arguments.of(
+            "SELECT PARSE_URL_TUPLE('x', 'HOST') FROM occurrence",
+            "No match found for function signature parse_url_tuple"));
   }
 }
