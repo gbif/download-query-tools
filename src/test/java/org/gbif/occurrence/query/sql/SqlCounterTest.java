@@ -32,7 +32,7 @@ public class SqlCounterTest {
   }
 
   @Test
-  public void testSqlCount() {
+  public void testSqlCount() throws Exception {
     // AND/ORs should count one each.
     // Literals should count one each.
     final String sql =
@@ -43,7 +43,7 @@ public class SqlCounterTest {
   }
 
   @Test
-  public void testSqlWithinCount() {
+  public void testSqlWithinCount() throws Exception {
     String withinSql =
         "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))', decimalLatitude, decimalLongitude)";
     HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, withinSql);
@@ -58,7 +58,7 @@ public class SqlCounterTest {
   }
 
   @Test
-  public void testCountNull() {
+  public void testCountNull() throws Exception {
     HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, "SELECT gbifid FROM occurrence");
     assertEquals(0, q.getPredicateCount());
   }

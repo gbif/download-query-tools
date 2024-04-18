@@ -40,7 +40,7 @@ public class HiveSqlQueryTest {
 
   @ParameterizedTest
   @MethodSource("provideSql")
-  public void testAllowedSql(String sql, String where, List<String> columns) {
+  public void testAllowedSql(String sql, String where, List<String> columns) throws Exception {
     HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, sql);
 
     assertEquals(where, q.getSqlWhere());
