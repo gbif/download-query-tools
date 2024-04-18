@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -30,6 +31,7 @@ import org.apache.calcite.util.Util;
  *
  * Exposes useful parts of the query.
  */
+@Getter
 public class HiveSqlQuery {
 
   final String sql;
@@ -38,13 +40,21 @@ public class HiveSqlQuery {
   final Integer predicateCount;
   final Integer pointsCount;
 
+
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
   public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql) {
+    this(sqlValidator, unvalidatedSql, null);
+  }
+
+  /**
+   * Parse and validate the query.  Throws an exception if parsing/validation fails.
+   */
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog) {
     SqlDialect sqlDialect = sqlValidator.getDialect();
 
-    SqlSelect node = sqlValidator.validate(unvalidatedSql);
+    SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);
 
     this.sql = node.toSqlString(sqlDialect).getSql();
     if (node.getWhere() != null) {
@@ -81,23 +91,4 @@ public class HiveSqlQuery {
     pointsCount = node.accept(new GeometryPointCounterVisitor());
   }
 
-  public String getSql() {
-    return sql;
-  }
-
-  public String getSqlWhere() {
-    return sqlWhere;
-  }
-
-  public List<String> getSqlSelectColumnNames() {
-    return sqlSelectColumnNames;
-  }
-
-  public Integer getPredicateCount() {
-    return predicateCount;
-  }
-
-  public Integer getPointsCount() {
-    return pointsCount;
-  }
 }
