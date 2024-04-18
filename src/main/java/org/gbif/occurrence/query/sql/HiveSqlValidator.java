@@ -13,11 +13,13 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
@@ -25,6 +27,7 @@ import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
+import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlDialect;
@@ -116,6 +119,10 @@ public class HiveSqlValidator {
   }
 
   public SqlSelect validate(String sql) {
+    return validate(sql, null);
+  }
+
+  public SqlSelect validate(String sql, String catalog) {
     LOG.debug("Parsing «{}»", sql);
     Matcher m = SEMICOLON_END.matcher(sql);
     if (m.find()) {
@@ -206,6 +213,12 @@ public class HiveSqlValidator {
 
       // Validate WKT strings.
       select.accept(new GeometryPointCounterVisitor());
+
+      if (catalog != null) {
+        String firstTable = rootSchema.getTableNames().stream().findFirst().get();
+        Prepare.PreparingTable table = catalogReader.getTable(Collections.singletonList(firstTable));
+        select.setFrom(((SqlSelect)sqlParser.parseQuery("SELECT " + table.getRowType().getFieldList().get(0).getName() + " FROM " + catalog + "." + firstTable)).getFrom());
+      }
 
       return select;
     } catch (Exception e) {

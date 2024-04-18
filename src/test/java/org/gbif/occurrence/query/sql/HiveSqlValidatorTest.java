@@ -31,12 +31,11 @@ public class HiveSqlValidatorTest {
 
   HiveSqlValidator hiveSqlValidator;
 
-  HiveSqlValidatorTest() {
-    SchemaPlus rootSchema = Frameworks.createRootSchema(true);
-    TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
-    rootSchema.add(testTable.getTableName(), testTable);
+  private static final String TEST_CATALOG = "cattest";
 
-    hiveSqlValidator = new HiveSqlValidator(rootSchema, testTable.additionalOperators());
+  HiveSqlValidatorTest() {
+
+    hiveSqlValidator = SqlValidatorTestUtil.createOccurrenceTableValidator();
   }
 
   @ParameterizedTest
@@ -45,6 +44,12 @@ public class HiveSqlValidatorTest {
     hiveSqlValidator.validate(sql);
   }
 
+  @ParameterizedTest
+  @MethodSource("provideStringsForAllowedSql")
+  public void testAllowedSqlInCatalog(String sql) {
+    HiveSqlValidator catalogValidator = SqlValidatorTestUtil.createOccurrenceTableValidator(TEST_CATALOG);
+    catalogValidator.validate(sql, TEST_CATALOG);
+  }
   /**
    * Check support exists for appropriate Hive functions
    * https://cwiki.apache.org/confluence/display/hive/languagemanual+udf
