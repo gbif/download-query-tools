@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
@@ -216,8 +215,18 @@ public class HiveSqlValidator {
 
       if (catalog != null) {
         String firstTable = rootSchema.getTableNames().stream().findFirst().get();
-        Prepare.PreparingTable table = catalogReader.getTable(Collections.singletonList(firstTable));
-        select.setFrom(((SqlSelect)sqlParser.parseQuery("SELECT " + table.getRowType().getFieldList().get(0).getName() + " FROM " + catalog + "." + firstTable)).getFrom());
+        Prepare.PreparingTable table =
+            catalogReader.getTable(Collections.singletonList(firstTable));
+        select.setFrom(
+            ((SqlSelect)
+                    sqlParser.parseQuery(
+                        "SELECT "
+                            + table.getRowType().getFieldList().get(0).getName()
+                            + " FROM "
+                            + catalog
+                            + "."
+                            + firstTable))
+                .getFrom());
       }
 
       return select;

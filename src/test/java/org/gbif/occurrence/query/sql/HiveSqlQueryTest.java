@@ -39,17 +39,19 @@ public class HiveSqlQueryTest {
     SchemaPlus rootSchema = Frameworks.createRootSchema(true);
 
     TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
-    rootSchema.add("cattest", new AbstractSchema() {
-      @Override
-      protected Map<String, Table> getTableMap() {
-        // Define a map to hold tables
-        Map<String, Table> tables = new HashMap<>();
-        // Add your table to the map
-        tables.put("occurrence", testTable);
-        return tables;
-      }
-    });
-    //TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
+    rootSchema.add(
+        "cattest",
+        new AbstractSchema() {
+          @Override
+          protected Map<String, Table> getTableMap() {
+            // Define a map to hold tables
+            Map<String, Table> tables = new HashMap<>();
+            // Add your table to the map
+            tables.put("occurrence", testTable);
+            return tables;
+          }
+        });
+    // TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
     rootSchema.add(testTable.getTableName(), testTable);
 
     hiveSqlValidator = new HiveSqlValidator(rootSchema, testTable.additionalOperators());
@@ -66,7 +68,8 @@ public class HiveSqlQueryTest {
 
   @Test
   public void testSqlWithCatalog() {
-    HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, "SELECT \"year\" FROM occurrence", "cattest");
+    HiveSqlQuery q =
+        new HiveSqlQuery(hiveSqlValidator, "SELECT \"year\" FROM occurrence", "cattest");
 
     assertEquals("SELECT year\nFROM cattest.occurrence", q.getSql());
   }

@@ -15,8 +15,6 @@ package org.gbif.occurrence.query.sql;
 
 import java.util.stream.Stream;
 
-import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.tools.Frameworks;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,7 +45,8 @@ public class HiveSqlValidatorTest {
   @ParameterizedTest
   @MethodSource("provideStringsForAllowedSql")
   public void testAllowedSqlInCatalog(String sql) {
-    HiveSqlValidator catalogValidator = SqlValidatorTestUtil.createOccurrenceTableValidator(TEST_CATALOG);
+    HiveSqlValidator catalogValidator =
+        SqlValidatorTestUtil.createOccurrenceTableValidator(TEST_CATALOG);
     catalogValidator.validate(sql, TEST_CATALOG);
   }
   /**

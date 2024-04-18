@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import lombok.Getter;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -25,6 +24,8 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.util.Util;
+
+import lombok.Getter;
 
 /**
  * A parsed, validated Hive SQL query.
@@ -39,7 +40,6 @@ public class HiveSqlQuery {
   final List<String> sqlSelectColumnNames;
   final Integer predicateCount;
   final Integer pointsCount;
-
 
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
@@ -90,5 +90,4 @@ public class HiveSqlQuery {
     // Count points in geometry within queries
     pointsCount = node.accept(new GeometryPointCounterVisitor());
   }
-
 }
