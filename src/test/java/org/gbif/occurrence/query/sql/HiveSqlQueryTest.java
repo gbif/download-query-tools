@@ -67,7 +67,7 @@ public class HiveSqlQueryTest {
   }
 
   @Test
-  public void testSqlWithCatalog() {
+  public void testSqlWithCatalog() throws Exception {
     HiveSqlQuery q =
         new HiveSqlQuery(hiveSqlValidator, "SELECT \"year\" FROM occurrence", "cattest");
 

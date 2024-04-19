@@ -13,6 +13,8 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import org.gbif.api.exception.QueryBuildingException;
+
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,30 +34,30 @@ public class HiveSqlValidatorTest {
   private static final String TEST_CATALOG = "cattest";
 
   HiveSqlValidatorTest() {
-
     hiveSqlValidator = SqlValidatorTestUtil.createOccurrenceTableValidator();
   }
 
   @ParameterizedTest
   @MethodSource("provideStringsForAllowedSql")
-  public void testAllowedSql(String sql) {
+  public void testAllowedSql(String sql) throws Exception {
     hiveSqlValidator.validate(sql);
   }
 
   @ParameterizedTest
   @MethodSource("provideStringsForAllowedSql")
-  public void testAllowedSqlInCatalog(String sql) {
+  public void testAllowedSqlInCatalog(String sql) throws Exception {
     HiveSqlValidator catalogValidator =
         SqlValidatorTestUtil.createOccurrenceTableValidator(TEST_CATALOG);
     catalogValidator.validate(sql, TEST_CATALOG);
   }
+
   /**
    * Check support exists for appropriate Hive functions
    * https://cwiki.apache.org/confluence/display/hive/languagemanual+udf
    */
   @ParameterizedTest
   @MethodSource("provideStringsForHiveBuiltInFunctions")
-  public void testHiveBuiltInFunctions(String sql) {
+  public void testHiveBuiltInFunctions(String sql) throws Exception {
     hiveSqlValidator.validate(sql);
   }
 
@@ -65,7 +67,7 @@ public class HiveSqlValidatorTest {
     try {
       hiveSqlValidator.validate(sql);
       fail();
-    } catch (Exception e) {
+    } catch (QueryBuildingException e) {
       System.out.println(e.getMessage());
     }
   }
@@ -76,7 +78,21 @@ public class HiveSqlValidatorTest {
     try {
       hiveSqlValidator.validate(sql);
       fail();
-    } catch (Exception e) {
+    } catch (QueryBuildingException e) {
+      if (!e.getMessage().contains(expectedErrorFragment)) {
+        System.out.println(e.getMessage());
+      }
+      assertTrue(e.getMessage().contains(expectedErrorFragment));
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideStringsForBadSql")
+  public void testValidateSql(String sql, String expectedErrorFragment) {
+    try {
+      hiveSqlValidator.validate(sql);
+      fail();
+    } catch (QueryBuildingException e) {
       if (!e.getMessage().contains(expectedErrorFragment)) {
         System.out.println(e.getMessage());
       }

@@ -13,6 +13,8 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import org.gbif.api.exception.QueryBuildingException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,14 +46,14 @@ public class HiveSqlQuery {
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
-  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql) {
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql) throws QueryBuildingException {
     this(sqlValidator, unvalidatedSql, null);
   }
 
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
-  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog) {
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog) throws QueryBuildingException {
     SqlDialect sqlDialect = sqlValidator.getDialect();
 
     SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);
