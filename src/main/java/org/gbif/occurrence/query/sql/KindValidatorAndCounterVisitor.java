@@ -33,9 +33,9 @@ import org.apache.calcite.sql.util.SqlVisitor;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Counts parts of SQL queries
+ * Validates and counts parts of SQL queries
  */
-class KindCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>> {
+class KindValidatorAndCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>> {
 
   private ImmutableList<String> mistakenAsFields = ImmutableList.of("year", "month", "day");
 
@@ -58,23 +58,34 @@ class KindCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>> {
   public Map<SqlKind, Integer> visit(SqlCall call) {
     Map<SqlKind, Integer> m = new HashMap<>();
     for (SqlNode n : call.getOperandList()) {
-      // Check this isn't something like "CAST('year' AS INTEGER)" which happens when the user does something like
-      // "'year' > 2000" and Calcite tries to fix it.
-      //
-      // This is handled specially because it's a common error for someone new to the SQL API.
-      if (n != null && n.getKind() == SqlKind.CAST) {
-        SqlBasicCall castCall = (SqlBasicCall) n;
-        if (castCall.operandCount() == 2) {
-          SqlNode first = castCall.getOperandList().get(0);
-          SqlNode second = castCall.getOperandList().get(1);
-          if (first instanceof SqlLiteral && mistakenAsFields.contains(((SqlLiteral)first).toValue())) {
-            if (second instanceof SqlDataTypeSpec && ((SqlDataTypeSpec)second).getTypeName().names.get(0).equals("INTEGER")) {
-              throw new RuntimeException("'year', 'month' or 'day' string literals used in a comparison. (Hint: use double quotes for \"year\", \"month\" and \"day\" columns.)");
+      if (n != null) {
+        switch (n.getKind()) {
+          case CAST:
+            // Check this isn't something like "CAST('year' AS INTEGER)" which happens when the user does something like
+            // "'year' > 2000" and Calcite tries to fix it.
+            //
+            // This is handled specially because it's a common error for someone new to the SQL API.
+            SqlBasicCall castCall = (SqlBasicCall) n;
+            if (castCall.operandCount() == 2) {
+              SqlNode first = castCall.getOperandList().get(0);
+              SqlNode second = castCall.getOperandList().get(1);
+              if (first instanceof SqlLiteral && mistakenAsFields.contains(((SqlLiteral) first).toValue())) {
+                if (second instanceof SqlDataTypeSpec && ((SqlDataTypeSpec) second).getTypeName().names.get(0).equals("INTEGER")) {
+                  throw new RuntimeException("'year', 'month' or 'day' string literals used in a comparison. (Hint: use double quotes for \"year\", \"month\" and \"day\" columns.)");
+                }
+              }
             }
-          }
+            break;
+
+          case IS_TRUE:
+          case IS_NOT_TRUE:
+          case IS_FALSE:
+          case IS_NOT_FALSE:
+            // These are not supported by our old Hive version.  Remove the restriction with Hive 3 or later.
+            throw new RuntimeException("x IS TRUE and x IS FALSE are not supported, please use x = TRUE and x = FALSE instead.");
         }
+        m = addMaps(m, n.accept(this));
       }
-      if (n != null) m = addMaps(m, n.accept(this));
     }
     return incMap(m, call.getKind());
   }

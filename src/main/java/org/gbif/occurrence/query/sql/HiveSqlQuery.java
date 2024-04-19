@@ -81,7 +81,7 @@ public class HiveSqlQuery {
     }
 
     // Count predicates
-    Map<SqlKind, Integer> count = node.accept(new KindCounterVisitor());
+    Map<SqlKind, Integer> count = node.accept(new KindValidatorAndCounterVisitor());
     predicateCount =
         count.getOrDefault(SqlKind.LITERAL, 0)
             + count.getOrDefault(SqlKind.AND, 0)

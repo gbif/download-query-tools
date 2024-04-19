@@ -193,7 +193,7 @@ public class HiveSqlValidator {
         }
       }
 
-      Map<SqlKind, Integer> count = select.accept(new KindCounterVisitor());
+      Map<SqlKind, Integer> count = select.accept(new KindValidatorAndCounterVisitor());
       LOG.debug("Count: " + count);
       if (count.getOrDefault(SqlKind.SELECT, -1) != 1) {
         LOG.warn("Rejected as multiple selects present; {} → {}.", sql);
