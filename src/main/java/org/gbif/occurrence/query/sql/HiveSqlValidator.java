@@ -13,8 +13,7 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import org.gbif.api.exception.QueryBuildingException;
-
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -27,8 +26,8 @@ import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
+import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
-import org.apache.calcite.runtime.CalciteContextException;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -40,7 +39,6 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlSelectKeyword;
 import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.impl.SqlParserImpl;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
@@ -119,7 +117,11 @@ public class HiveSqlValidator {
             frameworkConfig.getSqlValidatorConfig());
   }
 
-  public SqlSelect validate(String sql) throws QueryBuildingException {
+  public SqlSelect validate(String sql) {
+    return validate(sql, null);
+  }
+
+  public SqlSelect validate(String sql, String catalog) {
     LOG.debug("Parsing «{}»", sql);
     Matcher m = SEMICOLON_END.matcher(sql);
     if (m.find()) {
@@ -137,7 +139,7 @@ public class HiveSqlValidator {
             "Rejected as only SELECT statements are supported; {} → {}.",
             sql,
             validatedSqlNode.getKind());
-        throw new QueryBuildingException("Only SQL SELECT statements are supported.");
+        throw new RuntimeException("Only SQL SELECT statements are supported.");
       }
 
       SqlSelect select = (SqlSelect) validatedSqlNode;
@@ -145,7 +147,7 @@ public class HiveSqlValidator {
 
       if (select.hasHints()) {
         LOG.warn("Rejected as hints supported; {} → {}.", sql, select.getHints());
-        throw new QueryBuildingException("SQL hints are not supported.");
+        throw new RuntimeException("SQL hints are not supported.");
       }
 
       if (select.getModifierNode(SqlSelectKeyword.STREAM) != null) {
@@ -153,7 +155,7 @@ public class HiveSqlValidator {
             "Rejected as streams are not supported; {} → {}.",
             sql,
             select.getModifierNode(SqlSelectKeyword.STREAM));
-        throw new QueryBuildingException("SQL streams are not supported.");
+        throw new RuntimeException("SQL streams are not supported.");
       }
 
       LOG.trace("- ModNod-ALL: {}", select.getModifierNode(SqlSelectKeyword.ALL));
@@ -164,21 +166,16 @@ public class HiveSqlValidator {
       LOG.trace("- Where: {}", select.getWhere());
       LOG.trace("- Group: {}", select.getGroup());
 
-      if (select.getGroup() != null && select.getModifierNode(SqlSelectKeyword.DISTINCT) != null) {
-        LOG.warn("Rejected as distinct clauses are not supported alongside group by clauses; {}.", sql);
-        throw new QueryBuildingException("SQL DISTINCT clauses cannot be combined with GROUP BY.");
-      }
-
       if (select.getHaving() != null) {
         LOG.warn("Rejected as having clauses are not supported; {} → {}.", sql, select.getHaving());
-        throw new QueryBuildingException("SQL HAVING clauses are not supported.");
+        throw new RuntimeException("SQL having clauses are not supported.");
       }
 
       LOG.trace("- WindowList: {}", select.getWindowList());
 
       if (select.getQualify() != null) {
         LOG.warn("SQL qualify clauses are not supported; {} → {}.", sql, select.getQualify());
-        throw new QueryBuildingException("SQL QUALIFY clauses are not supported.");
+        throw new RuntimeException("SQL qualify clauses are not supported.");
       }
 
       LOG.trace("- OrderList: {}", select.getOrderList());
@@ -191,7 +188,7 @@ public class HiveSqlValidator {
           SqlIdentifier id = (SqlIdentifier) n;
           if (id.isStar()) {
             LOG.warn("Rejected as star selects are not supported; {} → {}.", sql, id);
-            throw new QueryBuildingException("Star selects are not supported.");
+            throw new RuntimeException("Star selects are not supported.");
           }
         }
       }
@@ -200,32 +197,42 @@ public class HiveSqlValidator {
       LOG.debug("Count: " + count);
       if (count.getOrDefault(SqlKind.SELECT, -1) != 1) {
         LOG.warn("Rejected as multiple selects present; {} → {}.", sql);
-        throw new QueryBuildingException("Must be exactly one SQL select statement.");
+        throw new RuntimeException("Must be exactly one SQL select statement.");
       }
 
       if (count.getOrDefault(SqlKind.JOIN, 0) > 0) {
         LOG.warn("Rejected as joins present; {} → {}.", sql);
-        throw new QueryBuildingException("Joins are not supported.");
+        throw new RuntimeException("Joins are not supported.");
       }
 
       if (count.getOrDefault(SqlKind.ARRAY_VALUE_CONSTRUCTOR, 0) > 0) {
         LOG.warn("Rejected as arrays must use array('value') syntax; {} → {}.", sql);
-        throw new QueryBuildingException("Array constructors should use array(), not array[].");
+        throw new RuntimeException("Array constructors should use array(), not array[].");
       }
 
       // Validate WKT strings.
       select.accept(new GeometryPointCounterVisitor());
 
+      if (catalog != null) {
+        String firstTable = rootSchema.getTableNames().stream().findFirst().get();
+        Prepare.PreparingTable table =
+            catalogReader.getTable(Collections.singletonList(firstTable));
+        select.setFrom(
+            ((SqlSelect)
+                    sqlParser.parseQuery(
+                        "SELECT "
+                            + table.getRowType().getFieldList().get(0).getName()
+                            + " FROM "
+                            + catalog
+                            + "."
+                            + firstTable))
+                .getFrom());
+      }
+
       return select;
-    } catch (CalciteContextException cce) {
-      // Just the main message is decent.
-      throw new QueryBuildingException(cce.getMessage(), cce);
-    } catch (SqlParseException spe) {
-      // Use the first line only, otherwise there's a huge list of all possible keywords.
-      throw new QueryBuildingException(spe.getMessage().split("\n")[0], spe);
     } catch (Exception e) {
-      LOG.error("SQL validation failed for an unknown reason: {} → {}.", sql, e.getMessage());
-      throw new QueryBuildingException(e.getMessage(), e);
+      LOG.warn("Rejected for another reason; {} → {}.", sql, e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 

@@ -17,8 +17,6 @@ import org.gbif.api.exception.QueryBuildingException;
 
 import java.util.stream.Stream;
 
-import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.tools.Frameworks;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,12 +31,11 @@ public class HiveSqlValidatorTest {
 
   HiveSqlValidator hiveSqlValidator;
 
-  HiveSqlValidatorTest() {
-    SchemaPlus rootSchema = Frameworks.createRootSchema(true);
-    TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
-    rootSchema.add(testTable.getTableName(), testTable);
+  private static final String TEST_CATALOG = "cattest";
 
-    hiveSqlValidator = new HiveSqlValidator(rootSchema, testTable.additionalOperators());
+  HiveSqlValidatorTest() {
+
+    hiveSqlValidator = SqlValidatorTestUtil.createOccurrenceTableValidator();
   }
 
   @ParameterizedTest
@@ -47,6 +44,13 @@ public class HiveSqlValidatorTest {
     hiveSqlValidator.validate(sql);
   }
 
+  @ParameterizedTest
+  @MethodSource("provideStringsForAllowedSql")
+  public void testAllowedSqlInCatalog(String sql) {
+    HiveSqlValidator catalogValidator =
+        SqlValidatorTestUtil.createOccurrenceTableValidator(TEST_CATALOG);
+    catalogValidator.validate(sql, TEST_CATALOG);
+  }
   /**
    * Check support exists for appropriate Hive functions
    * https://cwiki.apache.org/confluence/display/hive/languagemanual+udf

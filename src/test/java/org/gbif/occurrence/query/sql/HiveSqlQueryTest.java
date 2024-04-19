@@ -14,11 +14,16 @@
 package org.gbif.occurrence.query.sql;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.schema.Table;
+import org.apache.calcite.schema.impl.AbstractSchema;
 import org.apache.calcite.tools.Frameworks;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,7 +37,21 @@ public class HiveSqlQueryTest {
 
   HiveSqlQueryTest() {
     SchemaPlus rootSchema = Frameworks.createRootSchema(true);
+
     TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
+    rootSchema.add(
+        "cattest",
+        new AbstractSchema() {
+          @Override
+          protected Map<String, Table> getTableMap() {
+            // Define a map to hold tables
+            Map<String, Table> tables = new HashMap<>();
+            // Add your table to the map
+            tables.put("occurrence", testTable);
+            return tables;
+          }
+        });
+    // TestOccurrenceTable testTable = new TestOccurrenceTable("occurrence");
     rootSchema.add(testTable.getTableName(), testTable);
 
     hiveSqlValidator = new HiveSqlValidator(rootSchema, testTable.additionalOperators());
@@ -45,6 +64,14 @@ public class HiveSqlQueryTest {
 
     assertEquals(where, q.getSqlWhere());
     assertArrayEquals(columns.toArray(), q.getSqlSelectColumnNames().toArray());
+  }
+
+  @Test
+  public void testSqlWithCatalog() {
+    HiveSqlQuery q =
+        new HiveSqlQuery(hiveSqlValidator, "SELECT \"year\" FROM occurrence", "cattest");
+
+    assertEquals("SELECT year\nFROM cattest.occurrence", q.getSql());
   }
 
   private static Stream<Arguments> provideSql() {

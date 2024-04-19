@@ -13,8 +13,6 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import org.gbif.api.exception.QueryBuildingException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +25,14 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.util.Util;
 
+import lombok.Getter;
+
 /**
  * A parsed, validated Hive SQL query.
  *
  * Exposes useful parts of the query.
  */
+@Getter
 public class HiveSqlQuery {
 
   final String sql;
@@ -43,10 +44,17 @@ public class HiveSqlQuery {
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
-  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql) throws QueryBuildingException {
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql) {
+    this(sqlValidator, unvalidatedSql, null);
+  }
+
+  /**
+   * Parse and validate the query.  Throws an exception if parsing/validation fails.
+   */
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog) {
     SqlDialect sqlDialect = sqlValidator.getDialect();
 
-    SqlSelect node = sqlValidator.validate(unvalidatedSql);
+    SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);
 
     this.sql = node.toSqlString(sqlDialect).getSql();
     if (node.getWhere() != null) {
@@ -81,25 +89,5 @@ public class HiveSqlQuery {
 
     // Count points in geometry within queries
     pointsCount = node.accept(new GeometryPointCounterVisitor());
-  }
-
-  public String getSql() {
-    return sql;
-  }
-
-  public String getSqlWhere() {
-    return sqlWhere;
-  }
-
-  public List<String> getSqlSelectColumnNames() {
-    return sqlSelectColumnNames;
-  }
-
-  public Integer getPredicateCount() {
-    return predicateCount;
-  }
-
-  public Integer getPointsCount() {
-    return pointsCount;
   }
 }
