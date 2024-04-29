@@ -46,14 +46,16 @@ public class HiveSqlQuery {
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
-  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql) throws QueryBuildingException {
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql)
+      throws QueryBuildingException {
     this(sqlValidator, unvalidatedSql, null);
   }
 
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
-  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog) throws QueryBuildingException {
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog)
+      throws QueryBuildingException {
     SqlDialect sqlDialect = sqlValidator.getDialect();
 
     SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);

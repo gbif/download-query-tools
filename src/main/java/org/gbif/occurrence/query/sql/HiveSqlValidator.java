@@ -171,7 +171,8 @@ public class HiveSqlValidator {
       LOG.trace("- Group: {}", select.getGroup());
 
       if (select.getGroup() != null && select.getModifierNode(SqlSelectKeyword.DISTINCT) != null) {
-        LOG.warn("Rejected as distinct clauses are not supported alongside group by clauses; {}.", sql);
+        LOG.warn(
+            "Rejected as distinct clauses are not supported alongside group by clauses; {}.", sql);
         throw new QueryBuildingException("SQL DISTINCT clauses cannot be combined with GROUP BY.");
       }
 

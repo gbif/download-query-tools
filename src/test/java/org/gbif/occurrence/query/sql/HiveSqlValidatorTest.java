@@ -419,32 +419,43 @@ public class HiveSqlValidatorTest {
 
   private static Stream<Arguments> provideStringsForBadSql() {
     return Stream.of(
-    // Missing column
-    Arguments.of("SELECT gbifid FROM occurrence GROUP BY missing_column", "Column 'missing_column' not found in any table"),
-    Arguments.of("SELECT country FROM occurrence", "Column 'country' not found in any table"),
-    Arguments.of("SELECT year, gbifid FROM occurrence", "Encountered"),
-    Arguments.of("SELECT \"YEAR\" FROM occurrence", "Column 'YEAR' not found in any table"),
-    Arguments.of("SELECT gbifid FROM occurrence WHERE year > 10", "Encountered \"year >\""),
-    Arguments.of("SELECT gbifid FROM occurrence WHERE 'year' > 10", "string literals used in a comparison"),
+        // Missing column
+        Arguments.of(
+            "SELECT gbifid FROM occurrence GROUP BY missing_column",
+            "Column 'missing_column' not found in any table"),
+        Arguments.of("SELECT country FROM occurrence", "Column 'country' not found in any table"),
+        Arguments.of("SELECT year, gbifid FROM occurrence", "Encountered"),
+        Arguments.of("SELECT \"YEAR\" FROM occurrence", "Column 'YEAR' not found in any table"),
+        Arguments.of("SELECT gbifid FROM occurrence WHERE year > 10", "Encountered \"year >\""),
+        Arguments.of(
+            "SELECT gbifid FROM occurrence WHERE 'year' > 10",
+            "string literals used in a comparison"),
 
-    // Invalid grouping
-    Arguments.of("SELECT gbifid FROM occurrence GROUP BY datasetkey", "Expression 'gbifid' is not being grouped"),
-    Arguments.of("SELECT DISTINCT datasetkey, COUNT(*) FROM occurrence GROUP BY datasetkey", "SQL DISTINCT clauses cannot be combined with GROUP BY."),
+        // Invalid grouping
+        Arguments.of(
+            "SELECT gbifid FROM occurrence GROUP BY datasetkey",
+            "Expression 'gbifid' is not being grouped"),
+        Arguments.of(
+            "SELECT DISTINCT datasetkey, COUNT(*) FROM occurrence GROUP BY datasetkey",
+            "SQL DISTINCT clauses cannot be combined with GROUP BY."),
 
-    // Unknown function
-    Arguments.of("SELECT unknown_function(gbifid) FROM occurrence;", "No match found for function signature"),
+        // Unknown function
+        Arguments.of(
+            "SELECT unknown_function(gbifid) FROM occurrence;",
+            "No match found for function signature"),
 
-    // Incorrect syntax
-    Arguments.of("SELECT gbifid, FROM occurrence", "Incorrect syntax near the keyword"),
-    Arguments.of("SELECT gbifid FROM occurrence,", "Encountered"),
-    Arguments.of("SELECT gbifid FROM occurrence GROUP BY gbifid, ORDER BY gbifid", "Encountered"),
-    Arguments.of("SELECT gbifid FROM occurrence ORDER BY gbifid,", "Encountered"),
-    Arguments.of("SELECT COALESCE(gbifid, 0 AS eeaCellCode FROM occurrence", "Encountered"),
+        // Incorrect syntax
+        Arguments.of("SELECT gbifid, FROM occurrence", "Incorrect syntax near the keyword"),
+        Arguments.of("SELECT gbifid FROM occurrence,", "Encountered"),
+        Arguments.of(
+            "SELECT gbifid FROM occurrence GROUP BY gbifid, ORDER BY gbifid", "Encountered"),
+        Arguments.of("SELECT gbifid FROM occurrence ORDER BY gbifid,", "Encountered"),
+        Arguments.of("SELECT COALESCE(gbifid, 0 AS eeaCellCode FROM occurrence", "Encountered"),
 
-    // Comments
-    Arguments.of("SELECT -- Comment gbifid FROM occurrence", "Encountered"),
+        // Comments
+        Arguments.of("SELECT -- Comment gbifid FROM occurrence", "Encountered"),
 
-    // Unsupported syntax (needs Hive 3 or later).
-    Arguments.of("SELECT gbifid FROM occurrence WHERE hascoordinate IS TRUE", "not supported"));
+        // Unsupported syntax (needs Hive 3 or later).
+        Arguments.of("SELECT gbifid FROM occurrence WHERE hascoordinate IS TRUE", "not supported"));
   }
 }
