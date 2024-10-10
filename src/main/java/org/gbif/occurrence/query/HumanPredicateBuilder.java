@@ -14,6 +14,7 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.api.model.common.search.SearchParameter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.registry.Dataset;
@@ -26,6 +27,8 @@ import org.gbif.api.ws.mixin.LicenseMixin;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,9 +47,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.DEPTH;
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.ELEVATION;
-import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.GEOMETRY;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.*;
 
 /**
  * This class builds a human readable filter from a {@link Predicate} hierarchy.
@@ -96,6 +97,12 @@ public class HumanPredicateBuilder {
 
     // Add mixins
     MAPPER.addMixIn(Dataset.class, LicenseMixin.class);
+
+    MAPPER.registerModule(new SimpleModule()
+            .addKeyDeserializer(OccurrenceSearchParameter.class, new OccurrenceSearchParameter.OccurrenceSearchParameterKeyDeserializer())
+            .addDeserializer(OccurrenceSearchParameter.class,
+                    new OccurrenceSearchParameter.OccurrenceSearchParameterDeserializer())
+    );
 
     // Improved custom pretty printer
     DefaultPrettyPrinter pp = new DefaultPrettyPrinter();
@@ -156,6 +163,7 @@ public class HumanPredicateBuilder {
       return "{ }";
     }
     try {
+
       return humanFilterString(MAPPER.readValue(predicate, Predicate.class));
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -181,50 +189,35 @@ public class HumanPredicateBuilder {
    * Gets the human readable value of the parameter value.
    */
   private String getHumanValue(SearchParameter param, String value) {
-    String humanValue;
-    // lookup values
-    if (param instanceof OccurrenceSearchParameter) {
-      switch ((OccurrenceSearchParameter) param) {
-        case ACCEPTED_TAXON_KEY:
-        case TAXON_KEY:
-        case KINGDOM_KEY:
-        case PHYLUM_KEY:
-        case CLASS_KEY:
-        case ORDER_KEY:
-        case FAMILY_KEY:
-        case GENUS_KEY:
-        case SUBGENUS_KEY:
-        case SPECIES_KEY:
-          humanValue = titleLookupService.getSpeciesName(value);
-          break;
-        case DATASET_KEY:
-          humanValue = titleLookupService.getDatasetTitle(value);
-          break;
-        case COUNTRY:
-        case PUBLISHING_COUNTRY:
-          humanValue = lookupCountryCode(value);
-          break;
-        case CONTINENT:
-          humanValue = lookupContinent(value);
-          break;
-        case MONTH:
-          humanValue = lookupMonth(value);
-          break;
 
-        default:
-          if (param.type().isEnum()) {
-            humanValue = lookupEnum(param.type(), value);
-          } else {
-            humanValue = value;
-          }
-      }
-    } else {
-      if (param.type().isEnum()) {
-        humanValue = lookupEnum(param.type(), value);
-      } else {
-        humanValue = value;
-      }
+
+    if (List.of(ACCEPTED_TAXON_KEY, TAXON_KEY, KINGDOM_KEY, PHYLUM_KEY, CLASS_KEY, ORDER_KEY, FAMILY_KEY, GENUS_KEY, SUBGENUS_KEY, SPECIES_KEY).contains(param)) {
+      return titleLookupService.getSpeciesName(value);
     }
+
+    if (Objects.equals(DATASET_KEY,param)) {
+      return titleLookupService.getDatasetTitle(value);
+    }
+
+    if (List.of(COUNTRY,PUBLISHING_COUNTRY).contains(param)) {
+      return lookupCountryCode(value);
+    }
+
+    if (Objects.equals(CONTINENT, param)) {
+      return lookupContinent(value);
+    }
+    if (Objects.equals(MONTH, param)) {
+      return lookupMonth(value);
+    }
+
+    // lookup values
+    String humanValue;
+    if (param.type().isEnum()) {
+      humanValue = lookupEnum(param.type(), value);
+    } else {
+      humanValue = value;
+    }
+
     // add unit symbol
     if (param == DEPTH || param == ELEVATION) {
       humanValue = humanValue + "m";
@@ -318,31 +311,31 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(EqualsPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(GreaterThanOrEqualsPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), GREATER_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), GREATER_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(GreaterThanPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), GREATER_THAN_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), GREATER_THAN_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(InPredicate in, JsonNode node) {
-    addParamValue(in.getKey(), IN_OPERATOR, in.getValues(), node);
+    addParamValue( (OccurrenceSearchParameter) in.getKey(), IN_OPERATOR, in.getValues(), node);
   }
 
   private void visit(LessThanOrEqualsPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), LESS_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LESS_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(LessThanPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), LESS_THAN_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LESS_THAN_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(LikePredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), LIKE_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LIKE_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(NotPredicate not, JsonNode node) {
@@ -352,11 +345,11 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(IsNotNullPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getParameter(), IS_NOT_NULL_OPERATOR, node);
+    addParamValue((OccurrenceSearchParameter) predicate.getParameter(), IS_NOT_NULL_OPERATOR, node);
   }
 
   private void visit(IsNullPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getParameter(), IS_NULL_OPERATOR, node);
+    addParamValue((OccurrenceSearchParameter) predicate.getParameter(), IS_NULL_OPERATOR, node);
   }
 
   private void visit(GeoDistancePredicate predicate, JsonNode node) {

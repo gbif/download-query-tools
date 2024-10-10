@@ -13,9 +13,8 @@
  */
 package org.gbif.occurrence.query;
 
+import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
-import org.gbif.api.model.predicate.InPredicate;
-import org.gbif.api.model.predicate.Predicate;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -78,8 +77,8 @@ public class HumanPredicateBuilderTest {
                           .writeValueAsString(mapper.readTree(stringPredicate));
                       return builder.humanFilterString(stringPredicate);
                     } catch (Exception e) {
-                      System.err.println("there is an exception");
-                      System.err.println(e.getMessage());
+                      System.out.println("there is an exception");
+                      e.printStackTrace();
                       return null;
                     }
                   })
