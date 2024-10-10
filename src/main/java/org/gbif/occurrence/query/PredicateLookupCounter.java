@@ -14,18 +14,16 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.api.model.common.search.SearchParameter;
-import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.predicate.*;
+import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.*;
 
 /**
  * This class counts the number of webservice lookups needed to format a {@link Predicate} hierarchy.
  */
 public class PredicateLookupCounter extends PredicateVisitor<Integer> {
-
-  protected static final Logger LOG = LoggerFactory.getLogger(PredicateLookupCounter.class);
 
   public Integer count(Predicate p) {
     if (p == null) {
@@ -36,27 +34,11 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
 
   protected Integer getHumanValue(SearchParameter param) {
     // lookup values
-    if (param instanceof OccurrenceSearchParameter) {
-      switch ((OccurrenceSearchParameter) param) {
-        case SCIENTIFIC_NAME:
-        case ACCEPTED_TAXON_KEY:
-        case TAXON_KEY:
-        case KINGDOM_KEY:
-        case PHYLUM_KEY:
-        case CLASS_KEY:
-        case ORDER_KEY:
-        case FAMILY_KEY:
-        case GENUS_KEY:
-        case SUBGENUS_KEY:
-        case SPECIES_KEY:
-        case DATASET_KEY:
-          return 1;
-        default:
-          return 0;
-      }
-    } else {
-      return 0;
+    if (List.of(SCIENTIFIC_NAME,ACCEPTED_TAXON_KEY,TAXON_KEY,KINGDOM_KEY,PHYLUM_KEY,CLASS_KEY,
+            ORDER_KEY,FAMILY_KEY,GENUS_KEY,SUBGENUS_KEY,SPECIES_KEY,DATASET_KEY).contains(param)){
+        return 1;
     }
+    return 0;
   }
 
   @Override
