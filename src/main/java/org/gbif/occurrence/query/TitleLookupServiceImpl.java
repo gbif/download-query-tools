@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 package org.gbif.occurrence.query;
-
 import org.gbif.api.model.checklistbank.NameUsage;
 import org.gbif.api.model.registry.Dataset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.client.WebResource;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Utility ws-client class to get dataset and species titles used in downloads.
@@ -28,32 +28,48 @@ public class TitleLookupServiceImpl implements TitleLookupService {
 
   private static final Logger LOG = LoggerFactory.getLogger(TitleLookupServiceImpl.class);
 
-  private final WebResource apiRoot;
+  private final WebTarget apiRoot;
 
   /**
    * Creates a lookup instance from an existing jersey client resource pointing to the root of the API.
    */
-  public TitleLookupServiceImpl(WebResource apiRoot) {
+  public TitleLookupServiceImpl(WebTarget apiRoot) {
     this.apiRoot = apiRoot;
   }
 
   @Override
   public String getDatasetTitle(String datasetKey) {
     try {
-      return apiRoot.path("dataset").path(datasetKey).get(Dataset.class).getTitle();
+      WebTarget target = apiRoot.path("dataset").path(datasetKey);
+      Response response = target.request().get();
+
+      if (response.getStatus() == 200) {
+        Dataset dataset = response.readEntity(Dataset.class);
+        return dataset.getTitle();
+      } else {
+        LOG.error("Failed to retrieve dataset title for {}. Status code: {}", datasetKey, response.getStatus());
+      }
     } catch (RuntimeException e) {
       LOG.error("Cannot lookup dataset title {}", datasetKey, e);
-      return datasetKey;
     }
+    return datasetKey;
   }
 
   @Override
   public String getSpeciesName(String usageKey) {
     try {
-      return apiRoot.path("species").path(usageKey).get(NameUsage.class).getScientificName();
+      WebTarget target = apiRoot.path("species").path(usageKey);
+      Response response = target.request().get();
+
+      if (response.getStatus() == 200) {
+        NameUsage nameUsage = response.readEntity(NameUsage.class);
+        return nameUsage.getScientificName();
+      } else {
+        LOG.error("Failed to retrieve species name for {}. Status code: {}", usageKey, response.getStatus());
+      }
     } catch (RuntimeException e) {
       LOG.error("Cannot lookup species title {}", usageKey, e);
-      return usageKey;
     }
+    return usageKey;
   }
 }

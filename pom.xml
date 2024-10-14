@@ -42,16 +42,16 @@
   </repositories>
 
   <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
 
     <!-- Note Calcite 1.36.0 may hit a bug in asm when shading occurrence-download.
          See https://github.com/sbt/sbt-assembly/issues/475 -->
     <calcite.version>1.35.0</calcite.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <gbif-api.version>1.18.0-multitaxonomy-SNAPSHOT</gbif-api.version>
-    <jackson.version>2.11.3</jackson.version>
-    <jersey.version>1.18.3</jersey.version>
+    <jackson.version>2.18.0</jackson.version>
+    <glassfish-jersey.version>3.1.9</glassfish-jersey.version>
     <jts.version>1.16.1</jts.version>
     <junit.version>5.8.2</junit.version>
     <logback.version>1.2.3</logback.version>
@@ -108,8 +108,8 @@
       <version>${jackson.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
       <version>${jackson.version}</version>
     </dependency>
     <dependency>
@@ -118,9 +118,14 @@
       <version>${jts.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.sun.jersey</groupId>
+      <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>${jersey.version}</version>
+      <version>${glassfish-jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${glassfish-jersey.version}</version>
     </dependency>
 
     <!-- Logging -->
