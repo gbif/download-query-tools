@@ -12,7 +12,9 @@
  * limitations under the License.
  */
 package org.gbif.occurrence.query;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import org.gbif.api.model.checklistbank.NameUsage;
+import org.gbif.api.model.common.DOI;
 import org.gbif.api.model.registry.Dataset;
 
 import org.slf4j.Logger;
@@ -20,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
+
+import java.lang.reflect.Type;
 
 /**
  * Utility ws-client class to get dataset and species titles used in downloads.
@@ -44,6 +48,13 @@ public class TitleLookupServiceImpl implements TitleLookupService {
       Response response = target.request().get();
 
       if (response.getStatus() == 200) {
+//        JsonbConfig config = new JsonbConfig()
+//                .withDeserializers(new DOIDeserializer());
+//
+//        // Create Jsonb instance with the custom configuration
+//        Jsonb jsonb = JsonbBuilder.create(config);
+//        String datasetAsString = response.readEntity(String.class);
+//        Dataset dataset = jsonb.fromJson(datasetAsString, Dataset.class);
         Dataset dataset = response.readEntity(Dataset.class);
         return dataset.getTitle();
       } else {
@@ -72,4 +83,16 @@ public class TitleLookupServiceImpl implements TitleLookupService {
     }
     return usageKey;
   }
+
+//  public class DOIDeserializer implements jakarta.json.bind.serializer.JsonbDeserializer<DOI> {
+//    @Override
+//    public DOI deserialize(jakarta.json.stream.JsonParser jsonParser, DeserializationContext deserializationContext, Type type) {
+//      if (jsonParser.next() == jakarta.json.stream.JsonParser.Event.VALUE_STRING) {
+//        String doiValue = jsonParser.getString();
+//        return new DOI(doiValue);  // assuming DOI has a constructor that accepts a string
+//      } else {
+//        throw new JsonbException("Expected DOI as a string.");
+//      }
+//    }
+//  }
 }
