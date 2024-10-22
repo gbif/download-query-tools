@@ -123,6 +123,11 @@
       <version>${glassfish-jersey.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
+      <version>${glassfish-jersey.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-common</artifactId>
       <version>${glassfish-jersey.version}</version>

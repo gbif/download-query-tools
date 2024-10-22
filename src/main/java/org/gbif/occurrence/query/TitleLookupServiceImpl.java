@@ -48,13 +48,6 @@ public class TitleLookupServiceImpl implements TitleLookupService {
       Response response = target.request().get();
 
       if (response.getStatus() == 200) {
-//        JsonbConfig config = new JsonbConfig()
-//                .withDeserializers(new DOIDeserializer());
-//
-//        // Create Jsonb instance with the custom configuration
-//        Jsonb jsonb = JsonbBuilder.create(config);
-//        String datasetAsString = response.readEntity(String.class);
-//        Dataset dataset = jsonb.fromJson(datasetAsString, Dataset.class);
         Dataset dataset = response.readEntity(Dataset.class);
         return dataset.getTitle();
       } else {
