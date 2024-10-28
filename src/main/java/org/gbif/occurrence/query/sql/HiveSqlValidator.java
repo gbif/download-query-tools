@@ -204,7 +204,7 @@ public class HiveSqlValidator {
       }
 
       Map<SqlKind, Integer> count = select.accept(new KindValidatorAndCounterVisitor());
-      LOG.debug("Count: " + count);
+      LOG.debug("Count: {}", count);
       if (count.getOrDefault(SqlKind.SELECT, -1) != 1) {
         LOG.warn("Rejected as multiple selects present; {} → {}.", sql);
         throw new QueryBuildingException("Must be exactly one SQL select statement.");
@@ -246,9 +246,9 @@ public class HiveSqlValidator {
     } catch (SqlParseException spe) {
       // Use the first line only, otherwise there's a huge list of all possible keywords.
       throw new QueryBuildingException(spe.getMessage().split("\n")[0], spe);
-    } catch (Exception e) {
-      LOG.error("SQL validation failed for an unknown reason: {} → {}.", sql, e.getMessage());
-      throw new QueryBuildingException(e.getMessage(), e);
+    } catch (KindValidatorAndCounterVisitor.SqlValidationException sve) {
+      // Our custom reasons for invalidation.
+      throw new QueryBuildingException(sve.getMessage(), sve);
     }
   }
 

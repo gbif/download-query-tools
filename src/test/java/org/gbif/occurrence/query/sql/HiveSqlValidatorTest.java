@@ -455,7 +455,9 @@ public class HiveSqlValidatorTest {
         // Comments
         Arguments.of("SELECT -- Comment gbifid FROM occurrence", "Encountered"),
 
-        // Unsupported syntax (needs Hive 3 or later).
-        Arguments.of("SELECT gbifid FROM occurrence WHERE hascoordinate IS TRUE", "not supported"));
+        // Unsupported syntax (see class for detailed reason)
+        Arguments.of("SELECT gbifid FROM occurrence WHERE hascoordinate IS TRUE", "not supported"),
+        Arguments.of("SELECT gbifid FROM occurrence WHERE \"year\" BETWEEN 1980 AND 1990", "not supported")
+      );
   }
 }
