@@ -12,26 +12,10 @@
  * limitations under the License.
  */
 package org.gbif.occurrence.query;
-
-import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
-import org.gbif.api.ws.mixin.Mixins;
-import java.net.URI;
 import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.WebTarget;
-import org.glassfish.jersey.client.ClientConfig;
-
-import static org.gbif.api.util.PreconditionUtils.checkArgument;
 
 public final class TitleLookupServiceFactory {
 
@@ -40,23 +24,7 @@ public final class TitleLookupServiceFactory {
   private TitleLookupServiceFactory() {}
 
   public static TitleLookupService getInstance(String apiRootProperty) {
-    URI apiRoot = URI.create(Objects.requireNonNull(apiRootProperty, "API url can't be null"));
-    checkArgument(apiRoot.getHost() != null, "API url must have a host! " + apiRoot);
-    LOG.info("Create new TitleLookup using API {}", apiRoot);
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    Mixins.getPredefinedMixins().forEach(objectMapper::addMixIn);
-
-    JacksonJsonProvider jacksonJsonProvider = new JacksonJsonProvider(objectMapper);
-    ClientConfig clientConfig = new ClientConfig();
-    clientConfig.register(jacksonJsonProvider);  // Register Jackson provider with Jersey client
-
-    Client client = ClientBuilder.newClient(clientConfig);
-    WebTarget api = client.target(apiRoot);
-
-    return new TitleLookupServiceImpl(api);
+    String apiRoot = Objects.requireNonNull(apiRootProperty, "API url can't be null");
+    return new TitleLookupServiceImpl(apiRoot);
   }
 }

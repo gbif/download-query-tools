@@ -12,18 +12,19 @@
  * limitations under the License.
  */
 package org.gbif.occurrence.query;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.gbif.api.model.checklistbank.NameUsage;
-import org.gbif.api.model.common.DOI;
 import org.gbif.api.model.registry.Dataset;
 
+import org.gbif.api.ws.mixin.Mixins;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Response;
-
-import java.lang.reflect.Type;
+import java.net.URL;
 
 /**
  * Utility ws-client class to get dataset and species titles used in downloads.
@@ -32,28 +33,29 @@ public class TitleLookupServiceImpl implements TitleLookupService {
 
   private static final Logger LOG = LoggerFactory.getLogger(TitleLookupServiceImpl.class);
 
-  private final WebTarget apiRoot;
+  private final String apiRoot;
+  final ObjectMapper objectMapper;
 
   /**
    * Creates a lookup instance from an existing jersey client resource pointing to the root of the API.
    */
-  public TitleLookupServiceImpl(WebTarget apiRoot) {
+  public TitleLookupServiceImpl(String apiRoot) {
     this.apiRoot = apiRoot;
+    objectMapper = new ObjectMapper();
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    Mixins.getPredefinedMixins().forEach(objectMapper::addMixIn);
   }
 
   @Override
   public String getDatasetTitle(String datasetKey) {
+    String apiUrl = apiRoot + "dataset/" + datasetKey;
     try {
-      WebTarget target = apiRoot.path("dataset").path(datasetKey);
-      Response response = target.request().get();
-
-      if (response.getStatus() == 200) {
-        Dataset dataset = response.readEntity(Dataset.class);
-        return dataset.getTitle();
-      } else {
-        LOG.error("Failed to retrieve dataset title for {}. Status code: {}", datasetKey, response.getStatus());
-      }
-    } catch (RuntimeException e) {
+      URL url = new URL(apiUrl);
+      Dataset dataset = objectMapper.readValue(url, Dataset.class);
+      return dataset.getTitle();
+    } catch (Exception e) {
       LOG.error("Cannot lookup dataset title {}", datasetKey, e);
     }
     return datasetKey;
@@ -62,30 +64,13 @@ public class TitleLookupServiceImpl implements TitleLookupService {
   @Override
   public String getSpeciesName(String usageKey) {
     try {
-      WebTarget target = apiRoot.path("species").path(usageKey);
-      Response response = target.request().get();
-
-      if (response.getStatus() == 200) {
-        NameUsage nameUsage = response.readEntity(NameUsage.class);
-        return nameUsage.getScientificName();
-      } else {
-        LOG.error("Failed to retrieve species name for {}. Status code: {}", usageKey, response.getStatus());
-      }
-    } catch (RuntimeException e) {
+      String apiUrl = apiRoot + "species/" + usageKey;
+      URL url = new URL(apiUrl);
+      NameUsage nameUsage = objectMapper.readValue(url, NameUsage.class);
+      return nameUsage.getScientificName();
+    } catch (Exception e) {
       LOG.error("Cannot lookup species title {}", usageKey, e);
     }
     return usageKey;
   }
-
-//  public class DOIDeserializer implements jakarta.json.bind.serializer.JsonbDeserializer<DOI> {
-//    @Override
-//    public DOI deserialize(jakarta.json.stream.JsonParser jsonParser, DeserializationContext deserializationContext, Type type) {
-//      if (jsonParser.next() == jakarta.json.stream.JsonParser.Event.VALUE_STRING) {
-//        String doiValue = jsonParser.getString();
-//        return new DOI(doiValue);  // assuming DOI has a constructor that accepts a string
-//      } else {
-//        throw new JsonbException("Expected DOI as a string.");
-//      }
-//    }
-//  }
 }
