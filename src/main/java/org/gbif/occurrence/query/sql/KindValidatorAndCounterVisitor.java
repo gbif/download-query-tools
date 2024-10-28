@@ -94,7 +94,7 @@ class KindValidatorAndCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>
             // This gets changed into "BETWEEN ASYMMETRIC" by Calcite which Hive doesn't support.
             // See https://issues.apache.org/jira/browse/CALCITE-4471 in case Calcite fix this.
             throw new SqlValidationException(
-              "BETWEEN is not supported, please use comparison operators (<, <=, >=, >) instead.");
+                "BETWEEN is not supported, please use comparison operators (<, <=, >=, >) instead.");
         }
         m = addMaps(m, n.accept(this));
       }
