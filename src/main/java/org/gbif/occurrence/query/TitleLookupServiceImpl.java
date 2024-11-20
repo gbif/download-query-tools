@@ -73,4 +73,17 @@ public class TitleLookupServiceImpl implements TitleLookupService {
     }
     return usageKey;
   }
+
+  @Override
+  public String getSpeciesName(String usageKey, String checklistKey) {
+    try {
+      String apiUrl = apiRoot + "species/" + usageKey;
+      URL url = new URL(apiUrl);
+      NameUsage nameUsage = objectMapper.readValue(url, NameUsage.class);
+      return nameUsage.getScientificName();
+    } catch (Exception e) {
+      LOG.error("Cannot lookup species title {}", usageKey, e);
+    }
+    return usageKey;
+  }
 }
