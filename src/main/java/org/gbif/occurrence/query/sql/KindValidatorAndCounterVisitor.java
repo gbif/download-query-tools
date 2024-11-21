@@ -61,7 +61,8 @@ class KindValidatorAndCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>
       if (n != null) {
         switch (n.getKind()) {
           case CAST:
-            // Check this isn't something like "CAST('year' AS INTEGER)" which happens when the user does something like
+            // Check this isn't something like "CAST('year' AS INTEGER)" which happens when the user
+            // does something like
             // "'year' > 2000" and Calcite tries to fix it.
             //
             // This is handled specially because it's a common error for someone new to the SQL API.
@@ -69,9 +70,12 @@ class KindValidatorAndCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>
             if (castCall.operandCount() == 2) {
               SqlNode first = castCall.getOperandList().get(0);
               SqlNode second = castCall.getOperandList().get(1);
-              if (first instanceof SqlLiteral && mistakenAsFields.contains(((SqlLiteral) first).toValue())) {
-                if (second instanceof SqlDataTypeSpec && ((SqlDataTypeSpec) second).getTypeName().names.get(0).equals("INTEGER")) {
-                  throw new RuntimeException("'year', 'month' or 'day' string literals used in a comparison. (Hint: use double quotes for \"year\", \"month\" and \"day\" columns.)");
+              if (first instanceof SqlLiteral
+                  && mistakenAsFields.contains(((SqlLiteral) first).toValue())) {
+                if (second instanceof SqlDataTypeSpec
+                    && ((SqlDataTypeSpec) second).getTypeName().names.get(0).equals("INTEGER")) {
+                  throw new SqlValidationException(
+                      "'year', 'month' or 'day' string literals used in a comparison. (Hint: use double quotes for \"year\", \"month\" and \"day\" columns.)");
                 }
               }
             }
@@ -81,8 +85,16 @@ class KindValidatorAndCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>
           case IS_NOT_TRUE:
           case IS_FALSE:
           case IS_NOT_FALSE:
-            // These are not supported by our old Hive version.  Remove the restriction with Hive 3 or later.
-            throw new RuntimeException("x IS TRUE and x IS FALSE are not supported, please use x = TRUE and x = FALSE instead.");
+            // These are not supported by our old Hive version.  Remove the restriction with Hive 3
+            // or later.
+            throw new SqlValidationException(
+                "x IS TRUE and x IS FALSE are not supported, please use x = TRUE and x = FALSE instead.");
+
+          case BETWEEN:
+            // This gets changed into "BETWEEN ASYMMETRIC" by Calcite which Hive doesn't support.
+            // See https://issues.apache.org/jira/browse/CALCITE-4471 in case Calcite fix this.
+            throw new SqlValidationException(
+              "BETWEEN is not supported, please use comparison operators (<, <=, >=, >) instead.");
         }
         m = addMaps(m, n.accept(this));
       }
@@ -127,5 +139,11 @@ class KindValidatorAndCounterVisitor implements SqlVisitor<Map<SqlKind, Integer>
   @Override
   public Map<SqlKind, Integer> visitNode(SqlNode n) {
     return n.accept(this);
+  }
+
+  class SqlValidationException extends RuntimeException {
+    SqlValidationException(String message) {
+      super(message);
+    }
   }
 }
