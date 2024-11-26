@@ -14,16 +14,16 @@
 package org.gbif.occurrence.query;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.gbif.api.model.checklistbank.NameUsage;
 import org.gbif.api.model.registry.Dataset;
 
 import org.gbif.api.ws.mixin.Mixins;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.ws.rs.client.WebTarget;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -64,10 +64,8 @@ public class TitleLookupServiceImpl implements TitleLookupService {
   @Override
   public String getSpeciesName(String usageKey) {
     try {
-      String apiUrl = apiRoot + "species/" + usageKey;
-      URL url = new URL(apiUrl);
-      NameUsage nameUsage = objectMapper.readValue(url, NameUsage.class);
-      return nameUsage.getScientificName();
+      String apiUrl = getV2Url() + "species/match?usageKey=" + usageKey;
+      return getCanonical(apiUrl);
     } catch (Exception e) {
       LOG.error("Cannot lookup species title {}", usageKey, e);
     }
@@ -76,14 +74,40 @@ public class TitleLookupServiceImpl implements TitleLookupService {
 
   @Override
   public String getSpeciesName(String usageKey, String checklistKey) {
+    if (checklistKey == null) {
+      return getSpeciesName(usageKey);
+    }
     try {
-      String apiUrl = apiRoot + "species/" + usageKey;
-      URL url = new URL(apiUrl);
-      NameUsage nameUsage = objectMapper.readValue(url, NameUsage.class);
-      return nameUsage.getScientificName();
+      String apiUrl = getV2Url() + "species/match/" + checklistKey + "?usageKey=" + usageKey;
+      return getCanonical(apiUrl);
     } catch (Exception e) {
       LOG.error("Cannot lookup species title {}", usageKey, e);
     }
     return usageKey;
+  }
+
+  private String getCanonical(String apiUrl) throws IOException {
+    URL url = new URL(apiUrl);
+    JsonNode rootNode = objectMapper.readTree(url);
+    JsonNode usageNode = rootNode.path("usage");
+    if (usageNode != null) {
+      if (usageNode.path("canonicalName") != null) {
+        return usageNode.path("canonicalName").asText();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Update the URL version from v1 to v2.
+   * This isn't ideal, but will certainly easy the pain of transitioning between v1 and v2
+   * APIs as the api.url configuration property is ubiquitous in config.
+   */
+  private String getV2Url() {
+    String baseUrl = apiRoot;
+    if (baseUrl != null && baseUrl.endsWith("v1/")) {
+      baseUrl = baseUrl.replace("v1/", "v2/");
+    }
+    return baseUrl;
   }
 }

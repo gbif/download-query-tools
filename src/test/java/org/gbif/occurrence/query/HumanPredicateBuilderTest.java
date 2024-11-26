@@ -45,6 +45,7 @@ public class HumanPredicateBuilderTest {
     TitleLookupServiceImpl tl = mock(TitleLookupServiceImpl.class);
     when(tl.getDatasetTitle(ArgumentMatchers.any())).thenReturn("The little Mermaid");
     when(tl.getSpeciesName(ArgumentMatchers.any())).thenReturn("Abies alba Mill.");
+    when(tl.getSpeciesName(ArgumentMatchers.any(), ArgumentMatchers.any() )).thenReturn("Abies alba Mill.");
     builder = new HumanPredicateBuilder(tl);
   }
 
