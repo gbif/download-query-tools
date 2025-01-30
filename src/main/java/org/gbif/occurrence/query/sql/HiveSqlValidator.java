@@ -13,15 +13,6 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import org.gbif.api.exception.QueryBuildingException;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
@@ -40,6 +31,8 @@ import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlSelectKeyword;
+import org.apache.calcite.sql.SqlWriterConfig;
+import org.apache.calcite.sql.dialect.AnsiSqlDialect;
 import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -53,8 +46,18 @@ import org.apache.calcite.sql.validate.SqlValidatorImpl;
 import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
+import org.apache.calcite.util.Util;
+import org.gbif.api.exception.QueryBuildingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
@@ -70,10 +73,20 @@ public class HiveSqlValidator {
   private final CalciteCatalogReader catalogReader;
   private final SqlOperatorTable sqlOperatorTable;
   private final SqlValidator validator;
+  private final UnaryOperator<SqlWriterConfig> sqlDebugWriterConfig;
 
   public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
     // dialect = SqlDialect.DatabaseProduct.HIVE.getDialect();
     dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
+
+    sqlDebugWriterConfig = c ->
+      c.withDialect(Util.first(dialect, AnsiSqlDialect.DEFAULT))
+        .withClauseStartsLine(true)
+        .withClauseEndsLine(true)
+        .withIndentation(2)
+        .withAlwaysUseParentheses(false)
+        .withQuoteAllIdentifiers(true)
+        .withLineFolding(SqlWriterConfig.LineFolding.TALL);
 
     parserConfig =
         SqlParser.Config.DEFAULT
@@ -85,7 +98,8 @@ public class HiveSqlValidator {
     validatorConfig =
         SqlValidatorImpl.Config.DEFAULT
             .withConformance(SqlConformanceEnum.LENIENT)
-            .withColumnReferenceExpansion(false);
+            .withColumnReferenceExpansion(false)
+            .withCallRewrite(false); // Disable rewriting COALESCE as CASE WHEN, etc.
 
     SqlStdOperatorTable sqlStdOperatorTable = SqlStdOperatorTable.instance();
     // Built-in Hive functions
@@ -136,7 +150,8 @@ public class HiveSqlValidator {
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
       SqlNode validatedSqlNode = validator.validate(sqlNode);
-      LOG.debug("Validated as {}", validatedSqlNode.toSqlString(dialect));
+
+      LOG.debug("Validated as {}", validatedSqlNode.toSqlString(sqlDebugWriterConfig));
 
       if (validatedSqlNode.getKind() != SqlKind.SELECT) {
         LOG.warn(
@@ -223,6 +238,7 @@ public class HiveSqlValidator {
       // Validate WKT strings.
       select.accept(new GeometryPointCounterVisitor());
 
+      // Prepend catalog if defined
       if (catalog != null) {
         String firstTable = rootSchema.getTableNames().stream().findFirst().get();
         Prepare.PreparingTable table =

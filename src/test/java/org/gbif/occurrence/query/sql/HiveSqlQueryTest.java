@@ -161,9 +161,9 @@ public class HiveSqlQueryTest {
                 "countrycode IS NULL",
                 "gbifid * 2",
                 "ROUND(decimallatitude, 1)",
-                "EXTRACT(HOUR FROM eventdate)",
+                "HOUR(eventdate)",
                 "CAST(gbifid AS CHAR)",
-                "GBIF_EEACELLCODE(1000, decimallatitude, decimallongitude, CASE WHEN coordinateuncertaintyinmeters IS NOT NULL THEN coordinateuncertaintyinmeters ELSE 1000 END)")),
+                "GBIF_EEACELLCODE(1000, decimallatitude, decimallongitude, COALESCE(coordinateuncertaintyinmeters, 1000))")),
 
         // Check functions (to fit the other tests, put them in the WHERE clause).
         Arguments.of(
@@ -174,8 +174,8 @@ public class HiveSqlQueryTest {
                 + "AND countryCode = 'DK' and \"month\" > \"day\" AND "
                 + "PRINTF('%04d-%02d', \"year\", \"month\") = '2024-03'",
             "occurrence.gbifid > 10000 AND - occurrence.gbifid > 10 AND occurrence.countrycode IS NULL AND occurrence.gbifid * 2 > 1 AND "
-                + "ROUND(occurrence.decimallatitude, 1) > 1 AND EXTRACT(HOUR FROM occurrence.eventdate) > 1 AND CAST(occurrence.gbifid AS CHAR) = 'X' "
-                + "AND GBIF_EEACELLCODE(1000, occurrence.decimallatitude, occurrence.decimallongitude, CASE WHEN occurrence.coordinateuncertaintyinmeters IS NOT NULL THEN occurrence.coordinateuncertaintyinmeters ELSE 1000 END) IS NOT NULL "
+                + "ROUND(occurrence.decimallatitude, 1) > 1 AND HOUR(occurrence.eventdate) > 1 AND CAST(occurrence.gbifid AS CHAR) = 'X' "
+                + "AND GBIF_EEACELLCODE(1000, occurrence.decimallatitude, occurrence.decimallongitude, COALESCE(occurrence.coordinateuncertaintyinmeters, 1000)) IS NOT NULL "
                 + "AND occurrence.countrycode = 'DK' AND occurrence.month > occurrence.day AND PRINTF('%04d-%02d', occurrence.year, occurrence.month) = '2024-03'",
             Arrays.asList("gbifid")),
 

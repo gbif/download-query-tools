@@ -13,11 +13,14 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import org.apache.calcite.sql.SqlWriterConfig;
+import org.apache.calcite.sql.dialect.AnsiSqlDialect;
 import org.gbif.api.exception.QueryBuildingException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
@@ -37,8 +40,22 @@ import lombok.Getter;
 @Getter
 public class HiveSqlQuery {
 
+  /*
+   * SQL string for internal use — validation, execution using Hive.
+   */
   final String sql;
+
+  /*
+   * SQL WHERE clause string for internal use — validation, execution using Hive.
+   */
   final String sqlWhere;
+
+  /*
+   * User-facing SQL string — nicely formatted, and without internal catalogue/table names or other
+   * implementation concerns.
+   */
+  final String userSql;
+
   final List<String> sqlSelectColumnNames;
   final Integer predicateCount;
   final Integer pointsCount;
@@ -60,7 +77,22 @@ public class HiveSqlQuery {
 
     SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);
 
+    // Nicely formatted SQL
+    UnaryOperator<SqlWriterConfig> sqlWriterConfig = c ->
+      c.withDialect(Util.first(sqlDialect, AnsiSqlDialect.DEFAULT))
+        .withClauseStartsLine(true)
+        .withClauseEndsLine(true)
+        .withIndentation(2)
+        .withAlwaysUseParentheses(false)
+        .withQuoteAllIdentifiers(true)
+        .withLineFolding(SqlWriterConfig.LineFolding.TALL);
+
+    // Internal SQL
     this.sql = node.toSqlString(sqlDialect).getSql();
+
+    // Nicely formatted SQL for the user
+    this.userSql = node.toSqlString(sqlWriterConfig).getSql();
+
     if (node.getWhere() != null) {
       this.sqlWhere = node.getWhere().toSqlString(sqlDialect).getSql();
     } else {
