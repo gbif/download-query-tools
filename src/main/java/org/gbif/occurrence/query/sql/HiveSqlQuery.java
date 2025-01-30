@@ -14,7 +14,7 @@
 package org.gbif.occurrence.query.sql;
 
 import org.apache.calcite.sql.SqlWriterConfig;
-import org.apache.calcite.sql.dialect.AnsiSqlDialect;
+import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.gbif.api.exception.QueryBuildingException;
 
 import java.util.ArrayList;
@@ -78,13 +78,18 @@ public class HiveSqlQuery {
     SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);
 
     // Nicely formatted SQL
+    SqlDialect prettySqlDialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT
+      .withDatabaseMajorVersion(3)
+      // Override quote string, which is empty even though Hive's quote string is `, and which we
+      // want to be " for alignment with standard ANSI SQL.
+      .withIdentifierQuoteString("\""));
     UnaryOperator<SqlWriterConfig> sqlWriterConfig = c ->
-      c.withDialect(Util.first(sqlDialect, AnsiSqlDialect.DEFAULT))
+      c.withDialect(prettySqlDialect)
         .withClauseStartsLine(true)
         .withClauseEndsLine(true)
         .withIndentation(2)
         .withAlwaysUseParentheses(false)
-        .withQuoteAllIdentifiers(true)
+        .withQuoteAllIdentifiers(false) // Only quote identifiers like "year"
         .withLineFolding(SqlWriterConfig.LineFolding.TALL);
 
     // Internal SQL

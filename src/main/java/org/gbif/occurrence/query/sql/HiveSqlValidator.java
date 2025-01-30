@@ -85,7 +85,7 @@ public class HiveSqlValidator {
         .withClauseEndsLine(true)
         .withIndentation(2)
         .withAlwaysUseParentheses(false)
-        .withQuoteAllIdentifiers(true)
+        .withQuoteAllIdentifiers(true) // There's no quote string defined for HiveSqlDialect anyway.
         .withLineFolding(SqlWriterConfig.LineFolding.TALL);
 
     parserConfig =
