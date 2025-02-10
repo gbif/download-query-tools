@@ -13,8 +13,6 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import org.apache.calcite.sql.SqlWriterConfig;
-import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.gbif.api.exception.QueryBuildingException;
 
 import java.util.ArrayList;
@@ -28,6 +26,8 @@ import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.SqlWriterConfig;
+import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.util.Util;
 
 import lombok.Getter;
@@ -78,19 +78,23 @@ public class HiveSqlQuery {
     SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);
 
     // Nicely formatted SQL
-    SqlDialect prettySqlDialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT
-      .withDatabaseMajorVersion(3)
-      // Override quote string, which is empty even though Hive's quote string is `, and which we
-      // want to be " for alignment with standard ANSI SQL.
-      .withIdentifierQuoteString("\""));
-    UnaryOperator<SqlWriterConfig> sqlWriterConfig = c ->
-      c.withDialect(prettySqlDialect)
-        .withClauseStartsLine(true)
-        .withClauseEndsLine(true)
-        .withIndentation(2)
-        .withAlwaysUseParentheses(false)
-        .withQuoteAllIdentifiers(false) // Only quote identifiers like "year"
-        .withLineFolding(SqlWriterConfig.LineFolding.TALL);
+    SqlDialect prettySqlDialect =
+        new HiveSqlDialect(
+            HiveSqlDialect.DEFAULT_CONTEXT
+                .withDatabaseMajorVersion(3)
+                // Override quote string, which is empty even though Hive's quote string is `, and
+                // which we
+                // want to be " for alignment with standard ANSI SQL.
+                .withIdentifierQuoteString("\""));
+    UnaryOperator<SqlWriterConfig> sqlWriterConfig =
+        c ->
+            c.withDialect(prettySqlDialect)
+                .withClauseStartsLine(true)
+                .withClauseEndsLine(true)
+                .withIndentation(2)
+                .withAlwaysUseParentheses(false)
+                .withQuoteAllIdentifiers(false) // Only quote identifiers like "year"
+                .withLineFolding(SqlWriterConfig.LineFolding.TALL);
 
     // Internal SQL
     this.sql = node.toSqlString(sqlDialect).getSql();
