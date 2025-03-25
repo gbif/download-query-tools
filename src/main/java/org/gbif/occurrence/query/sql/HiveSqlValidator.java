@@ -152,7 +152,10 @@ public class HiveSqlValidator {
     SqlParser sqlParser = SqlParser.create(sql, frameworkConfig.getParserConfig());
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
-      SqlNode validatedSqlNode = validator.validate(sqlNode);
+      SqlNode validatedSqlNode;
+      synchronized (validator) {
+        validatedSqlNode = validator.validate(sqlNode);
+      }
 
       LOG.debug("Validated as {}", validatedSqlNode.toSqlString(sqlDebugWriterConfig));
 
