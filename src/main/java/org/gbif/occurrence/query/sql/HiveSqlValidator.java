@@ -271,9 +271,9 @@ public class HiveSqlValidator {
 
   private SqlValidator newValidator() {
     return SqlValidatorUtil.newValidator(
-      sqlOperatorTable,
-      catalogReader,
-      relDataTypeFactory,
-      frameworkConfig.getSqlValidatorConfig());
+        sqlOperatorTable,
+        catalogReader,
+        relDataTypeFactory,
+        frameworkConfig.getSqlValidatorConfig());
   }
 }
