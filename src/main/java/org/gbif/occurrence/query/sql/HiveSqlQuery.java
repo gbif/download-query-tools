@@ -18,6 +18,7 @@ import org.gbif.api.exception.QueryBuildingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
@@ -25,6 +26,8 @@ import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.SqlWriterConfig;
+import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.util.Util;
 
 import lombok.Getter;
@@ -37,8 +40,22 @@ import lombok.Getter;
 @Getter
 public class HiveSqlQuery {
 
+  /*
+   * SQL string for internal use — validation, execution using Hive.
+   */
   final String sql;
+
+  /*
+   * SQL WHERE clause string for internal use — validation, execution using Hive.
+   */
   final String sqlWhere;
+
+  /*
+   * User-facing SQL string — nicely formatted, and without internal catalogue/table names or other
+   * implementation concerns.
+   */
+  final String userSql;
+
   final List<String> sqlSelectColumnNames;
   final Integer predicateCount;
   final Integer pointsCount;
@@ -46,19 +63,45 @@ public class HiveSqlQuery {
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
-  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql) throws QueryBuildingException {
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql)
+      throws QueryBuildingException {
     this(sqlValidator, unvalidatedSql, null);
   }
 
   /**
    * Parse and validate the query.  Throws an exception if parsing/validation fails.
    */
-  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog) throws QueryBuildingException {
+  public HiveSqlQuery(HiveSqlValidator sqlValidator, String unvalidatedSql, String catalog)
+      throws QueryBuildingException {
     SqlDialect sqlDialect = sqlValidator.getDialect();
 
     SqlSelect node = sqlValidator.validate(unvalidatedSql, catalog);
 
+    // Nicely formatted SQL
+    SqlDialect prettySqlDialect =
+        new HiveSqlDialect(
+            HiveSqlDialect.DEFAULT_CONTEXT
+                .withDatabaseMajorVersion(3)
+                // Override quote string, which is empty even though Hive's quote string is `, and
+                // which we
+                // want to be " for alignment with standard ANSI SQL.
+                .withIdentifierQuoteString("\""));
+    UnaryOperator<SqlWriterConfig> sqlWriterConfig =
+        c ->
+            c.withDialect(prettySqlDialect)
+                .withClauseStartsLine(true)
+                .withClauseEndsLine(true)
+                .withIndentation(2)
+                .withAlwaysUseParentheses(false)
+                .withQuoteAllIdentifiers(false) // Only quote identifiers like "year"
+                .withLineFolding(SqlWriterConfig.LineFolding.TALL);
+
+    // Internal SQL
     this.sql = node.toSqlString(sqlDialect).getSql();
+
+    // Nicely formatted SQL for the user
+    this.userSql = node.toSqlString(sqlWriterConfig).getSql();
+
     if (node.getWhere() != null) {
       this.sqlWhere = node.getWhere().toSqlString(sqlDialect).getSql();
     } else {

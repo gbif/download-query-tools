@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +41,8 @@ import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlSelectKeyword;
+import org.apache.calcite.sql.SqlWriterConfig;
+import org.apache.calcite.sql.dialect.AnsiSqlDialect;
 import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -53,6 +56,7 @@ import org.apache.calcite.sql.validate.SqlValidatorImpl;
 import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
+import org.apache.calcite.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,10 +74,22 @@ public class HiveSqlValidator {
   private final CalciteCatalogReader catalogReader;
   private final SqlOperatorTable sqlOperatorTable;
   private final SqlValidator validator;
+  private final UnaryOperator<SqlWriterConfig> sqlDebugWriterConfig;
 
   public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
     // dialect = SqlDialect.DatabaseProduct.HIVE.getDialect();
     dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
+
+    sqlDebugWriterConfig =
+        c ->
+            c.withDialect(Util.first(dialect, AnsiSqlDialect.DEFAULT))
+                .withClauseStartsLine(true)
+                .withClauseEndsLine(true)
+                .withIndentation(2)
+                .withAlwaysUseParentheses(false)
+                .withQuoteAllIdentifiers(
+                    true) // There's no quote string defined for HiveSqlDialect anyway.
+                .withLineFolding(SqlWriterConfig.LineFolding.TALL);
 
     parserConfig =
         SqlParser.Config.DEFAULT
@@ -85,7 +101,8 @@ public class HiveSqlValidator {
     validatorConfig =
         SqlValidatorImpl.Config.DEFAULT
             .withConformance(SqlConformanceEnum.LENIENT)
-            .withColumnReferenceExpansion(false);
+            .withColumnReferenceExpansion(false)
+            .withCallRewrite(false); // Disable rewriting COALESCE as CASE WHEN, etc.
 
     SqlStdOperatorTable sqlStdOperatorTable = SqlStdOperatorTable.instance();
     // Built-in Hive functions
@@ -136,7 +153,8 @@ public class HiveSqlValidator {
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
       SqlNode validatedSqlNode = validator.validate(sqlNode);
-      LOG.debug("Validated as {}", validatedSqlNode.toSqlString(dialect));
+
+      LOG.debug("Validated as {}", validatedSqlNode.toSqlString(sqlDebugWriterConfig));
 
       if (validatedSqlNode.getKind() != SqlKind.SELECT) {
         LOG.warn(
@@ -171,7 +189,8 @@ public class HiveSqlValidator {
       LOG.trace("- Group: {}", select.getGroup());
 
       if (select.getGroup() != null && select.getModifierNode(SqlSelectKeyword.DISTINCT) != null) {
-        LOG.warn("Rejected as distinct clauses are not supported alongside group by clauses; {}.", sql);
+        LOG.warn(
+            "Rejected as distinct clauses are not supported alongside group by clauses; {}.", sql);
         throw new QueryBuildingException("SQL DISTINCT clauses cannot be combined with GROUP BY.");
       }
 
@@ -203,7 +222,7 @@ public class HiveSqlValidator {
       }
 
       Map<SqlKind, Integer> count = select.accept(new KindValidatorAndCounterVisitor());
-      LOG.debug("Count: " + count);
+      LOG.debug("Count: {}", count);
       if (count.getOrDefault(SqlKind.SELECT, -1) != 1) {
         LOG.warn("Rejected as multiple selects present; {} → {}.", sql);
         throw new QueryBuildingException("Must be exactly one SQL select statement.");
@@ -222,6 +241,7 @@ public class HiveSqlValidator {
       // Validate WKT strings.
       select.accept(new GeometryPointCounterVisitor());
 
+      // Prepend catalog if defined
       if (catalog != null) {
         String firstTable = rootSchema.getTableNames().stream().findFirst().get();
         Prepare.PreparingTable table =
@@ -245,9 +265,9 @@ public class HiveSqlValidator {
     } catch (SqlParseException spe) {
       // Use the first line only, otherwise there's a huge list of all possible keywords.
       throw new QueryBuildingException(spe.getMessage().split("\n")[0], spe);
-    } catch (Exception e) {
-      LOG.error("SQL validation failed for an unknown reason: {} → {}.", sql, e.getMessage());
-      throw new QueryBuildingException(e.getMessage(), e);
+    } catch (KindValidatorAndCounterVisitor.SqlValidationException sve) {
+      // Our custom reasons for invalidation.
+      throw new QueryBuildingException(sve.getMessage(), sve);
     }
   }
 
