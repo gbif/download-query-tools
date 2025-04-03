@@ -18,4 +18,6 @@ public interface TitleLookupService {
   String getDatasetTitle(String datasetKey);
 
   String getSpeciesName(String usageKey);
+
+  String getSpeciesName(String usageKey, String checklistKey);
 }
