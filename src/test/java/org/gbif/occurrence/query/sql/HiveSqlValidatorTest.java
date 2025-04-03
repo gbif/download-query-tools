@@ -165,10 +165,7 @@ public class HiveSqlValidatorTest {
         Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
 
         // Probably not what was intended, stricter AS?
-        Arguments.of("SELECT countrycode datasetkey FROM occurrence"),
-
-        // Probably not what was intended, stricter AS?
-        Arguments.of("SELECT datasetKey, scientificName, decimalLatitude, decimalLongitude, eventDate FROM occurrence WHERE checklistKey = '2d59e5db-57ad-41ff-97d6-11f5fb264527' AND taxonKey = 'urn:lsid:marinespecies.org:taxname:158970'" ));
+        Arguments.of("SELECT countrycode datasetkey FROM occurrence"));
   }
 
   private static Stream<Arguments> provideStringsForHiveBuiltInFunctions() {

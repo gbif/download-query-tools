@@ -77,10 +77,12 @@ public class HiveSqlQueryTest {
   @Test
   public void testUserSql() throws Exception {
     HiveSqlQuery q =
-      new HiveSqlQuery(hiveSqlValidator, "SELECT \"year\" FROM occurrence WHERE \"year\" > 2000");
+        new HiveSqlQuery(hiveSqlValidator, "SELECT \"year\" FROM occurrence WHERE \"year\" > 2000");
 
     assertEquals("SELECT year\nFROM occurrence\nWHERE occurrence.year > 2000", q.getSql());
-    assertEquals("SELECT\n  \"year\"\nFROM\n  occurrence\nWHERE\n  occurrence.\"year\" > 2000", q.getUserSql());
+    assertEquals(
+        "SELECT\n  \"year\"\nFROM\n  occurrence\nWHERE\n  occurrence.\"year\" > 2000",
+        q.getUserSql());
   }
 
   private static Stream<Arguments> provideSql() {

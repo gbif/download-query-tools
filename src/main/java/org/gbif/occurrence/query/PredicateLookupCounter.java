@@ -16,7 +16,6 @@ package org.gbif.occurrence.query;
 import lombok.extern.slf4j.Slf4j;
 import org.gbif.api.model.common.search.SearchParameter;
 import org.gbif.api.model.predicate.*;
-import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import java.util.List;
 
 import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.*;

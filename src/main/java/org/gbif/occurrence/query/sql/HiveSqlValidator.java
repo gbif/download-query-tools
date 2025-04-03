@@ -13,6 +13,16 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import org.gbif.api.exception.QueryBuildingException;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
@@ -47,17 +57,8 @@ import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.util.Util;
-import org.gbif.api.exception.QueryBuildingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
@@ -79,14 +80,16 @@ public class HiveSqlValidator {
     // dialect = SqlDialect.DatabaseProduct.HIVE.getDialect();
     dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
 
-    sqlDebugWriterConfig = c ->
-      c.withDialect(Util.first(dialect, AnsiSqlDialect.DEFAULT))
-        .withClauseStartsLine(true)
-        .withClauseEndsLine(true)
-        .withIndentation(2)
-        .withAlwaysUseParentheses(false)
-        .withQuoteAllIdentifiers(true) // There's no quote string defined for HiveSqlDialect anyway.
-        .withLineFolding(SqlWriterConfig.LineFolding.TALL);
+    sqlDebugWriterConfig =
+        c ->
+            c.withDialect(Util.first(dialect, AnsiSqlDialect.DEFAULT))
+                .withClauseStartsLine(true)
+                .withClauseEndsLine(true)
+                .withIndentation(2)
+                .withAlwaysUseParentheses(false)
+                .withQuoteAllIdentifiers(
+                    true) // There's no quote string defined for HiveSqlDialect anyway.
+                .withLineFolding(SqlWriterConfig.LineFolding.TALL);
 
     parserConfig =
         SqlParser.Config.DEFAULT
