@@ -13,9 +13,8 @@
  */
 package org.gbif.occurrence.query;
 
+import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
-import org.gbif.api.model.predicate.InPredicate;
-import org.gbif.api.model.predicate.Predicate;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,6 +45,7 @@ public class HumanPredicateBuilderTest {
     TitleLookupServiceImpl tl = mock(TitleLookupServiceImpl.class);
     when(tl.getDatasetTitle(ArgumentMatchers.any())).thenReturn("The little Mermaid");
     when(tl.getSpeciesName(ArgumentMatchers.any())).thenReturn("Abies alba Mill.");
+    when(tl.getSpeciesName(ArgumentMatchers.any(), ArgumentMatchers.any() )).thenReturn("Abies alba Mill.");
     builder = new HumanPredicateBuilder(tl);
   }
 
@@ -78,8 +78,8 @@ public class HumanPredicateBuilderTest {
                           .writeValueAsString(mapper.readTree(stringPredicate));
                       return builder.humanFilterString(stringPredicate);
                     } catch (Exception e) {
-                      System.err.println("there is an exception");
-                      System.err.println(e.getMessage());
+                      System.out.println("there is an exception");
+                      e.printStackTrace();
                       return null;
                     }
                   })
