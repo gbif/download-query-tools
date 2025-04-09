@@ -13,6 +13,7 @@
  */
 package org.gbif.occurrence.query;
 
+import lombok.extern.slf4j.Slf4j;
 import org.gbif.api.model.common.search.SearchParameter;
 import org.gbif.api.model.predicate.*;
 import java.util.List;
@@ -22,6 +23,7 @@ import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.*;
 /**
  * This class counts the number of webservice lookups needed to format a {@link Predicate} hierarchy.
  */
+@Slf4j
 public class PredicateLookupCounter extends PredicateVisitor<Integer> {
 
   public Integer count(Predicate p) {

@@ -171,12 +171,12 @@ public class HumanPredicateBuilder {
   }
 
   private void addParamValue(
-      SearchParameter param, String op, Collection<String> values, JsonNode node) {
+      SearchParameter param, String op, Collection<String> values, String checklistKey, JsonNode node) {
     addParamValue(
         param,
         op
             + "("
-            + values.stream().map(p -> getHumanValue(param, p)).collect(Collectors.joining(", "))
+            + values.stream().map(p -> getHumanValue(param, p, checklistKey)).collect(Collectors.joining(", "))
             + ")",
         node);
   }
@@ -185,14 +185,22 @@ public class HumanPredicateBuilder {
     addParamValue(param, op + getHumanValue(param, value), node);
   }
 
+  private void addParamValue(SearchParameter param, String op, String value, String checklistKey, JsonNode node) {
+    addParamValue(param, op + getHumanValue(param, value, checklistKey), node);
+  }
+
+  private String getHumanValue(SearchParameter param, String value) {
+    return getHumanValue(param, value, null);
+  }
+
   /**
    * Gets the human readable value of the parameter value.
    */
-  private String getHumanValue(SearchParameter param, String value) {
+  private String getHumanValue(SearchParameter param, String value, String checklistKey) {
 
 
     if (List.of(ACCEPTED_TAXON_KEY, TAXON_KEY, KINGDOM_KEY, PHYLUM_KEY, CLASS_KEY, ORDER_KEY, FAMILY_KEY, GENUS_KEY, SUBGENUS_KEY, SPECIES_KEY).contains(param)) {
-      return titleLookupService.getSpeciesName(value);
+      return titleLookupService.getSpeciesName(value, checklistKey);
     }
 
     if (Objects.equals(DATASET_KEY,param)) {
@@ -311,7 +319,7 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(EqualsPredicate predicate, JsonNode node) {
-    addParamValue((OccurrenceSearchParameter) predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue((OccurrenceSearchParameter) predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), predicate.getChecklistKey(), node);
   }
 
   private void visit(GreaterThanOrEqualsPredicate predicate, JsonNode node) {
@@ -323,7 +331,7 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(InPredicate in, JsonNode node) {
-    addParamValue( (OccurrenceSearchParameter) in.getKey(), IN_OPERATOR, in.getValues(), node);
+    addParamValue( (OccurrenceSearchParameter) in.getKey(), IN_OPERATOR, in.getValues(), in.getChecklistKey(), node);
   }
 
   private void visit(LessThanOrEqualsPredicate predicate, JsonNode node) {
