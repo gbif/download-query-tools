@@ -9,7 +9,7 @@
 
   <groupId>org.gbif.occurrence</groupId>
   <artifactId>download-query-tools</artifactId>
-  <version>2.1.0-SNAPSHOT</version>
+  <version>2.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Download Query Tools</name>
@@ -49,7 +49,7 @@
          See https://github.com/sbt/sbt-assembly/issues/475 -->
     <calcite.version>1.35.0</calcite.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
-    <gbif-api.version>2.2.0-SNAPSHOT</gbif-api.version>
+    <gbif-api.version>2.0.3-multitaxonomy-SNAPSHOT</gbif-api.version>
     <jackson.version>2.18.0</jackson.version>
     <glassfish-jersey.version>3.1.9</glassfish-jersey.version>
     <jts.version>1.16.1</jts.version>

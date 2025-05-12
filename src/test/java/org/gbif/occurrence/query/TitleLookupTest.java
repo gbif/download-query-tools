@@ -34,14 +34,14 @@ public class TitleLookupTest {
         "FBIP: Magnoliophyta collection",
         service.getDatasetTitle("7abad3fc-068a-4f34-8b3d-bfe03155ccde"));
   }
-//
-//  @Test
-//  public void lookupSpeciesNameTest() {
-//    TitleLookupService service =
-//        TitleLookupServiceFactory.getInstance("http://api.gbif-uat.org/v1/");
-//
-//    assertEquals("incertae sedis", service.getSpeciesName("0"));
-//    assertEquals("Animalia", service.getSpeciesName("1"));
-//    assertEquals("Archaea", service.getSpeciesName("2"));
-//  }
+
+  @Test
+  public void lookupSpeciesNameTest() {
+    TitleLookupService service =
+        TitleLookupServiceFactory.getInstance("http://api.gbif-uat.org/v1/");
+
+    assertEquals("incertae sedis", service.getSpeciesName("0"));
+    assertEquals("Animalia", service.getSpeciesName("1"));
+    assertEquals("Archaea", service.getSpeciesName("2"));
+  }
 }
