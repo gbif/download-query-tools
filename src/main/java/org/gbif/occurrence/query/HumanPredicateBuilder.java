@@ -319,31 +319,31 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(EqualsPredicate predicate, JsonNode node) {
-    addParamValue((OccurrenceSearchParameter) predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), predicate.getChecklistKey(), node);
+    addParamValue(predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), predicate.getChecklistKey(), node);
   }
 
   private void visit(GreaterThanOrEqualsPredicate predicate, JsonNode node) {
-    addParamValue((OccurrenceSearchParameter) predicate.getKey(), GREATER_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue(predicate.getKey(), GREATER_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(GreaterThanPredicate predicate, JsonNode node) {
-    addParamValue((OccurrenceSearchParameter) predicate.getKey(), GREATER_THAN_OPERATOR, predicate.getValue(), node);
+    addParamValue(predicate.getKey(), GREATER_THAN_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(InPredicate in, JsonNode node) {
-    addParamValue( (OccurrenceSearchParameter) in.getKey(), IN_OPERATOR, in.getValues(), in.getChecklistKey(), node);
+    addParamValue( in.getKey(), IN_OPERATOR, in.getValues(), in.getChecklistKey(), node);
   }
 
   private void visit(LessThanOrEqualsPredicate predicate, JsonNode node) {
-    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LESS_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
+    addParamValue(predicate.getKey(), LESS_THAN_EQUALS_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(LessThanPredicate predicate, JsonNode node) {
-    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LESS_THAN_OPERATOR, predicate.getValue(), node);
+    addParamValue(predicate.getKey(), LESS_THAN_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(LikePredicate predicate, JsonNode node) {
-    addParamValue((OccurrenceSearchParameter) predicate.getKey(), LIKE_OPERATOR, predicate.getValue(), node);
+    addParamValue(predicate.getKey(), LIKE_OPERATOR, predicate.getValue(), node);
   }
 
   private void visit(NotPredicate not, JsonNode node) {
