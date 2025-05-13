@@ -58,8 +58,8 @@ public class TitleLookupServiceImpl implements TitleLookupService {
     } catch (Exception e) {
       LOG.error("Cannot lookup dataset title {}", datasetKey, e);
     }
-    return datasetKey;
-  }
+      return datasetKey;
+    }
 
   @Override
   public String getSpeciesName(String usageKey) {
@@ -84,8 +84,8 @@ public class TitleLookupServiceImpl implements TitleLookupService {
     } catch (Exception e) {
       LOG.error("Cannot lookup species title {}", usageKey, e);
     }
-    return usageKey;
-  }
+      return usageKey;
+    }
 
   private String getCanonical(String apiUrl) throws IOException {
     URL url = new URL(apiUrl);
