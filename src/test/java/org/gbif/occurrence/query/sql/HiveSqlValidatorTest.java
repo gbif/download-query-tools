@@ -165,7 +165,10 @@ public class HiveSqlValidatorTest {
         Arguments.of("SELECT DISTINCT datasetkey FROM occurrence; ;; ;\t\t;\t"),
 
         // Probably not what was intended, stricter AS?
-        Arguments.of("SELECT countrycode datasetkey FROM occurrence"));
+        Arguments.of("SELECT countrycode datasetkey FROM occurrence"),
+
+        // Cope with non-ASCII query parameters
+        Arguments.of("SELECT datasetkey FROM occurrence WHERE location LIKE 'København' OR location LIKE '沖縄';"));
   }
 
   private static Stream<Arguments> provideStringsForHiveBuiltInFunctions() {

@@ -175,6 +175,14 @@ public class HiveSqlQueryTest {
                 "HOUR(eventdate)",
                 "CAST(gbifid AS CHAR)",
                 "GBIF_EEACELLCODE(1000, decimallatitude, decimallongitude, COALESCE(coordinateuncertaintyinmeters, 1000))")),
+        Arguments.of(
+            "SELECT datasetkey AS データセットキー, location, countrycode AS country "
+              + "FROM occurrence WHERE location LIKE 'København' OR location LIKE '沖縄';",
+          "occurrence.location LIKE 'København' OR occurrence.location LIKE '沖縄'",
+          Arrays.asList(
+              "データセットキー",
+              "location",
+              "country")),
 
         // Check functions (to fit the other tests, put them in the WHERE clause).
         Arguments.of(
