@@ -53,8 +53,8 @@ class TestOccurrenceTable extends AbstractTable {
     builder.add("gbifid", SqlTypeName.INTEGER);
     builder.add("datasetkey", SqlTypeName.CHAR);
     builder.add("countrycode", SqlTypeName.CHAR);
-    builder.add("familykey", SqlTypeName.INTEGER);
-    builder.add("specieskey", SqlTypeName.INTEGER);
+    builder.add("familykey", SqlTypeName.CHAR);
+    builder.add("specieskey", SqlTypeName.CHAR);
     builder.add("eventdate", SqlTypeName.TIMESTAMP);
     builder.add("year", SqlTypeName.INTEGER);
     builder.add("month", SqlTypeName.INTEGER);
@@ -65,6 +65,9 @@ class TestOccurrenceTable extends AbstractTable {
     builder.add("occurrencestatus", SqlTypeName.CHAR);
     builder.add("identificationverificationstatus", SqlTypeName.CHAR);
     builder.add("hascoordinate", SqlTypeName.BOOLEAN);
+    builder.add("checklistkey", SqlTypeName.CHAR);
+    builder.add("taxonkey", SqlTypeName.CHAR);
+    builder.add("scientificname", SqlTypeName.CHAR);
 
     RelDataTypeFactory tdf = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     RelDataType varChar = tdf.createSqlType(SqlTypeName.VARCHAR);
