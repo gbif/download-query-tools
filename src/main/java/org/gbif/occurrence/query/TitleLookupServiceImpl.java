@@ -12,19 +12,21 @@
  * limitations under the License.
  */
 package org.gbif.occurrence.query;
+
+import org.gbif.api.model.registry.Dataset;
+import org.gbif.api.ws.mixin.Mixins;
+
+import java.io.IOException;
+import java.net.URL;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.gbif.api.model.registry.Dataset;
-
-import org.gbif.api.ws.mixin.Mixins;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URL;
 
 /**
  * Utility ws-client class to get dataset and species titles used in downloads.
@@ -78,7 +80,8 @@ public class TitleLookupServiceImpl implements TitleLookupService {
       return getSpeciesName(usageKey);
     }
     try {
-      String apiUrl = getV2Url() + "species/match?checklistKey=" + checklistKey + "&usageKey=" + usageKey;
+      String apiUrl =
+          getV2Url() + "species/match?checklistKey=" + checklistKey + "&usageKey=" + usageKey;
       String checklistName = getDatasetTitle(checklistKey);
       return getCanonical(apiUrl) + " [" + checklistName + "]";
     } catch (Exception e) {
