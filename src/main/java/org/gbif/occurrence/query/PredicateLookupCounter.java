@@ -13,10 +13,12 @@
  */
 package org.gbif.occurrence.query;
 
-import lombok.extern.slf4j.Slf4j;
 import org.gbif.api.model.common.search.SearchParameter;
 import org.gbif.api.model.predicate.*;
+
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static org.gbif.api.model.occurrence.search.OccurrenceSearchParameter.*;
 
@@ -35,9 +37,21 @@ public class PredicateLookupCounter extends PredicateVisitor<Integer> {
 
   protected Integer getHumanValue(SearchParameter param) {
     // lookup values
-    if (List.of(SCIENTIFIC_NAME,ACCEPTED_TAXON_KEY,TAXON_KEY,KINGDOM_KEY,PHYLUM_KEY,CLASS_KEY,
-            ORDER_KEY,FAMILY_KEY,GENUS_KEY,SUBGENUS_KEY,SPECIES_KEY,DATASET_KEY).contains(param)){
-        return 1;
+    if (List.of(
+            SCIENTIFIC_NAME,
+            ACCEPTED_TAXON_KEY,
+            TAXON_KEY,
+            KINGDOM_KEY,
+            PHYLUM_KEY,
+            CLASS_KEY,
+            ORDER_KEY,
+            FAMILY_KEY,
+            GENUS_KEY,
+            SUBGENUS_KEY,
+            SPECIES_KEY,
+            DATASET_KEY)
+        .contains(param)) {
+      return 1;
     }
     return 0;
   }
