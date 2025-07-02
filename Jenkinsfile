@@ -49,7 +49,7 @@ pipeline {
       when {
           allOf {
               expression { params.RELEASE };
-              branch 'master';
+              branch 'support/java11';
           }
       }
       environment {
