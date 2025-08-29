@@ -13,13 +13,7 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import org.gbif.api.exception.QueryBuildingException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.UnaryOperator;
-
+import lombok.Getter;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -27,10 +21,15 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlWriterConfig;
+import org.apache.calcite.sql.dialect.GbifHiveSqlDialect;
 import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.util.Util;
+import org.gbif.api.exception.QueryBuildingException;
 
-import lombok.Getter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.UnaryOperator;
 
 /**
  * A parsed, validated Hive SQL query.
@@ -79,7 +78,7 @@ public class HiveSqlQuery {
 
     // Nicely formatted SQL
     SqlDialect prettySqlDialect =
-        new HiveSqlDialect(
+        new GbifHiveSqlDialect(
             HiveSqlDialect.DEFAULT_CONTEXT
                 .withDatabaseMajorVersion(3)
                 // Override quote string, which is empty even though Hive's quote string is `, and

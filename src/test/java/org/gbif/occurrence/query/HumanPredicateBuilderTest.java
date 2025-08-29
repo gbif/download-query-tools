@@ -13,8 +13,8 @@
  */
 package org.gbif.occurrence.query;
 
-import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
+import org.gbif.api.model.predicate.*;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -45,7 +45,8 @@ public class HumanPredicateBuilderTest {
     TitleLookupServiceImpl tl = mock(TitleLookupServiceImpl.class);
     when(tl.getDatasetTitle(ArgumentMatchers.any())).thenReturn("The little Mermaid");
     when(tl.getSpeciesName(ArgumentMatchers.any())).thenReturn("Abies alba Mill.");
-    when(tl.getSpeciesName(ArgumentMatchers.any(), ArgumentMatchers.any() )).thenReturn("Abies alba Mill.");
+    when(tl.getSpeciesName(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn("Abies alba Mill.");
     builder = new HumanPredicateBuilder(tl);
   }
 

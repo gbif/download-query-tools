@@ -14,7 +14,6 @@
 package org.gbif.occurrence.query;
 
 import org.gbif.api.model.common.search.SearchParameter;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.predicate.*;
 import org.gbif.api.model.registry.Dataset;
@@ -43,6 +42,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -98,11 +98,14 @@ public class HumanPredicateBuilder {
     // Add mixins
     MAPPER.addMixIn(Dataset.class, LicenseMixin.class);
 
-    MAPPER.registerModule(new SimpleModule()
-            .addKeyDeserializer(OccurrenceSearchParameter.class, new OccurrenceSearchParameter.OccurrenceSearchParameterKeyDeserializer())
-            .addDeserializer(OccurrenceSearchParameter.class,
-                    new OccurrenceSearchParameter.OccurrenceSearchParameterDeserializer())
-    );
+    MAPPER.registerModule(
+        new SimpleModule()
+            .addKeyDeserializer(
+                OccurrenceSearchParameter.class,
+                new OccurrenceSearchParameter.OccurrenceSearchParameterKeyDeserializer())
+            .addDeserializer(
+                OccurrenceSearchParameter.class,
+                new OccurrenceSearchParameter.OccurrenceSearchParameterDeserializer()));
 
     // Improved custom pretty printer
     DefaultPrettyPrinter pp = new DefaultPrettyPrinter();
@@ -171,12 +174,18 @@ public class HumanPredicateBuilder {
   }
 
   private void addParamValue(
-      SearchParameter param, String op, Collection<String> values, String checklistKey, JsonNode node) {
+      SearchParameter param,
+      String op,
+      Collection<String> values,
+      String checklistKey,
+      JsonNode node) {
     addParamValue(
         param,
         op
             + "("
-            + values.stream().map(p -> getHumanValue(param, p, checklistKey)).collect(Collectors.joining(", "))
+            + values.stream()
+                .map(p -> getHumanValue(param, p, checklistKey))
+                .collect(Collectors.joining(", "))
             + ")",
         node);
   }
@@ -185,7 +194,8 @@ public class HumanPredicateBuilder {
     addParamValue(param, op + getHumanValue(param, value), node);
   }
 
-  private void addParamValue(SearchParameter param, String op, String value, String checklistKey, JsonNode node) {
+  private void addParamValue(
+      SearchParameter param, String op, String value, String checklistKey, JsonNode node) {
     addParamValue(param, op + getHumanValue(param, value, checklistKey), node);
   }
 
@@ -198,16 +208,26 @@ public class HumanPredicateBuilder {
    */
   private String getHumanValue(SearchParameter param, String value, String checklistKey) {
 
-
-    if (List.of(ACCEPTED_TAXON_KEY, TAXON_KEY, KINGDOM_KEY, PHYLUM_KEY, CLASS_KEY, ORDER_KEY, FAMILY_KEY, GENUS_KEY, SUBGENUS_KEY, SPECIES_KEY).contains(param)) {
+    if (List.of(
+            ACCEPTED_TAXON_KEY,
+            TAXON_KEY,
+            KINGDOM_KEY,
+            PHYLUM_KEY,
+            CLASS_KEY,
+            ORDER_KEY,
+            FAMILY_KEY,
+            GENUS_KEY,
+            SUBGENUS_KEY,
+            SPECIES_KEY)
+        .contains(param)) {
       return titleLookupService.getSpeciesName(value, checklistKey);
     }
 
-    if (Objects.equals(DATASET_KEY,param)) {
+    if (Objects.equals(DATASET_KEY, param)) {
       return titleLookupService.getDatasetTitle(value);
     }
 
-    if (List.of(COUNTRY,PUBLISHING_COUNTRY).contains(param)) {
+    if (List.of(COUNTRY, PUBLISHING_COUNTRY).contains(param)) {
       return lookupCountryCode(value);
     }
 
@@ -319,7 +339,12 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(EqualsPredicate predicate, JsonNode node) {
-    addParamValue(predicate.getKey(), EQUALS_OPERATOR, predicate.getValue(), predicate.getChecklistKey(), node);
+    addParamValue(
+        predicate.getKey(),
+        EQUALS_OPERATOR,
+        predicate.getValue(),
+        predicate.getChecklistKey(),
+        node);
   }
 
   private void visit(GreaterThanOrEqualsPredicate predicate, JsonNode node) {
