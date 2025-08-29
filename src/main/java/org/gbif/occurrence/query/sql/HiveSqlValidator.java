@@ -73,7 +73,6 @@ public class HiveSqlValidator {
   private final RelDataTypeFactory relDataTypeFactory;
   private final CalciteCatalogReader catalogReader;
   private final SqlOperatorTable sqlOperatorTable;
-  private final SqlValidator validator;
   private final UnaryOperator<SqlWriterConfig> sqlDebugWriterConfig;
 
   public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
@@ -130,12 +129,6 @@ public class HiveSqlValidator {
             new CalciteConnectionConfigImpl(properties));
     this.sqlOperatorTable =
         SqlOperatorTables.chain(frameworkConfig.getOperatorTable(), catalogReader);
-    this.validator =
-        SqlValidatorUtil.newValidator(
-            sqlOperatorTable,
-            catalogReader,
-            relDataTypeFactory,
-            frameworkConfig.getSqlValidatorConfig());
   }
 
   public SqlSelect validate(String sql) throws QueryBuildingException {
@@ -152,7 +145,8 @@ public class HiveSqlValidator {
     SqlParser sqlParser = SqlParser.create(sql, frameworkConfig.getParserConfig());
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
-      SqlNode validatedSqlNode = validator.validate(sqlNode);
+      SqlNode validatedSqlNode;
+      validatedSqlNode = newValidator().validate(sqlNode);
 
       LOG.debug("Validated as {}", validatedSqlNode.toSqlString(sqlDebugWriterConfig));
 
@@ -273,5 +267,13 @@ public class HiveSqlValidator {
 
   public SqlDialect getDialect() {
     return dialect;
+  }
+
+  private SqlValidator newValidator() {
+    return SqlValidatorUtil.newValidator(
+        sqlOperatorTable,
+        catalogReader,
+        relDataTypeFactory,
+        frameworkConfig.getSqlValidatorConfig());
   }
 }
