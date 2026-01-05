@@ -113,9 +113,27 @@ public class HumanPredicateBuilder {
     MAPPER.setDefaultPrettyPrinter(pp);
   }
 
+  /**
+   * @return the ObjectMapper used internally
+   */
+  public static ObjectMapper getMapper() {
+    return MAPPER;
+  }
+
   public HumanPredicateBuilder(TitleLookupService titleLookupService) {
+    this(titleLookupService, OccurrenceSearchParameter.class);
+  }
+
+  public <SP extends SearchParameter> HumanPredicateBuilder(TitleLookupService titleLookupService, Class<SP> searchParameterClass) {
     this.titleLookupService = titleLookupService;
     resourceBundle = ResourceBundle.getBundle(DEFAULT_BUNDLE);
+    // Create custom module for SearchParameter deserialization
+    SimpleModule module = new SimpleModule();
+    module.addAbstractTypeMapping(
+        SearchParameter.class,
+        searchParameterClass
+    );
+    MAPPER.registerModule(module);
   }
 
   /**
