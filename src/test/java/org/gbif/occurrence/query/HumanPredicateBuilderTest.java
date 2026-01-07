@@ -16,7 +16,6 @@ package org.gbif.occurrence.query;
 import org.gbif.api.model.occurrence.search.OccurrenceSearchParameter;
 import org.gbif.api.model.predicate.*;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -62,10 +61,8 @@ public class HumanPredicateBuilderTest {
   @Test
   public void humanPredicateFilterTest() throws Exception {
     String expected =
-        new String(
-            Files.readAllBytes(
-                Paths.get(getClass().getClassLoader().getResource("result.txt").getPath())),
-            StandardCharsets.UTF_8);
+        Files.readString(
+            Paths.get(getClass().getClassLoader().getResource("result.txt").getPath()));
     try (Stream<String> stream =
         Files.lines(Paths.get(getClass().getClassLoader().getResource("source.txt").getPath()))) {
       String actual =

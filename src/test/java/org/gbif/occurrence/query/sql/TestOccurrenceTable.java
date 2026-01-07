@@ -62,6 +62,7 @@ class TestOccurrenceTable extends AbstractTable {
     builder.add("decimallatitude", SqlTypeName.DOUBLE);
     builder.add("decimallongitude", SqlTypeName.DOUBLE);
     builder.add("coordinateuncertaintyinmeters", SqlTypeName.DOUBLE);
+    builder.add("location", SqlTypeName.VARCHAR);
     builder.add("occurrencestatus", SqlTypeName.CHAR);
     builder.add("identificationverificationstatus", SqlTypeName.CHAR);
     builder.add("hascoordinate", SqlTypeName.BOOLEAN);

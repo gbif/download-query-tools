@@ -13,16 +13,6 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import org.gbif.api.exception.QueryBuildingException;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
@@ -43,6 +33,7 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlSelectKeyword;
 import org.apache.calcite.sql.SqlWriterConfig;
 import org.apache.calcite.sql.dialect.AnsiSqlDialect;
+import org.apache.calcite.sql.dialect.GbifHiveSqlDialect;
 import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -57,8 +48,17 @@ import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.util.Util;
+import org.gbif.api.exception.QueryBuildingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
@@ -75,9 +75,15 @@ public class HiveSqlValidator {
   private final SqlOperatorTable sqlOperatorTable;
   private final UnaryOperator<SqlWriterConfig> sqlDebugWriterConfig;
 
+  static {
+    // This isn't here to fix any particular bug, but the default is ISO-8859-1 for some reason,
+    // so it seems wise to fix that.
+    System.setProperty("calcite.default.charset", "UTF-8");
+  }
+
   public HiveSqlValidator(SchemaPlus rootSchema, List<SqlOperator> additionalOperators) {
     // dialect = SqlDialect.DatabaseProduct.HIVE.getDialect();
-    dialect = new HiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
+    dialect = new GbifHiveSqlDialect(HiveSqlDialect.DEFAULT_CONTEXT.withDatabaseMajorVersion(3));
 
     sqlDebugWriterConfig =
         c ->
