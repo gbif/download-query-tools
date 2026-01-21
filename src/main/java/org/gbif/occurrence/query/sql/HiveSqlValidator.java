@@ -161,7 +161,7 @@ public class HiveSqlValidator {
             "Rejected as only SELECT statements are supported; {} → {}.",
             sql,
             validatedSqlNode.getKind());
-        throw new QueryBuildingException("Only SQL SELECT statements are supported.");
+        throw new QueryBuildingException("Only SQL SELECT statements are supported, " + validatedSqlNode.getKind() + " is not supported.");
       }
 
       SqlSelect select = (SqlSelect) validatedSqlNode;
@@ -239,7 +239,11 @@ public class HiveSqlValidator {
       }
 
       // Validate WKT strings.
-      select.accept(new GeometryPointCounterVisitor());
+      try {
+        select.accept(new GeometryPointCounterVisitor());
+      } catch (IllegalArgumentException e) {
+        throw new QueryBuildingException("Polygon used in GBIF_Within is invalid: "+e.getMessage());
+      }
 
       // Prepend catalog if defined
       if (catalog != null) {

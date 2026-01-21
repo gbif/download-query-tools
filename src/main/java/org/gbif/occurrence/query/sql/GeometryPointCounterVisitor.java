@@ -47,7 +47,9 @@ class GeometryPointCounterVisitor implements SqlVisitor<Integer> {
     for (SqlNode n : call.getOperandList()) {
       if (n != null) c += n.accept(this);
     }
-    within--;
+    if (call.getOperator().isName(GBIF_WITHIN, false)) {
+      within--;
+    }
     return c;
   }
 

@@ -329,7 +329,7 @@ public class HiveSqlValidatorTest {
         // Block modification of data
         Arguments.of("DELETE FROM occurrence"),
         Arguments.of(
-            "INSERT INTO occurrence (datasetkey, countrycode, \"month\", \"day\") VALUES ('aoeuaoeuaoeu', 'XX', 0, 0)"),
+            "INSERT INTO occurrence (gbifid, datasetkey, countryCode, \"day\") VALUES (1234, 'aoeuaoeuaoeu', 'XX', 0)"),
         Arguments.of("UPDATE occurrence SET datasetkey = 'AOEU'"),
         Arguments.of("TRUNCATE occurrence"),
         Arguments.of("DROP TABLE occurrence"),
@@ -446,6 +446,14 @@ public class HiveSqlValidatorTest {
         Arguments.of(
             "SELECT unknown_function(gbifid) FROM occurrence;",
             "No match found for function signature"),
+
+        // Invalid polygon in GBIF_Within(...)
+        Arguments.of(
+          "SELECT gbifid FROM occurrence WHERE gbif_within('POLYGON ((30 10, 10 20, 20 40, 40 40))', decimalLatitude, decimalLongitude)",
+          "Polygon used in GBIF_Within is invalid: Points of LinearRing do not form a closed linestring"),
+        Arguments.of("SELECT scientificname, COUNT(*) FROM occurrence " +
+            "WHERE GBIF_WITHIN('POLYGON ((-85.12207 22.390714, -74.311523 22.836946, -78.046875 15.623037, -84.858398 22.268764))', occurrence.decimallatitude, occurrence.decimallongitude) = TRUE " +
+            "GROUP BY occurrence.scientificname", "Polygon used in GBIF_Within is invalid: Points of LinearRing do not form a closed linestring"),
 
         // Incorrect syntax
         Arguments.of("SELECT gbifid, FROM occurrence", "Incorrect syntax near the keyword"),
