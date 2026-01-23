@@ -191,7 +191,7 @@ public class HiveSqlValidatorTest {
         Arguments.of(
             "SELECT gbifid = gbifid, gbifid <> gbifid, \n"
                 + "gbifid != gbifid, gbifid < gbifid, gbifid <= gbifid, gbifid > gbifid, gbifid >= gbifid, \n"
-                + "gbifid NOT BETWEEN 1 AND 2, gbifid IS NULL, gbifid IS NOT NULL, TRUE IS TRUE, gbifid LIKE 'abcd%' \n"
+                + "gbifid IS NULL, gbifid IS NOT NULL, TRUE IS TRUE, gbifid LIKE 'abcd%' \n"
                 + " FROM occurrence;"),
 
         // Arithmetic operators
@@ -494,8 +494,8 @@ public class HiveSqlValidatorTest {
         Arguments.of("SELECT -- Comment gbifid FROM occurrence", "Encountered"),
 
         // Unsupported syntax (see class for detailed reason)
-        Arguments.of("SELECT gbifid FROM occurrence WHERE hascoordinate IS TRUE", "not supported"),
         Arguments.of("SELECT gbifid FROM occurrence WHERE \"year\" BETWEEN 1980 AND 1990", "not supported"),
+        Arguments.of("SELECT gbifid, \"year\" BETWEEN 1980 AND 1990 FROM occurrence", "not supported"),
 
         // Spark doesn't correctly autogenerate a column name from a function with multiple arguments
         //
