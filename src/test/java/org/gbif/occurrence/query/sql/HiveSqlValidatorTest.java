@@ -201,7 +201,7 @@ public class HiveSqlValidatorTest {
         // Logical operators
         // Not included: ! TRUE,
         Arguments.of(
-            "SELECT TRUE AND TRUE, TRUE OR TRUE, NOT TRUE, gbifid IN('1234', '5678') FROM occurrence;"),
+            "SELECT TRUE AND TRUE, TRUE OR TRUE, NOT TRUE, gbifid IN('1234', '5678') AS col_in FROM occurrence;"),
 
         // String operators
         Arguments.of("SELECT 'a' || 'b' FROM occurrence;"),
@@ -225,17 +225,17 @@ public class HiveSqlValidatorTest {
         // Not included: WIDTH_BUCKET(10, 50, 80, 15)
         // Not our Hive: BROUND(decimalLatitude), BROUND(decimalLatitude, 2),
         Arguments.of(
-            "SELECT ROUND(decimalLatitude), ROUND(decimalLatitude, 2), \n"
+            "SELECT ROUND(decimalLatitude), ROUND(decimalLatitude, 2) AS col_round, \n"
                 + "FLOOR(decimalLatitude), ceil(decimalLatitude), CEILING(decimalLatitude), \n"
-                + "RAND(), RAND(1234), EXP(2.0), LN(2.7), LOG10(100), LOG2(64), POWER(2, 3), SQRT(81), HEX(63), \n"
-                + "UNHEX('A'), CONV(32, 10, 16), CONV('32', 10, 16), ABS(-1), SIN(3.141/2), ASIN(0.5), COS(3.141/2), ACOS(0.5), \n"
+                + "RAND(), RAND(1234), EXP(2.0), LN(2.7), LOG10(100), LOG2(64), POWER(2, 3) AS col_power, SQRT(81), HEX(63), \n"
+                + "UNHEX('A'), CONV(32, 10, 16) AS col_conv_int, CONV('32', 10, 16) AS col_conv_char, ABS(-1), SIN(3.141/2), ASIN(0.5), COS(3.141/2), ACOS(0.5), \n"
                 + "TAN(3.141/2), ATAN(0.5), DEGREES(3.141/2), RADIANS(180), POSITIVE(-1), NEGATIVE(1), SIGN(-1), E(), PI(), \n"
-                + "FACTORIAL(6), CBRT(27), SHIFTLEFT(2, 2), SHIFTRIGHT(2, 2), SHIFTRIGHTUNSIGNED(2, 2), GREATEST(1, 2), \n"
-                + "LEAST(1, 2) FROM occurrence"),
+                + "FACTORIAL(6), CBRT(27), SHIFTLEFT(2, 2) AS col_shiftleft, SHIFTRIGHT(2, 2) AS col_shiftright, SHIFTRIGHTUNSIGNED(2, 2) AS col_shiftrightunsigned, \n"
+                + " GREATEST(1, 2) AS col_greatest, LEAST(1, 2) AS col_least FROM occurrence"),
 
         // Collection functions (TODO: Maps)
         Arguments.of(
-            "SELECT size(issue), array_contains(issue, 'A'), sort_array(issue) FROM occurrence"),
+            "SELECT size(issue), array_contains(issue, 'A') AS col_array_contains, sort_array(issue) FROM occurrence"),
 
         // Type conversion functions
         // Not included: BINARY('A'),
@@ -243,53 +243,53 @@ public class HiveSqlValidatorTest {
 
         // Date functions
         Arguments.of(
-            "SELECT FROM_UNIXTIME(0), FROM_UNIXTIME(0, 'uuuu-MM-dd'), UNIX_TIMESTAMP(), \n"
-                + "UNIX_TIMESTAMP('2024-03-05 15:13:00'), UNIX_TIMESTAMP('2024-03-05', 'uuuu-MM-dd'), TO_DATE('2024-03-05 15:13:00'), \n"
+            "SELECT FROM_UNIXTIME(0), FROM_UNIXTIME(0, 'uuuu-MM-dd') AS col_from_unixtime, UNIX_TIMESTAMP(), \n"
+                + "UNIX_TIMESTAMP('2024-03-05 15:13:00'), UNIX_TIMESTAMP('2024-03-05', 'uuuu-MM-dd') AS col_from_unix_timestamp, TO_DATE('2024-03-05 15:13:00'), \n"
                 + "YEAR(CAST('2024-03-05 15:13:00' AS DATE)), QUARTER(CAST('2024-03-05 15:13:00' AS DATE)), MONTH(CAST('2024-03-05 15:13:00' AS DATE)), \n"
                 + "DAYOFMONTH(CAST('2024-03-05 15:13:00' AS DATE)), HOUR(CAST('2024-03-05 15:13:00' AS DATE)), \n"
                 + "MINUTE(CAST('2024-03-05 15:13:00' AS DATE)), SECOND(CAST('2024-03-05 15:13:00' AS DATE)), WEEKOFYEAR(CAST('2024-03-05 15:13:00' AS DATE)), \n"
                 + "EXTRACT(month FROM CAST('2024-03-05' AS DATE)), "
-                + "DATEDIFF('2024-03-05 15:13:00', '2024-03-05 15:13:00'), \n"
-                + "DATE_ADD('2024-03-05 15:13:00', 1), DATE_SUB('2024-03-05 15:13:00', 1), FROM_UTC_TIMESTAMP(1, 'UTC'), \n"
-                + "TO_UTC_TIMESTAMP('2024-03-05 15:13:00', 'Z'), CURRENT_DATE(), CURRENT_TIMESTAMP(), ADD_MONTHS('2024-03-05 15:13:00', 1), \n"
-                + "LAST_DAY(CAST('2024-03-05' AS DATE)), NEXT_DAY('2024-03-05 15:13:00', 'TU'), TRUNC('2024-03-05 15:13:00', 'MM'), \n"
-                + "MONTHS_BETWEEN('2024-03-05 15:13:00', '2024-03-05 15:13:00'), DATE_FORMAT('2024-03-05 15:13:00', 'D') FROM occurrence"),
+                + "DATEDIFF('2024-03-05 15:13:00', '2024-03-05 15:13:00') AS col_datediff, \n"
+                + "DATE_ADD('2024-03-05 15:13:00', 1) AS col_date_add, DATE_SUB('2024-03-05 15:13:00', 1) AS col_date_sub, FROM_UTC_TIMESTAMP(1, 'UTC') AS col_from_utc_timestamp, \n"
+                + "TO_UTC_TIMESTAMP('2024-03-05 15:13:00', 'Z') AS col_to_utc_timestamp, CURRENT_DATE(), CURRENT_TIMESTAMP(), ADD_MONTHS('2024-03-05 15:13:00', 1) AS col_add_months, \n"
+                + "LAST_DAY(CAST('2024-03-05' AS DATE)), NEXT_DAY('2024-03-05 15:13:00', 'TU') AS col_next_day, TRUNC('2024-03-05 15:13:00', 'MM') AS col_trunc, \n"
+                + "MONTHS_BETWEEN('2024-03-05 15:13:00', '2024-03-05 15:13:00') AS col_months_between, DATE_FORMAT('2024-03-05 15:13:00', 'D') AS col_date_format FROM occurrence"),
 
         // Conditional functions
         Arguments.of(
-            "SELECT IF(true, 1, 2), ISNULL(1), ISNOTNULL(1), NVL(1, 2), COALESCE(NULL, 1), \n"
-                + "CASE gbifid WHEN '1' THEN 2 ELSE 3 END, CASE WHEN TRUE THEN 2 ELSE 3 END, NULLIF(1, 2), \n"
+            "SELECT IF(true, 1, 2) AS col_if, ISNULL(1), ISNOTNULL(1), NVL(1, 2) AS col_nvl, COALESCE(NULL, 1) AS col_coalesce, \n"
+                + "CASE gbifid WHEN '1' THEN 2 ELSE 3 END, CASE WHEN TRUE THEN 2 ELSE 3 END, NULLIF(1, 2) AS col_nullif, \n"
                 + "ASSERT_TRUE(true) FROM occurrence"),
 
         // String functions
         // Not included: CONTEXT_NGRAMS(...), NGRAMS()
         Arguments.of(
-            "SELECT ASCII('x'), BASE64('x'), CHARACTER_LENGTH('X'), CHR(60), CONCAT('A', 'B'), "
-                + "CONCAT_WS('-', 'A', 'B'), CONCAT_WS(' ', issue), DECODE('A', 'UTF-8'), ELT(2,'HELLO','WORLD'), "
-                + "ENCODE('A', 'UTF-8'), FIELD('WORLD', 'SAY', 'HELLO', 'WORLD'), FIND_IN_SET('ab', 'abc,b,ab,c,def'), "
-                + "FORMAT_NUMBER(1000, '#,###'), GET_JSON_OBJECT('{}', '.'), IN_FILE('A', '/A/B'), INSTR('A', 'CAT'), "
-                + "LENGTH('AOEU'), LOCATE('A', 'ABCDABCD', 2), LOWER('AOEU'), LPAD('A', 1, ' '), LTRIM('A '), "
-                + "OCTET_LENGTH('AOEU'), PARSE_URL('a', 'a', 'a'), PRINTF('Y', 'X'), QUOTE('A'), REGEXP_EXTRACT('abc', 'a(b)c', 1), "
-                + "REGEXP_REPLACE('abc', 'b', ''), REPEAT('a', 3), REPLACE('a', 'a', 'b'), REVERSE('abc'), RPAD('s', 1, ' '), "
-                + "RTRIM(' a '), SPACE(4), SPLIT('a,b', ','), SUBSTR('abc', 1), SUBSTRING('abc', 1), SUBSTRING_INDEX('abc', 'b', 1), "
-                + "TRANSLATE('a', 'b', 'c'), TRIM(' a '), UNBASE64('6'), UPPER('abcd'), INITCAP('ab cd'), LEVENSHTEIN('cat', 'mat'),"
+            "SELECT ASCII('x'), BASE64('x'), CHARACTER_LENGTH('X'), CHR(60), CONCAT('A', 'B') AS col_concat, "
+                + "CONCAT_WS('-', 'A', 'B') AS col_concat_ws, CONCAT_WS(' ', issue) AS col_concat_ws_arr, DECODE('A', 'UTF-8') AS col_decode, ELT(2,'HELLO','WORLD') AS col_elt, "
+                + "ENCODE('A', 'UTF-8') AS col_encode, FIELD('WORLD', 'SAY', 'HELLO', 'WORLD') AS col_field, FIND_IN_SET('ab', 'abc,b,ab,c,def') AS col_find_in_set, "
+                + "FORMAT_NUMBER(1000, '#,###') AS col_format_number, GET_JSON_OBJECT('{}', '.') AS col_get_json_object, IN_FILE('A', '/A/B') AS col_in_file, INSTR('A', 'CAT') AS col_instr, "
+                + "LENGTH('AOEU'), LOCATE('A', 'ABCDABCD', 2) AS col_locate, LOWER('AOEU'), LPAD('A', 1, ' ') AS col_lpad, LTRIM('A '), "
+                + "OCTET_LENGTH('AOEU'), PARSE_URL('a', 'a', 'a') AS col_parse_url, PRINTF('Y', 'X') AS col_printf, QUOTE('A'), REGEXP_EXTRACT('abc', 'a(b)c', 1) AS col_regexp_extract, "
+                + "REGEXP_REPLACE('abc', 'b', '') AS col_regexp_replace, REPEAT('a', 3) AS col_repeat, REPLACE('a', 'a', 'b') AS col_replace, REVERSE('abc'), RPAD('s', 1, ' ') AS col_rpad, "
+                + "RTRIM(' a '), SPACE(4), SPLIT('a,b', ',') AS col_split, SUBSTR('abc', 1) AS col_substr, SUBSTR('abc', 1, 2) AS col_substr_2, SUBSTRING('abc', 1) AS col_substring, SUBSTRING('abc', 1, 2) AS col_substring_2, SUBSTRING_INDEX('abc', 'b', 1) AS col_substring_index, "
+                + "TRANSLATE('a', 'b', 'c') AS col_translate, TRIM(' a '), UNBASE64('6'), UPPER('abcd'), INITCAP('ab cd'), LEVENSHTEIN('cat', 'mat') AS col_levenshtein,"
                 + "SOUNDEX('mouse') FROM occurrence;"),
 
         // Data masking functions
         Arguments.of(
-            "SELECT MASK('a', 'X', 'x', '#'), MASK_FIRST_N('a'), MASK_LAST_N('b'), "
+            "SELECT MASK('a', 'X', 'x', '#') AS col_mask, MASK_FIRST_N('a'), MASK_LAST_N('b'), "
                 + "MASK_SHOW_FIRST_N('a'), MASK_SHOW_LAST_N('B'), MASK_HASH('A') FROM occurrence"),
 
         // Misc functions
         Arguments.of(
             "SELECT HASH('x'), MD5('A'), SHA1('A'), SHA2('A'), CRC32('A'), "
-                + "AES_ENCRYPT('A', 'A'), AES_DECRYPT('A', 'B') FROM occurrence"),
+                + "AES_ENCRYPT('A', 'A') AS col_aes_encrypt, AES_DECRYPT('A', 'B') AS col_aes_decrypt FROM occurrence"),
 
         // Aggregate functions.
         Arguments.of(
             "SELECT "
                 + "COUNT(datasetkey), "
-                + "COUNT(DISTINCT datasetkey, decimallatitude), "
+                + "COUNT(DISTINCT datasetkey, decimallatitude) AS col_count_distinct, "
                 + "SUM(decimallatitude), "
                 + "SUM(DISTINCT decimallatitude), "
                 + "AVG(decimallatitude), "
@@ -300,8 +300,8 @@ public class HiveSqlValidatorTest {
                 + "VAR_SAMP(decimallatitude), "
                 + "STDDEV_POP(decimallatitude), "
                 + "STDDEV_SAMP(decimallatitude), "
-                + "COVAR_POP(decimallatitude, decimallongitude), "
-                + "COVAR_SAMP(decimallatitude, decimallongitude) "
+                + "COVAR_POP(decimallatitude, decimallongitude) AS col_covar_pop, "
+                + "COVAR_SAMP(decimallatitude, decimallongitude) AS col_covar_samp "
                 // + "CORR(decimallatitude, decimallongitude), "
                 // + "PERCENTILE(\"year\", array(25, 50, 75)), "
                 // + "PERCENTILE_APPROX(decimallatitude, 50), "
@@ -495,7 +495,14 @@ public class HiveSqlValidatorTest {
 
         // Unsupported syntax (see class for detailed reason)
         Arguments.of("SELECT gbifid FROM occurrence WHERE hascoordinate IS TRUE", "not supported"),
-        Arguments.of(
-            "SELECT gbifid FROM occurrence WHERE \"year\" BETWEEN 1980 AND 1990", "not supported"));
+        Arguments.of("SELECT gbifid FROM occurrence WHERE \"year\" BETWEEN 1980 AND 1990", "not supported"),
+
+        // Spark doesn't correctly autogenerate a column name from a function with multiple arguments
+        //
+        Arguments.of("SELECT gbifid, SUBSTR(scientificname, 2, 3) FROM occurrence",
+          "function expressions must have an alias"),
+        Arguments.of("SELECT gbifid, ROUND(12.34, 2) FROM occurrence",
+          "function expressions must have an alias")
+    );
   }
 }

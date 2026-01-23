@@ -220,6 +220,14 @@ public class HiveSqlValidator {
             throw new QueryBuildingException("Star selects are not supported.");
           }
         }
+        // #429: Check for SELECT expressions without an AS alias where the function has a comma, since Spark-SQL cannot
+        // autogenerate a column name for these.
+        if (n instanceof SqlBasicCall) {
+          SqlBasicCall bc = ((SqlBasicCall) n);
+          if (bc.getKind() != SqlKind.AS && bc.toSqlString(dialect).toString().contains(",")) {
+            throw new QueryBuildingException("SELECT columns using function expressions must have an alias, e.g. "+bc.toSqlString(dialect) + " AS col_x");
+          }
+        }
       }
 
       Map<SqlKind, Integer> count = select.accept(new KindValidatorAndCounterVisitor());
