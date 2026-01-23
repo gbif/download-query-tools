@@ -17,6 +17,7 @@ import org.gbif.api.exception.QueryBuildingException;
 
 import java.util.stream.Stream;
 
+import org.apache.calcite.sql.SqlSelect;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -49,6 +50,18 @@ public class HiveSqlValidatorTest {
     HiveSqlValidator catalogValidator =
         SqlValidatorTestUtil.createOccurrenceTableValidator(TEST_CATALOG);
     catalogValidator.validate(sql, TEST_CATALOG);
+  }
+
+  /**
+   * Ensure aliases "occurrence AS occ" aren't messed up by adding the Iceberg catalogue.
+   */
+  @ParameterizedTest
+  @MethodSource("provideStringsForAsOperator")
+  public void testAsOperator(String sql, String expectedFragment) throws Exception {
+    HiveSqlValidator catalogValidator =
+      SqlValidatorTestUtil.createOccurrenceTableValidator(TEST_CATALOG);
+    SqlSelect select = catalogValidator.validate(sql, TEST_CATALOG);
+    assertTrue(select.toSqlString(catalogValidator.getDialect()).toString().contains(expectedFragment));
   }
 
   /**
@@ -298,6 +311,20 @@ public class HiveSqlValidatorTest {
                 // + "COLLECT_LIST(decimallatitude), "
                 // + "NTILE(5) "
                 + "FROM occurrence"));
+  }
+
+  private static Stream<Arguments> provideStringsForAsOperator() {
+    return Stream.of(
+      Arguments.of(
+        "SELECT gbifid FROM occurrence WHERE countrycode = 'CL'",
+        "FROM cattest.occurrence\nWHERE occurrence.countrycode = 'CL'"),
+      Arguments.of(
+        "SELECT gbifid FROM occurrence occ WHERE occ.countrycode = 'CL'",
+        "FROM cattest.occurrence occ\nWHERE occ.countrycode = 'CL'"),
+      Arguments.of(
+        "SELECT gbifid FROM occurrence AS occ WHERE occ.countrycode = 'CL'",
+        "FROM cattest.occurrence occ\nWHERE occ.countrycode = 'CL'")
+    );
   }
 
   private static Stream<Arguments> provideStringsForForbiddenSql() {

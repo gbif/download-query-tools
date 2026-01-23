@@ -13,7 +13,13 @@
  */
 package org.gbif.occurrence.query.sql;
 
-import lombok.Getter;
+import org.gbif.api.exception.QueryBuildingException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.UnaryOperator;
+
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -24,12 +30,8 @@ import org.apache.calcite.sql.SqlWriterConfig;
 import org.apache.calcite.sql.dialect.GbifHiveSqlDialect;
 import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.util.Util;
-import org.gbif.api.exception.QueryBuildingException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.UnaryOperator;
+import lombok.Getter;
 
 /**
  * A parsed, validated Hive SQL query.

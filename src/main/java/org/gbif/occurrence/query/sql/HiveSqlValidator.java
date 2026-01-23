@@ -13,6 +13,16 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import org.gbif.api.exception.QueryBuildingException;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
@@ -23,6 +33,7 @@ import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.runtime.CalciteContextException;
 import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
@@ -48,17 +59,8 @@ import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.util.Util;
-import org.gbif.api.exception.QueryBuildingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
@@ -151,8 +153,7 @@ public class HiveSqlValidator {
     SqlParser sqlParser = SqlParser.create(sql, frameworkConfig.getParserConfig());
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
-      SqlNode validatedSqlNode;
-      validatedSqlNode = newValidator().validate(sqlNode);
+      SqlNode validatedSqlNode = newValidator().validate(sqlNode);
 
       LOG.debug("Validated as {}", validatedSqlNode.toSqlString(sqlDebugWriterConfig));
 
@@ -250,16 +251,25 @@ public class HiveSqlValidator {
         String firstTable = rootSchema.getTableNames().stream().findFirst().get();
         Prepare.PreparingTable table =
             catalogReader.getTable(Collections.singletonList(firstTable));
-        select.setFrom(
-            ((SqlSelect)
-                    sqlParser.parseQuery(
-                        "SELECT "
-                            + table.getRowType().getFieldList().get(0).getName()
-                            + " FROM "
-                            + catalog
-                            + "."
-                            + firstTable))
-                .getFrom());
+
+        // This gets "iceberg.occurrence" or whatever.
+        SqlNode fromTableIdentifier = ((SqlSelect)
+          sqlParser.parseQuery(
+            "SELECT "
+              + table.getRowType().getFieldList().get(0).getName()
+              + " FROM "
+              + catalog
+              + "."
+              + firstTable))
+          .getFrom();
+
+        if (select.getFrom().getKind() == SqlKind.IDENTIFIER) {
+          // If the FROM is a plain table name replace it like this
+          select.setFrom(fromTableIdentifier);
+        } else if (select.getFrom().getKind() == SqlKind.AS) {
+          // If it's "occurrence AS xxx" then replace just the table identifier.
+          ((SqlBasicCall) select.getFrom()).setOperand(0, fromTableIdentifier);
+        }
       }
 
       return select;
