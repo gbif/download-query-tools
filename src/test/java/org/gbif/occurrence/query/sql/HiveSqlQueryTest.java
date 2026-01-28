@@ -159,8 +159,8 @@ public class HiveSqlQueryTest {
             Arrays.asList("datasetkey", "COUNT(*)")),
         Arguments.of(
             "SELECT datasetkey, gbifid > 10000, -gbifid, TRUE, 5, countrycode IS NULL, "
-                + "gbifid * 2, round(decimallatitude, 1), hour(eventdate), CAST(gbifid AS char), "
-                + "gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) "
+                + "gbifid * 2, round(decimallatitude, 1) AS c_round, hour(eventdate), CAST(gbifid AS char), "
+                + "gbif_eeaCellCode(1000, decimallatitude, decimallongitude, COALESCE(coordinateUncertaintyInMeters, 1000)) AS eea_code "
                 + "FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\"",
             "occurrence.countrycode = 'DK' AND occurrence.month > occurrence.day",
             Arrays.asList(
@@ -171,10 +171,10 @@ public class HiveSqlQueryTest {
                 "5",
                 "countrycode IS NULL",
                 "gbifid * 2",
-                "ROUND(decimallatitude, 1)",
+                "c_round",
                 "HOUR(eventdate)",
                 "CAST(gbifid AS CHAR)",
-                "GBIF_EEACELLCODE(1000, decimallatitude, decimallongitude, COALESCE(coordinateuncertaintyinmeters, 1000))")),
+                "eea_code")),
         Arguments.of(
             "SELECT datasetkey AS データセットキー, location, countrycode AS country "
               + "FROM occurrence WHERE location LIKE 'København' OR location LIKE '沖縄';",
