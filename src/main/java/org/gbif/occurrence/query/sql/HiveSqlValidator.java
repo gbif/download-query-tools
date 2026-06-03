@@ -150,6 +150,10 @@ public class HiveSqlValidator {
       sql = m.replaceAll("");
       LOG.debug("Stripped trailing semicolon(s) «{}»", sql);
     }
+    // Transform lambda arrow syntax (e.g. x -> x IN (1,2,3)) into a callable form LAMBDA(x, x IN (1,2,3))
+    // so that the Calcite parser (and our operator table) can validate higher-order functions
+    // used by Hive such as EXISTS(array, x -> x IN (...)).
+    sql = transformLambdaSyntax(sql);
     SqlParser sqlParser = SqlParser.create(sql, frameworkConfig.getParserConfig());
     try {
       SqlNode sqlNode = sqlParser.parseQuery();
@@ -291,6 +295,68 @@ public class HiveSqlValidator {
       // Our custom reasons for invalidation.
       throw new QueryBuildingException(sve.getMessage(), sve);
     }
+  }
+
+  /**
+   * Replace occurrences of `<identifier> -> <expression>` with `LAMBDA(<identifier>, <expression>)`.
+   * This is a simple, local parser that handles nested parentheses in the expression.
+   */
+  private static String transformLambdaSyntax(String sql) {
+    StringBuilder sb = new StringBuilder(sql);
+    int idx = 0;
+    while ((idx = sb.indexOf("->", idx)) != -1) {
+      // find identifier to the left
+      int left = idx - 1;
+      // skip whitespace leftwards
+      while (left >= 0 && Character.isWhitespace(sb.charAt(left))) {
+        left--;
+      }
+      int endIdent = left;
+      // find start of identifier
+      while (left >= 0 && (Character.isLetterOrDigit(sb.charAt(left)) || sb.charAt(left) == '_')) {
+        left--;
+      }
+      int startIdent = left + 1;
+      if (startIdent > endIdent) {
+        // no valid identifier found, skip this occurrence
+        idx += 2;
+        continue;
+      }
+      String ident = sb.substring(startIdent, endIdent + 1);
+
+      // find start of expression to the right of ->
+      int right = idx + 2;
+      while (right < sb.length() && Character.isWhitespace(sb.charAt(right))) {
+        right++;
+      }
+
+      // parse until a comma or closing parenthesis at depth 0
+      int depth = 0;
+      int exprEnd = right;
+      while (exprEnd < sb.length()) {
+        char c = sb.charAt(exprEnd);
+        if (c == '(') {
+          depth++;
+        } else if (c == ')') {
+          if (depth == 0) {
+            break;
+          }
+          depth--;
+        } else if (c == ',' && depth == 0) {
+          break;
+        }
+        exprEnd++;
+      }
+
+      String expr = sb.substring(right, exprEnd).trim();
+
+      String replacement = "LAMBDA(" + ident + ", " + expr + ")";
+      sb.replace(startIdent, exprEnd, replacement);
+
+      // continue scanning after the replacement
+      idx = startIdent + replacement.length();
+    }
+    return sb.toString();
   }
 
   public SqlDialect getDialect() {
