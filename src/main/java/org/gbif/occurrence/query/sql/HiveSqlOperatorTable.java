@@ -36,34 +36,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import com.google.common.collect.ImmutableList;
 
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.ARRAY;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.ARRAY_CONTAINS;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.ARRAY_SIZE;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.CHR;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.CONCAT_FUNCTION;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.FROM_BASE64;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.FROM_HEX;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.GREATEST;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.INSTR;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.LEAST;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.LENGTH;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.LPAD;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.LTRIM;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.MD5;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.NVL;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.REGEXP_REPLACE;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.REPEAT;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.REVERSE;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.RPAD;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.RTRIM;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.SHA1;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.SORT_ARRAY;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.SOUNDEX;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.SPACE;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.SPLIT;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.SUBSTR_BIG_QUERY;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.TO_BASE64;
-import static org.apache.calcite.sql.fun.SqlLibraryOperators.TRANSLATE3;
+import static org.apache.calcite.sql.fun.SqlLibraryOperators.*;
 import static org.apache.calcite.sql.fun.SqlStdOperatorTable.SIGN;
 import static org.apache.calcite.sql.type.OperandTypes.family;
 
@@ -369,7 +342,7 @@ public class HiveSqlOperatorTable {
             SqlFunctionCategory.STRING);
     additionalOperators.add(REGEXP_EXTRACT);
 
-    additionalOperators.add(REGEXP_REPLACE);
+    additionalOperators.add(REGEXP_REPLACE_2);
     additionalOperators.add(REPEAT);
     additionalOperators.add(REVERSE);
     additionalOperators.add(RPAD);
