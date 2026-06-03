@@ -201,4 +201,24 @@ public class HiveSqlQueryTest {
         // No where clause
         Arguments.of("SELECT gbifid FROM occurrence", "1 = 1", Arrays.asList("gbifid")));
   }
+
+  @Test
+  public void testSqlTaxonLookup() throws Exception {
+    HiveSqlQuery q =
+            new HiveSqlQuery(hiveSqlValidator, "SELECT scientificName FROM occurrence WHERE TAXON_LOOKUP('my-checklist-key', ARRAY('my-taxon-id'))", "cattest");
+
+    assertEquals("SELECT scientificname\n" +
+            "FROM cattest.occurrence\n" +
+            "WHERE EXISTS(classifications['my-checklist-key'], x -> x IN ARRAY('my-taxon-id'))", q.getSql());
+  }
+
+  @Test
+  public void testSqlTaxonLookup2() throws Exception {
+    HiveSqlQuery q =
+            new HiveSqlQuery(hiveSqlValidator, "SELECT scientificName FROM occurrence WHERE TAXON_LOOKUP('my-checklist-key', ARRAY('my-taxon-id', 'my-taxon-id2'))", "cattest");
+
+    assertEquals("SELECT scientificname\n" +
+            "FROM cattest.occurrence\n" +
+            "WHERE EXISTS(classifications['my-checklist-key'], x -> x IN ARRAY('my-taxon-id', 'my-taxon-id2'))", q.getSql());
+  }
 }

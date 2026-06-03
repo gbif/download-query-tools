@@ -13,6 +13,7 @@
  */
 package org.gbif.occurrence.query.sql;
 
+import org.apache.calcite.sql.dialect.GbifHiveSqlDialect;
 import org.gbif.api.exception.QueryBuildingException;
 
 import java.util.stream.Stream;
@@ -111,6 +112,19 @@ public class HiveSqlValidatorTest {
       }
       assertTrue(e.getMessage().contains(expectedErrorFragment));
     }
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideStringsForSqlWithTaxonLookup")
+  public void testSqlWithLambda(String sql) throws Exception {
+    hiveSqlValidator.validate(sql);
+  }
+
+  private static Stream<Arguments> provideStringsForSqlWithTaxonLookup() {
+    return Stream.of(
+            Arguments.of("SELECT datasetkey FROM occurrence " +
+                            "WHERE TAXON_LOOKUP(ARRAY('taoxn-12', 'taxon-222'), ARRAY('taoxn-12222', 'taxon-222'))")
+    );
   }
 
   private static Stream<Arguments> provideStringsForAllowedSql() {

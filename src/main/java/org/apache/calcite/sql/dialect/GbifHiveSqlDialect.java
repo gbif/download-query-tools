@@ -13,6 +13,12 @@
  */
 package org.apache.calcite.sql.dialect;
 
+import org.apache.calcite.sql.SqlCall;
+import org.apache.calcite.sql.SqlCharStringLiteral;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlWriter;
+import org.gbif.occurrence.query.sql.TaxonLookupFunction;
+
 public class GbifHiveSqlDialect extends HiveSqlDialect {
 
   public GbifHiveSqlDialect(Context context) {
@@ -28,4 +34,40 @@ public class GbifHiveSqlDialect extends HiveSqlDialect {
       buf.append(val.replace(literalEndQuoteString, literalEscapedQuote));
       buf.append(literalEndQuoteString);
   }
+    @Override
+    public void unparseCall(
+            SqlWriter writer,
+            SqlCall call,
+            int leftPrec,
+            int rightPrec) {
+
+        if (call.getOperator() == TaxonLookupFunction.INSTANCE) {
+            unparseTaxonLookup(writer, call);
+            return;
+        }
+
+        super.unparseCall(writer, call, leftPrec, rightPrec);
+    }
+
+    private void unparseTaxonLookup(SqlWriter writer, SqlCall call) {
+        SqlNode checklistKey = call.operand(0);
+        SqlNode taxonIDs = call.operand(1);
+
+        writer.print("EXISTS(");
+
+        // If the checklist key is a simple char literal, print it directly to avoid
+        // SqlWriter inserting an extra space before the closing bracket when
+        // unparsing the node. Otherwise, fall back to unparse
+        if (checklistKey instanceof SqlCharStringLiteral) {
+            writer.print("classifications[" + checklistKey + "], x -> x IN ");
+        } else {
+            writer.print("classifications[");
+            checklistKey.unparse(writer, 0, 0);
+            writer.print("], x -> x IN ");
+        }
+
+        taxonIDs.unparse(writer, 0, 0);
+
+        writer.print(")");
+    }
 }

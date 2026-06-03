@@ -456,6 +456,7 @@ public class HiveSqlOperatorTable {
     // Table-generating functions
 
     // Utility functions
+    additionalOperators.add(TaxonLookupFunction.INSTANCE);
   }
 
   public List<SqlOperator> getAdditionalOperators() {
