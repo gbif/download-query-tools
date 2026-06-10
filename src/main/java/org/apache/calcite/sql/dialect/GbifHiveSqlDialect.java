@@ -18,7 +18,6 @@ import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlWriter;
-import java.util.List;
 import org.gbif.occurrence.query.sql.TaxonLookupFunction;
 
 public class GbifHiveSqlDialect extends HiveSqlDialect {
@@ -53,47 +52,56 @@ public class GbifHiveSqlDialect extends HiveSqlDialect {
 
     private void unparseTaxonLookup(SqlWriter writer, SqlCall call) {
         SqlNode checklistKey = call.operand(0);
-        SqlNode taxonIDs = call.operand(1);
+        SqlNode taxonIds = call.operand(1);
 
         writer.print("EXISTS(");
+        writer.print("classifications[");
+        unparseNode(writer, checklistKey);
+        writer.print("], x -> x IN ");
 
-        // If the checklist key is a simple char literal, print it directly to avoid
-        // SqlWriter inserting an extra space before the closing bracket when
-        // unparsing the node. Otherwise, fall back to unparse
-        if (checklistKey instanceof SqlCharStringLiteral) {
-            // the variable in the lambda needs to be recognised column
-            // to pass Spark SQL validation
-            // (even though that column isnt used)
-            writer.print("classifications[" + checklistKey + "], x -> x IN ");
-        } else {
-            writer.print("classifications[");
-            checklistKey.unparse(writer, 0, 0);
-            writer.print("], x -> x IN ");
-        }
+        unparseTaxonIds(writer, taxonIds);
 
-        // If the taxon IDs are an ARRAY value constructor, unparse just the
-        // contents (e.g. ('a','b')) rather than the full ARRAY('a','b') form
-        // which Hive/Spark lambda expects when used with the "IN" operator.
-        if (taxonIDs.getKind() == SqlKind.OTHER_FUNCTION && taxonIDs instanceof SqlCall) {
-            List<SqlNode> elems = ((SqlCall) taxonIDs).getOperandList();
+        writer.print(")");
+    }
+
+    /**
+     * This is necessary as node.unparse(writer, 0, 0) will add the keyword 'ARRAY'
+     * which breaks spark sql queries. This is probably because we are extending the
+     * HiveSqlDialect as opposed to the SparkSqlDialect.
+     */
+    private void unparseTaxonIds(SqlWriter writer, SqlNode taxonIds) {
+        if (isArrayValueConstructor(taxonIds)) {
+            SqlCall arrayCall = (SqlCall) taxonIds;
+
             writer.print("(");
-            for (int i = 0; i < elems.size(); i++) {
+            for (int i = 0; i < arrayCall.getOperandList().size(); i++) {
                 if (i > 0) {
                     writer.print(", ");
                 }
 
-                SqlNode sqlNode = elems.get(i);
-                if (sqlNode instanceof SqlCharStringLiteral) {
-                    writer.print(sqlNode.toString());
-                } else {
-                    elems.get(i).unparse(writer, 0, 0);
-                }
+                unparseNode(writer, arrayCall.getOperandList().get(i));
             }
             writer.print(")");
-        } else {
-            taxonIDs.unparse(writer, 0, 0);
+
+            return;
         }
 
-        writer.print(")");
+        taxonIds.unparse(writer, 0, 0);
+    }
+
+    /**
+     * This tries to avoid superfluous spacing added after the literals
+     */
+    private void unparseNode(SqlWriter writer, SqlNode node) {
+        if (node instanceof SqlCharStringLiteral) {
+            writer.print(node.toString());
+        } else {
+            node.unparse(writer, 0, 0);
+        }
+    }
+
+    private boolean isArrayValueConstructor(SqlNode node) {
+        return node instanceof SqlCall
+                && node.getKind() == SqlKind.OTHER_FUNCTION;
     }
 }
