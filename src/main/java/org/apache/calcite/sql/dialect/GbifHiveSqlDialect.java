@@ -15,8 +15,10 @@ package org.apache.calcite.sql.dialect;
 
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlCharStringLiteral;
+import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlWriter;
+import java.util.List;
 import org.gbif.occurrence.query.sql.TaxonLookupFunction;
 
 public class GbifHiveSqlDialect extends HiveSqlDialect {
@@ -62,14 +64,35 @@ public class GbifHiveSqlDialect extends HiveSqlDialect {
             // the variable in the lambda needs to be recognised column
             // to pass Spark SQL validation
             // (even though that column isnt used)
-            writer.print("classifications[" + checklistKey + "], taxonkey -> taxonkey IN ");
+            writer.print("classifications[" + checklistKey + "], x -> x IN ");
         } else {
             writer.print("classifications[");
             checklistKey.unparse(writer, 0, 0);
-            writer.print("], taxonkey -> taxonkey IN ");
+            writer.print("], x -> x IN ");
         }
 
-        taxonIDs.unparse(writer, 0, 0);
+        // If the taxon IDs are an ARRAY value constructor, unparse just the
+        // contents (e.g. ('a','b')) rather than the full ARRAY('a','b') form
+        // which Hive/Spark lambda expects when used with the "IN" operator.
+        if (taxonIDs.getKind() == SqlKind.OTHER_FUNCTION && taxonIDs instanceof SqlCall) {
+            List<SqlNode> elems = ((SqlCall) taxonIDs).getOperandList();
+            writer.print("(");
+            for (int i = 0; i < elems.size(); i++) {
+                if (i > 0) {
+                    writer.print(", ");
+                }
+
+                SqlNode sqlNode = elems.get(i);
+                if (sqlNode instanceof SqlCharStringLiteral) {
+                    writer.print(sqlNode.toString());
+                } else {
+                    elems.get(i).unparse(writer, 0, 0);
+                }
+            }
+            writer.print(")");
+        } else {
+            taxonIDs.unparse(writer, 0, 0);
+        }
 
         writer.print(")");
     }
