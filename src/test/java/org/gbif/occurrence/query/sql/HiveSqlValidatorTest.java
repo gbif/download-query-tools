@@ -123,7 +123,7 @@ public class HiveSqlValidatorTest {
   private static Stream<Arguments> provideStringsForSqlWithTaxonLookup() {
     return Stream.of(
             Arguments.of("SELECT datasetkey FROM occurrence " +
-                            "WHERE TAXON_LOOKUP(ARRAY('taoxn-12', 'taxon-222'), ARRAY('taoxn-12222', 'taxon-222'))")
+                            "WHERE TAXON_LOOKUP('checklistKey', ARRAY('taoxn-12222', 'taxon-222'))")
     );
   }
 
