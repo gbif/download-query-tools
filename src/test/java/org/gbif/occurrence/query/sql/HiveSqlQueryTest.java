@@ -209,7 +209,7 @@ public class HiveSqlQueryTest {
 
     assertEquals("SELECT scientificname\n" +
             "FROM cattest.occurrence\n" +
-            "WHERE EXISTS(classifications['my-checklist-key'], x -> x IN ARRAY('my-taxon-id'))", q.getSql());
+            "WHERE EXISTS(classifications['my-checklist-key'], taxonkey -> taxonkey IN ARRAY('my-taxon-id'))", q.getSql());
   }
 
   @Test
@@ -219,6 +219,6 @@ public class HiveSqlQueryTest {
 
     assertEquals("SELECT scientificname\n" +
             "FROM cattest.occurrence\n" +
-            "WHERE EXISTS(classifications['my-checklist-key'], x -> x IN ARRAY('my-taxon-id', 'my-taxon-id2'))", q.getSql());
+            "WHERE EXISTS(classifications['my-checklist-key'], taxonkey -> taxonkey IN ARRAY('my-taxon-id', 'my-taxon-id2'))", q.getSql());
   }
 }
