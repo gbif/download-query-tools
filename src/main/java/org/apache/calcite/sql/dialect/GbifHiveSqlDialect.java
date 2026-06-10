@@ -59,11 +59,14 @@ public class GbifHiveSqlDialect extends HiveSqlDialect {
         // SqlWriter inserting an extra space before the closing bracket when
         // unparsing the node. Otherwise, fall back to unparse
         if (checklistKey instanceof SqlCharStringLiteral) {
-            writer.print("classifications[" + checklistKey + "], x -> x IN ");
+            // the variable in the lambda needs to be recognised column
+            // to pass Spark SQL validation
+            // (even though that column isnt used)
+            writer.print("classifications[" + checklistKey + "], taxonkey -> taxonkey IN ");
         } else {
             writer.print("classifications[");
             checklistKey.unparse(writer, 0, 0);
-            writer.print("], x -> x IN ");
+            writer.print("], taxonkey -> taxonkey IN ");
         }
 
         taxonIDs.unparse(writer, 0, 0);
