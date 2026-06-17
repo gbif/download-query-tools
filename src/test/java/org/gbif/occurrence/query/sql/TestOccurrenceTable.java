@@ -87,6 +87,14 @@ class TestOccurrenceTable extends AbstractTable {
     // Vocabulary definition: "STRUCT<concept: STRING,lineage: ARRAY<STRING>>"
     builder.add("lifestage", vocabulary);
 
+    // Map definition - needed for multiple classifications
+    RelDataType structMap = tdf.createMapType(varChar, varChar);
+    RelDataType structMapOfArrays = tdf.createMapType(varChar, varCharArray);
+    RelDataType structMapOfMap = tdf.createMapType(varChar, tdf.createMapType(varChar, varChar));
+
+    // Classification
+    builder.add("classificationdetails", structMapOfMap);
+
     return builder.build();
   }
 

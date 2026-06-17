@@ -149,6 +149,24 @@ public class HiveSqlValidatorTest {
                 + "  familyKey, "
                 + "  speciesKey "
                 + "ORDER BY \"year\" DESC, eeaCellCode ASC, speciesKey ASC"),
+      Arguments.of("SELECT\n" +
+                "  classificationdetails['d7dddbf4-2cf0-4f39-9b2a-bb099caae36c']['familykey'] AS col_familykey,\n" +
+                "  IF(col_familykey IS NULL, NULL, SUM(COUNT(*)) OVER (\n" +
+                "        PARTITION BY classificationdetails['d7dddbf4-2cf0-4f39-9b2a-bb099caae36c']['familykey'], \"year\")) kingdomcount\n" +
+                "FROM\n" +
+                "  occurrence\n" +
+                "GROUP BY\n" +
+                "  occurrence.classificationdetails['d7dddbf4-2cf0-4f39-9b2a-bb099caae36c']['familykey'],\n" +
+                "  occurrence.\"year\""),
+      Arguments.of("SELECT\n" +
+                "  NULLIF(classificationdetails['d7dddbf4-2cf0-4f39-9b2a-bb099caae36c']['familykey'], '') AS col_familykey,\n" +
+                "  IF(col_familykey IS NULL, NULL, SUM(COUNT(*)) OVER (\n" +
+                "        PARTITION BY classificationdetails['d7dddbf4-2cf0-4f39-9b2a-bb099caae36c']['familykey'], \"year\")) kingdomcount\n" +
+                "FROM\n" +
+                "  occurrence\n" +
+                "GROUP BY\n" +
+                "  occurrence.classificationdetails['d7dddbf4-2cf0-4f39-9b2a-bb099caae36c']['familykey'],\n" +
+                "  occurrence.\"year\""),
         Arguments.of(
             "SELECT datasetkey, COUNT(*) FROM occurrence WHERE countryCode = 'DK' and \"month\" > \"day\" GROUP BY datasetkey"),
         Arguments.of(
