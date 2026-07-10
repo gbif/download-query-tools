@@ -113,6 +113,12 @@ public class HiveSqlValidatorTest {
     }
   }
 
+  @ParameterizedTest
+  @MethodSource("provideStringsForExistsLambda")
+  public void testValidateExistsSql(String sql)  throws Exception{
+    hiveSqlValidator.validate(sql);
+  }
+
   private static Stream<Arguments> provideStringsForAllowedSql() {
     return Stream.of(
         Arguments.of(
@@ -388,6 +394,14 @@ public class HiveSqlValidatorTest {
     // Arguments.of("SELECT gbifid FROM occurrence GROUP BY gbifid"),
     // TODO: Block ORDER BY gbifid
     // Arguments.of("SELECT gbifid FROM occurrence ORDER BY gbifid"),
+  }
+
+  private static Stream<Arguments> provideStringsForExistsLambda() {
+    return Stream.of(
+            Arguments.of(
+                    "SELECT datasetKey from OCCURRENCE WHERE EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))")
+
+    );
   }
 
   private static Stream<Arguments> provideStringsForBlockedHiveFunctions() {
