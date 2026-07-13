@@ -18,12 +18,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.apache.calcite.avatica.util.TimeUnit;
-import org.apache.calcite.sql.SqlBasicFunction;
-import org.apache.calcite.sql.SqlFunction;
-import org.apache.calcite.sql.SqlFunctionCategory;
-import org.apache.calcite.sql.SqlOperator;
-import org.apache.calcite.sql.SqlOperatorTable;
-import org.apache.calcite.sql.SqlSyntax;
+import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.fun.SqlDatePartFunction;
 import org.apache.calcite.sql.fun.SqlLibrary;
 import org.apache.calcite.sql.fun.SqlLibraryOperatorTableFactory;
@@ -466,6 +461,17 @@ public class HiveSqlOperatorTable {
             OperandTypes.VARIADIC,
             SqlFunctionCategory.USER_DEFINED_FUNCTION);
     additionalOperators.add(LAMBDA);
+
+    SqlFunction TAXON_LOOKUP = new SqlFunction(
+            "TAXON_LOOKUP",
+            SqlKind.OTHER_FUNCTION,
+            ReturnTypes.BOOLEAN,
+            null,
+            OperandTypes.family(SqlTypeFamily.ARRAY, SqlTypeFamily.ANY), // Relaxes lambda strictness
+            SqlFunctionCategory.USER_DEFINED_FUNCTION
+    );
+
+    additionalOperators.add(TAXON_LOOKUP);
   }
 
   public List<SqlOperator> getAdditionalOperators() {

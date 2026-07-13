@@ -13,7 +13,7 @@
  */
 package org.apache.calcite.sql.dialect;
 
-public class GbifHiveSqlDialect extends HiveSqlDialect {
+public class GbifHiveSqlDialect extends SparkSqlDialect {
 
   public GbifHiveSqlDialect(Context context) {
     super(context);

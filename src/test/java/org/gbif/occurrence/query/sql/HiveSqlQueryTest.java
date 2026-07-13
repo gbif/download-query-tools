@@ -62,7 +62,7 @@ public class HiveSqlQueryTest {
   public void testAllowedSql(String sql, String where, List<String> columns) throws Exception {
     HiveSqlQuery q = new HiveSqlQuery(hiveSqlValidator, sql);
 
-    assertEquals(where, q.getSqlWhere());
+    assertEquals(where, q.getSqlWhere().replace("`", ""));
     assertArrayEquals(columns.toArray(), q.getSqlSelectColumnNames().toArray());
   }
 

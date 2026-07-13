@@ -15,13 +15,12 @@ package org.gbif.occurrence.query.sql;
 
 import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.dialect.SparkSqlDialect;
-import org.apache.calcite.sql.util.SqlShuttle;
+import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
+import org.apache.calcite.sql.validate.*;
 import org.gbif.api.exception.QueryBuildingException;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
@@ -32,27 +31,24 @@ import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.runtime.CalciteContextException;
-import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.dialect.AnsiSqlDialect;
+import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.dialect.GbifHiveSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.impl.SqlParserImpl;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.util.SqlOperatorTables;
-import org.apache.calcite.sql.validate.SqlConformanceEnum;
-import org.apache.calcite.sql.validate.SqlValidator;
-import org.apache.calcite.sql.validate.SqlValidatorImpl;
-import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HiveSqlValidator {
-  private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
 
   private static final Pattern SEMICOLON_END = Pattern.compile("[;\\s]*;\\s*$");
 
@@ -89,10 +85,10 @@ public class HiveSqlValidator {
 
     parserConfig =
         SqlParser.Config.DEFAULT
-            .withParserFactory(SqlParserImpl.FACTORY)
+            .withParserFactory(SqlBabelParserImpl.FACTORY)
             .withQuoting(Quoting.DOUBLE_QUOTE)
             .withUnquotedCasing(Casing.TO_LOWER)
-            .withConformance(SqlConformanceEnum.LENIENT);
+            .withConformance(SqlConformanceEnum.BABEL);
 
     validatorConfig =
         SqlValidatorImpl.Config.DEFAULT
@@ -103,7 +99,7 @@ public class HiveSqlValidator {
     SqlStdOperatorTable sqlStdOperatorTable = SqlStdOperatorTable.instance();
     // Built-in Hive functions
     HiveSqlOperatorTable.instance().getAdditionalOperators().stream()
-        .forEach(sqlStdOperatorTable::register);
+            .forEach(sqlStdOperatorTable::register);
     // Custom functions
     additionalOperators.stream().forEach(sqlStdOperatorTable::register);
 
@@ -139,20 +135,6 @@ public class HiveSqlValidator {
       sql = m.replaceAll("");
       LOG.debug("Stripped trailing semicolon(s) «{}»", sql);
     }
-//    // Transform lambda arrow syntax (e.g. x -> x IN (1,2,3)) into a callable form LAMBDA(x, x IN (1,2,3))
-//    // so that the Calcite parser (and our operator table) can validate higher-order functions
-//    // used by Hive such as EXISTS(array, x -> x IN (...)).
-//    LambdaChanges lambdaChanges = transformLambdaSyntax(sql);
-//    if (lambdaChanges.lambdaReplacements.size() > 0) {
-//      LOG.debug(
-//          "Transformed lambda syntax: {} → {}",
-//          lambdaChanges.originalSql,
-//          lambdaChanges.changedSql);
-//      for (Map.Entry<String, String> e : lambdaChanges.lambdaReplacements.entrySet()) {
-//        LOG.debug("  Replaced {} with {}", e.getValue(), e.getKey());
-//      }
-//      sql = lambdaChanges.changedSql;
-//    }
 
     SqlParser sqlParser = SqlParser.create(sql, frameworkConfig.getParserConfig());
     try {
@@ -283,37 +265,6 @@ public class HiveSqlValidator {
           ((SqlBasicCall) select.getFrom()).setOperand(0, fromTableIdentifier);
         }
       }
-
-//      // remove the lambda replacement changes we made so that the SQL would pass validation
-//      if (select.getWhere() != null && !lambdaChanges.lambdaReplacements.isEmpty()) {
-//        select.getWhere().accept(
-//          new SqlShuttle() {
-//            @Override
-//            public SqlNode visit(SqlCall call) {
-//              for (int i = 0; i < call.getOperandList().size(); i++) {
-//                SqlNode operand = call.getOperandList().get(i);
-//                if (operand instanceof SqlBasicCall) {
-//                  SqlBasicCall basicCall = (SqlBasicCall) operand;
-//                  if (basicCall.getOperator().getName().equals("LAMBDA")) {
-//                    String replacement = basicCall.toSqlString(dialect).toString();
-//                    String originalExpression = lambdaChanges.lambdaReplacements.get(replacement);
-//                    if (originalExpression != null) {
-//                      // Replace the LAMBDA(...) with the original expression
-//                      try {
-//                        call.setOperand(i, SqlParser.create(originalExpression, parserConfig).parseExpression());
-//                      } catch (SqlParseException e) {
-//                        throw new RuntimeException(e);
-//                      }
-//                    }
-//                  }
-//                }
-//              }
-//              return super.visit(call);
-//            }
-//          });
-//      }
-
-
       return select;
     } catch (CalciteContextException cce) {
       // Just the main message is decent.
@@ -325,82 +276,6 @@ public class HiveSqlValidator {
       // Our custom reasons for invalidation.
       throw new QueryBuildingException(sve.getMessage(), sve);
     }
-  }
-
-  static class LambdaChanges {
-    public String originalSql;
-    public String changedSql;
-    public Map<String, String> lambdaReplacements;
-  }
-
-  /**
-   * Replace occurrences of `<identifier> -> <expression>` with `LAMBDA(<identifier>, <expression>)`.
-   * This is a simple, local parser that handles nested parentheses in the expression.
-   */
-  private static LambdaChanges transformLambdaSyntax(String sql) {
-    StringBuilder sb = new StringBuilder(sql);
-    LambdaChanges changes = new LambdaChanges();
-    changes.lambdaReplacements = new LinkedHashMap<>();
-    int idx = 0;
-    while ((idx = sb.indexOf("->", idx)) != -1) {
-      // find identifier to the left
-      int left = idx - 1;
-      // skip whitespace leftwards
-      while (left >= 0 && Character.isWhitespace(sb.charAt(left))) {
-        left--;
-      }
-      int endIdent = left;
-      // find start of identifier
-      while (left >= 0 && (Character.isLetterOrDigit(sb.charAt(left)) || sb.charAt(left) == '_')) {
-        left--;
-      }
-      int startIdent = left + 1;
-      if (startIdent > endIdent) {
-        // no valid identifier found, skip this occurrence
-        idx += 2;
-        continue;
-      }
-      String ident = sb.substring(startIdent, endIdent + 1);
-
-      // find start of expression to the right of ->
-      int right = idx + 2;
-      while (right < sb.length() && Character.isWhitespace(sb.charAt(right))) {
-        right++;
-      }
-
-      // parse until a comma or closing parenthesis at depth 0
-      int depth = 0;
-      int exprEnd = right;
-      while (exprEnd < sb.length()) {
-        char c = sb.charAt(exprEnd);
-        if (c == '(') {
-          depth++;
-        } else if (c == ')') {
-          if (depth == 0) {
-            break;
-          }
-          depth--;
-        } else if (c == ',' && depth == 0) {
-          break;
-        }
-        exprEnd++;
-      }
-
-      String expr = sb.substring(right, exprEnd).trim();
-      String originalExpression = sb.substring(left, exprEnd).trim();
-
-      String replacement = "LAMBDA(" + ident + ", " + expr + ")";
-      sb.replace(startIdent, exprEnd, replacement);
-
-      changes.lambdaReplacements.put(replacement, originalExpression);
-
-      // continue scanning after the replacement
-      idx = startIdent + replacement.length();
-    }
-
-    changes.originalSql = sql;
-    changes.changedSql = sb.toString();
-    return changes;
   }
 
   public SqlDialect getDialect() {

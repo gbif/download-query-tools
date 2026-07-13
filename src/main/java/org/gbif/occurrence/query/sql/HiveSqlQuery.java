@@ -100,6 +100,11 @@ public class HiveSqlQuery {
     // Internal SQL
     this.sql = node.toSqlString(sqlDialect).getSql();
 
+    // Hack for EXISTS Spark SQL function used for large taxon keys queries
+    if (this.sql.contains("TAXON_LOOKUP")) {
+      this.sql.replace("TAXON_LOOKUP", "EXISTS");
+    }
+
     // Nicely formatted SQL for the user
     this.userSql = node.toSqlString(sqlWriterConfig).getSql();
 
