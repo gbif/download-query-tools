@@ -98,13 +98,13 @@ public class HiveSqlQuery {
                 .withLineFolding(SqlWriterConfig.LineFolding.TALL);
 
     // Internal SQL
-    this.sql = node.toSqlString(sqlDialect).getSql();
+    this.sql = LambdaUtil.convertLambda(node.toSqlString(sqlDialect).getSql());
 
     // Nicely formatted SQL for the user
-    this.userSql = node.toSqlString(sqlWriterConfig).getSql();
+    this.userSql = LambdaUtil.convertLambda(node.toSqlString(sqlWriterConfig).getSql());
 
     if (node.getWhere() != null) {
-      this.sqlWhere = node.getWhere().toSqlString(sqlDialect).getSql();
+      this.sqlWhere = LambdaUtil.convertLambda(node.getWhere().toSqlString(sqlDialect).getSql());
     } else {
       this.sqlWhere = "1 = 1";
     }
