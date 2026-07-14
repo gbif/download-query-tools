@@ -46,7 +46,6 @@ import org.apache.calcite.sql.SqlSelectKeyword;
 import org.apache.calcite.sql.SqlWriterConfig;
 import org.apache.calcite.sql.dialect.AnsiSqlDialect;
 import org.apache.calcite.sql.dialect.GbifHiveSqlDialect;
-import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -65,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.gbif.occurrence.query.sql.LambdaUtil.transformLambdaSyntax;
 
-class HiveSqlValidator {
+public class HiveSqlValidator {
   private static Logger LOG = LoggerFactory.getLogger(HiveSqlValidator.class);
 
   private static final Pattern SEMICOLON_END = Pattern.compile("[;\\s]*;\\s*$");
