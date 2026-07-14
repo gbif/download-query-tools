@@ -85,6 +85,30 @@ public class HiveSqlQueryTest {
         q.getUserSql());
   }
 
+  @Test
+  public void testExistsSql() throws Exception {
+    HiveSqlQuery q =
+            new HiveSqlQuery(hiveSqlValidator, "SELECT datasetKey from OCCURRENCE " +
+                    "WHERE EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))");
+    assertEquals("SELECT datasetkey\n" +
+            "FROM occurrence\n" +
+            "WHERE EXISTS (occurrence.classifications['uuid'], taxonkey -> taxonkey IN ('1', '2'))", q.getSql());
+  }
+
+  @Test
+  public void testDoubleExistsSql() throws Exception {
+    HiveSqlQuery q =
+            new HiveSqlQuery(hiveSqlValidator, "SELECT datasetKey from OCCURRENCE " +
+                    "WHERE " +
+                    "EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))" +
+                    " OR " +
+                    "EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('3','4'))"
+            );
+    assertEquals("SELECT datasetkey\n" +
+            "FROM occurrence\n" +
+            "WHERE EXISTS (occurrence.classifications['uuid'], taxonkey -> taxonkey IN ('1', '2')) OR EXISTS (occurrence.classifications['uuid'], taxonkey -> taxonkey IN ('3', '4'))", q.getSql());
+  }
+
   private static Stream<Arguments> provideSql() {
     return Stream.of(
         Arguments.of(
