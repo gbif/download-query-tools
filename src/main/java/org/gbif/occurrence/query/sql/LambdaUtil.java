@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 class LambdaUtil {
 
     private static final Pattern LAMBDA_PATTERN = Pattern.compile(
-            "LAMBDA\\s*\\(\\s*([^,]+?)\\s*,\\s*(.*?)\\s*\\)",
+            "TAXON_LOOKUP\\s*\\(\\s*([^,]+?)\\s*,\\s*(.*?)\\s*\\)",
             Pattern.CASE_INSENSITIVE);
 
     public static String convertLambda(String sql) {
@@ -20,10 +20,10 @@ class LambdaUtil {
             // Replace all occurrences of the variable with x
             expression = expression.replaceAll(
                     "\\b" + Pattern.quote(variable) + "\\b",
-                    "x");
+                    "taxonkey");
 
             matcher.appendReplacement(result,
-                    Matcher.quoteReplacement("x -> " + expression));
+                    Matcher.quoteReplacement("taxonkey -> " + expression));
         }
 
         matcher.appendTail(result);
@@ -83,7 +83,7 @@ class LambdaUtil {
 
             String expr = sb.substring(right, exprEnd).trim();
 
-            String replacement = "LAMBDA(" + ident + ", " + expr + ")";
+            String replacement = "TAXON_LOOKUP(" + ident + ", " + expr + ")";
             sb.replace(startIdent, exprEnd, replacement);
 
             // continue scanning after the replacement
