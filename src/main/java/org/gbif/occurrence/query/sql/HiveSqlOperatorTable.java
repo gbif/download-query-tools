@@ -457,8 +457,7 @@ public class HiveSqlOperatorTable {
 
     // Utility functions
     // Support for lambda expressions used by higher-order functions like EXISTS(array, x -> x IN (...))
-    // We register a simple LAMBDA function and an EXISTS function that can accept a lambda
-    // as a second argument. The validator will transform `x -> expr` into `TAXON_LOOKUP(x, expr)`.
+    // The validator transforms `x -> expr` into `TAXON_LOOKUP(x, expr)`.
     final SqlFunction TAXON_LOOKUP =
         SqlBasicFunction.create(
             "TAXON_LOOKUP",
