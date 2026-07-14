@@ -9,7 +9,22 @@ class LambdaUtil {
             "TAXON_LOOKUP\\s*\\(\\s*([^,]+?)\\s*,\\s*(.*?)\\s*\\)",
             Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Replaces occurrences of `TAXON_LOOKUP(<identifier>, <expression>)` with `<identifier> -> <expression>`.
+     * This is performed on the SQL after validation with calcite 1.35.0.
+     * @param sql
+     * @return
+     */
     public static String convertLambda(String sql) {
+
+        if (sql == null) {
+            return null;
+        }
+
+        if (!sql.contains("TAXON_LOOKUP")) {
+            return sql;
+        }
+
         Matcher matcher = LAMBDA_PATTERN.matcher(sql);
         StringBuffer result = new StringBuffer();
 
@@ -31,8 +46,8 @@ class LambdaUtil {
     }
 
     /**
-     * Replace occurrences of `<identifier> -> <expression>` with `LAMBDA(<identifier>, <expression>)`.
-     * This is a simple, local parser that handles nested parentheses in the expression.
+     * Replace occurrences of `<identifier> -> <expression>` with `TAXON_LOOKUP(<identifier>, <expression>)`.
+     * This enables validation with calcite 1.35.0.
      */
     public static String transformLambdaSyntax(String sql) {
         StringBuilder sb = new StringBuilder(sql);

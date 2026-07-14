@@ -116,18 +116,23 @@ public class HiveSqlValidatorTest {
   @ParameterizedTest
   @MethodSource("provideStringsForExistsLambda")
   public void testValidateExistsSql(String sql)  throws Exception{
-    SqlSelect s = hiveSqlValidator.validate(sql);
-
-    String sqlOut = s.toSqlString(hiveSqlValidator.getDialect()).toString();
-
-    System.out.println(sqlOut);
+    hiveSqlValidator.validate(sql);
   }
 
   private static Stream<Arguments> provideStringsForExistsLambda() {
     return Stream.of(
             Arguments.of(
                     "SELECT datasetKey from OCCURRENCE " +
-                            "WHERE EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))")
+                            "WHERE EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))"),
+            Arguments.of(
+                    "SELECT datasetKey from OCCURRENCE " +
+                            "WHERE EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))" +
+                            " OR EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('3','4'))"),
+            Arguments.of(
+                    "SELECT datasetKey from OCCURRENCE " +
+                            "WHERE EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))" +
+                            " OR EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('3','4')) and year > 2000")
+
     );
   }
 

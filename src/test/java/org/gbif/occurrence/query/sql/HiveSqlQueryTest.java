@@ -90,10 +90,9 @@ public class HiveSqlQueryTest {
     HiveSqlQuery q =
             new HiveSqlQuery(hiveSqlValidator, "SELECT datasetKey from OCCURRENCE " +
                     "WHERE EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('1','2'))");
-
-    String sql = q.getSql();
-
-    System.out.println(sql);
+    assertEquals("SELECT datasetkey\n" +
+            "FROM occurrence\n" +
+            "WHERE EXISTS (occurrence.classifications['uuid'], taxonkey -> taxonkey IN ('1', '2'))", q.getSql());
   }
 
   @Test
@@ -105,10 +104,9 @@ public class HiveSqlQueryTest {
                     " OR " +
                     "EXISTS(classifications['uuid'], taxonkey -> taxonkey IN ('3','4'))"
             );
-
-    String sql = q.getSql();
-
-    System.out.println(sql);
+    assertEquals("SELECT datasetkey\n" +
+            "FROM occurrence\n" +
+            "WHERE EXISTS (occurrence.classifications['uuid'], taxonkey -> taxonkey IN ('1', '2')) OR EXISTS (occurrence.classifications['uuid'], taxonkey -> taxonkey IN ('3', '4'))", q.getSql());
   }
 
   private static Stream<Arguments> provideSql() {
