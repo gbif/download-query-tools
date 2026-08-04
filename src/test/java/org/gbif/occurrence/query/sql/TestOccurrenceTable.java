@@ -69,6 +69,10 @@ class TestOccurrenceTable extends AbstractTable {
     builder.add("checklistkey", SqlTypeName.CHAR);
     builder.add("taxonkey", SqlTypeName.CHAR);
     builder.add("scientificname", SqlTypeName.CHAR);
+    builder.add("classifications", typeFactory.createMapType(
+            typeFactory.createSqlType(SqlTypeName.VARCHAR),
+            typeFactory.createArrayType(typeFactory.createSqlType(SqlTypeName.VARCHAR), -1))
+    );
 
     RelDataTypeFactory tdf = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     RelDataType varChar = tdf.createSqlType(SqlTypeName.VARCHAR);
