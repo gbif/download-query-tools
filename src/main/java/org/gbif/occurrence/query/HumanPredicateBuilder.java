@@ -361,7 +361,7 @@ public class HumanPredicateBuilder {
         predicate.getKey(),
         EQUALS_OPERATOR,
         predicate.getValue(),
-        predicate.getChecklistKey(),
+        Objects.toString(predicate.getChecklistKey(), null),
         node);
   }
 
@@ -374,7 +374,7 @@ public class HumanPredicateBuilder {
   }
 
   private void visit(InPredicate in, JsonNode node) {
-    addParamValue(in.getKey(), IN_OPERATOR, in.getValues(), in.getChecklistKey(), node);
+    addParamValue(in.getKey(), IN_OPERATOR, in.getValues(), Objects.toString(in.getChecklistKey(), null), node);
   }
 
   private void visit(LessThanOrEqualsPredicate predicate, JsonNode node) {

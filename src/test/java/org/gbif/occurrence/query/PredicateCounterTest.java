@@ -84,7 +84,7 @@ public class PredicateCounterTest {
         ands.add(new EqualsPredicate(p, "12.478", false));
         expectedCount++;
 
-      } else if (p.type() == Integer.class) {
+      } else if (p.type() == Integer.class || p.type() == Long.class) {
         ands.add(new EqualsPredicate(p, "10", false));
         expectedCount++;
 
@@ -96,7 +96,7 @@ public class PredicateCounterTest {
           ands.add(new GeoDistancePredicate("90", "100", "5km"));
           expectedCount++;
         } else {
-          ands.add(new EqualsPredicate(p, "Bernd Neumann", false));
+          ands.add(new EqualsPredicate(p, p.format() != null ? "abc" : "Bernd Neumann", false));
           expectedCount++;
         }
 
